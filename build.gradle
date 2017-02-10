@@ -38,4 +38,5 @@ ext {
     runnerVersion = '0.4.1'
     runtimeVersion = '100.0.0'
     espressoCoreVersion = '2.2.2'
+    daggerVerison = '2.x'
 }
