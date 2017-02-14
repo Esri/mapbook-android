@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -38,5 +39,7 @@ ext {
     runnerVersion = '0.4.1'
     runtimeVersion = '100.0.0'
     espressoCoreVersion = '2.2.2'
-    daggerVerison = '2.x'
+    daggerVerison = '2.8'
+    guavaVersion = '18.0'
+    constraintLayout = '1.0.0-beta5'
 }

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -29,6 +30,11 @@ dependencies {
     compile "com.android.support:design:$rootProject.supportLibraryVersion"
     compile "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
     compile "com.android.support:support-v4:$rootProject.supportLibraryVersion"
+    compile "com.google.dagger:dagger:$rootProject.daggerVerison"
+    apt "com.google.dagger:dagger-compiler:$rootProject.daggerVerison"
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    compile "com.google.guava:guava:$rootProject.guavaVersion"
+    provided 'javax.annotation:jsr250-api:1.0'
 
     androidTestCompile("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
