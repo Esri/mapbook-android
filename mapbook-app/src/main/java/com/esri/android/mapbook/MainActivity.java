@@ -27,9 +27,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
   private View mLayout = null;
   private static final String FILE_EXTENSION = ".mmpk";
   public static final String FILE_PATH = "mmpk file path";
-  private static File extStorDir;
-  private static String extSDCardDirName;
+  public static File extStorDir;
+  public static String extSDCardDirName;
   private static String filename;
+  public static String locatorName;
   private static String mmpkFilePath;
 
   @Override

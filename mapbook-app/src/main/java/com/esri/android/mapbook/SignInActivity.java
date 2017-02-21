@@ -26,16 +26,16 @@ package com.esri.android.mapbook;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.StrictMode;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
-import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
@@ -76,7 +76,7 @@ public class SignInActivity extends AppCompatActivity {
     progressDialog.setMessage("Trying to connect to your portal...");
     progressDialog.setTitle("Authenticating");
     progressDialog.show();
-    mPortal = new Portal(getString(R.string.portal), true);
+    mPortal = new Portal(getString(R.string.portal));
     mPortal.addDoneLoadingListener(new Runnable() {
       @Override
       public void run() {
@@ -84,16 +84,14 @@ public class SignInActivity extends AppCompatActivity {
 
           progressDialog.dismiss();
 
-          int SDK_INT = android.os.Build.VERSION.SDK_INT;
-          if (SDK_INT > 8)
-          {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                .permitAll().build();
-            StrictMode.setThreadPolicy(policy);
+          Handler handler = new Handler() ;
+          handler.post(new Runnable() {
+            @Override public void run() {
+              // Download map book
+              downloadMapBook();
+            }
+          });
 
-            // Download map book
-            downloadMapBook();
-          }
 
         }else{
           String errorMessage = mPortal.getLoadError().getMessage();
@@ -125,38 +123,76 @@ public class SignInActivity extends AppCompatActivity {
             Intent intent = new Intent();
             try {
               InputStream inputStream = future.get();
-              Log.i("SignInActivity", "Total bytes = " + inputStream.available());
-              File storageDirectory = Environment.getExternalStorageDirectory();
-              File data = new File(storageDirectory, "/Data/Risk_Data.mmpk");
-              OutputStream os = new FileOutputStream(data);
-              byte[] buffer = new byte[1024];
-              int bytesRead;
-              //read from is to buffer
-              while((bytesRead = inputStream.read(buffer)) !=-1){
-                os.write(buffer, 0, bytesRead);
-              }
-
-              inputStream.close();
-              Log.i("SignInActivity", "Input stream closed");
-              //flush OutputStream to write any buffered data to file
-              os.flush();
-              os.close();
-              intent.putExtra("FILE_NAME", data.getAbsolutePath());
-              setResult(RESULT_OK, intent);
+              new DownloadMobileMapPackage().execute(inputStream);
+//              Log.i("SignInActivity", "Total bytes = " + inputStream.available());
+//              File storageDirectory = Environment.getExternalStorageDirectory();
+//              File data = new File(storageDirectory, "/Data/Risk_Data.mmpk");
+//              OutputStream os = new FileOutputStream(data);
+//              byte[] buffer = new byte[1024];
+//              int bytesRead;
+//              //read from is to buffer
+//              while((bytesRead = inputStream.read(buffer)) !=-1){
+//                os.write(buffer, 0, bytesRead);
+//              }
+//
+//              inputStream.close();
+//              Log.i("SignInActivity", "Input stream closed");
+//              //flush OutputStream to write any buffered data to file
+//              os.flush();
+//              os.close();
+//              intent.putExtra("FILE_NAME", data.getAbsolutePath());
+//              setResult(RESULT_OK, intent);
             } catch (InterruptedException e) {
               e.printStackTrace();
-              setResult(RESULT_CANCELED, intent);
+           //   setResult(RESULT_CANCELED, intent);
             } catch (ExecutionException e) {
               e.printStackTrace();
-              setResult(RESULT_CANCELED, intent);
-            } catch (IOException io){
-              io.printStackTrace();
-              setResult(RESULT_CANCELED, intent);
+            //  setResult(RESULT_CANCELED, intent);
             }
-            finish();
+           // finish();
           }
         });
       }
     });
+  }
+
+  private void setProgressPercent(Integer progressPercent){
+    Log.i("SignInActivity", "Progress " + progressPercent);
+  }
+  private class DownloadMobileMapPackage extends AsyncTask<InputStream, Integer, String> {
+
+    @Override protected String doInBackground(InputStream... params) {
+      String path = null;
+      try {
+        InputStream inputStream = params[0];
+        File storageDirectory = Environment.getExternalStorageDirectory();
+        File data = new File(storageDirectory, "/Data/OfflineMap.mmpk");
+        OutputStream os = new FileOutputStream(data);
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        //read from is to buffer
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+          os.write(buffer, 0, bytesRead);
+        }
+
+        inputStream.close();
+        Log.i("SignInActivity", "Input stream closed");
+        //flush OutputStream to write any buffered data to file
+        os.flush();
+        os.close();
+
+        path =  data.getPath();
+      }catch (IOException io){
+        Log.i("SignInActivity", "Async Task Exception " + io.getMessage());
+      }
+      return path;
+    }
+    protected void onProgressUpdate(Integer... progress) {
+      setProgressPercent(progress[0]);
+    }
+
+    protected void onPostExecute(Long result) {
+      Log.i("SignInActivity" ,"Downloaded " + result + " bytes");
+    }
   }
 }

@@ -2,13 +2,16 @@
     <string name="app_name">mapbook</string>
     <string name="title">My Offline Map</string>
     <string name="portal">https://www.arcgis.com</string>
-    <string name="portalId">f0e30c2e84b247f49dd01df37ad1ff29</string>
+    <string name="portalId">52346d5fc4c348589f976b6a279ec3e6</string>
     <string name="mapName">OfflineMapbook_rd2</string>
     <string name="offlineDirectory">Data</string>
     <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
     <string name="wireless_problem">Wireless Connectivity Problem</string>
     <string name="query_hint">Search by address or name</string>
-    <string name="bookmarks">Bookmarks</string>
+    <string name="main_menu">Main Menu</string>
     <string name="layers">Layers</string>
     <string name="search">Search</string>
+    <string name="geo_locate_error">Geocode failed on address</string>
+    <string name="location_not_foud">We are sorry, we couldn\'t find a location with the name - </string>
+    <string name="reverse_geocode_message">Drag the pin to reverse-geocode</string>
 </resources>

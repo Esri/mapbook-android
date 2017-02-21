@@ -225,7 +225,28 @@ public class MapbookActivity extends AppCompatActivity {
 
     @Override public void onBindViewHolder(final RecycleViewHolder holder, final int position) {
       holder.mapName.setText("Map "+ (position+1));
-      ArcGISMap map = maps.get(position);
+      final ArcGISMap map = maps.get(position);
+      map.addDoneLoadingListener(new Runnable() {
+        @Override public void run() {
+          final Item i = map.getItem();
+          if (i != null){
+            i.loadAsync();
+            i.addDoneLoadingListener(new Runnable() {
+              @Override public void run() {
+                ListenableFuture<byte[]> future = i.fetchThumbnailAsync();
+                future.addDoneListener(new Runnable() {
+                  @Override public void run() {
+                    byte[] t = map.getItem().getThumbnailData();
+                  }
+                });
+              }
+            });
+          }
+        }
+      });
+      map.loadAsync();
+
+
       holder.bookmarkCount.setText("Bookmark Count " + map.getBookmarks().size());
       holder.layerCount.setText("Layer Count " + map.getOperationalLayers().size());
       holder.button.setText("View");

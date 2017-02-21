@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/action_bookmark"
-          android:title="@string/bookmarks"
+    <item android:id="@+id/action_list"
+          android:title="@string/main_menu"
           app:showAsAction="ifRoom"
-          android:icon="@drawable/ic_bookmark_border_white_24px"/>
+          android:icon="@drawable/ic_list_white_24px"/>
     <item android:id="@+id/action_layers"
           android:title="@string/layers"
           app:showAsAction="ifRoom"
