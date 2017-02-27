@@ -38,18 +38,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 
+import android.widget.TextView;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.Bookmark;
 import com.esri.arcgisruntime.mapping.Item;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
-import com.esri.arcgisruntime.mapping.view.MapView;
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.*;
@@ -62,6 +58,7 @@ public class MapbookActivity extends AppCompatActivity {
   private List<ArcGISMap> maps = new ArrayList<>();
   private RecyclerView mMapView;
   private Activity activity;
+  private MapAdapter mapAdapter;
   private String mmpkFilePath = null;
 
   @Override
@@ -82,6 +79,8 @@ public class MapbookActivity extends AppCompatActivity {
     mMapView = (RecyclerView) findViewById(R.id.recyclerView) ;
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     mMapView.setLayoutManager( layoutManager);
+    mapAdapter = new MapAdapter();
+    mMapView.setAdapter(mapAdapter);
     layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
     mmpkFilePath =  getIntent().getStringExtra(MainActivity.FILE_PATH);
@@ -110,8 +109,8 @@ public class MapbookActivity extends AppCompatActivity {
       public void run() {
         if (mmp.getLoadStatus() == LoadStatus.LOADED) {
           maps = mmp.getMaps();
-          MapAdapter mapAdapter = new MapAdapter(maps);
-          mMapView.setAdapter(mapAdapter);
+          mapAdapter.setMaps(maps);
+          mapAdapter.notifyDataSetChanged();
 
           Item item = mmp.getItem();
           populateUI(item);
@@ -216,6 +215,8 @@ public class MapbookActivity extends AppCompatActivity {
       maps = arcGISMaps;
     }
 
+    public MapAdapter(){}
+
     @Override public RecycleViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
       View itemView = LayoutInflater.
           from(viewGroup.getContext()).
@@ -229,40 +230,55 @@ public class MapbookActivity extends AppCompatActivity {
       map.addDoneLoadingListener(new Runnable() {
         @Override public void run() {
           final Item i = map.getItem();
+          Log.i("MapbookActivity", "Snippet " + i.getSnippet() );
+          Log.i("MapbookActivity", "Description " + i.getDescription()  );
+          holder.mapName.setText(i.getTitle());
+//          holder.description.setText(i.getDescription());
+          holder.snippet.setText(i.getSnippet());
+          String dateCreated = getDateString(i.getCreated());
+          Log.i("MapbookActivity", "Date created " + dateCreated );
+          holder.mapCreateDate.setText("Created " + dateCreated);
           if (i != null){
-            i.loadAsync();
-            i.addDoneLoadingListener(new Runnable() {
+            final ListenableFuture<byte[]> future = i.fetchThumbnailAsync();
+            future.addDoneListener(new Runnable() {
               @Override public void run() {
-                ListenableFuture<byte[]> future = i.fetchThumbnailAsync();
-                future.addDoneListener(new Runnable() {
-                  @Override public void run() {
-                    byte[] t = map.getItem().getThumbnailData();
-                  }
-                });
+                try {
+                  byte[] t = future.get();
+                  Log.i("MapbookActivity", "Length of bytes " + t.length);
+                  Bitmap bitmap = BitmapFactory.decodeByteArray(t, 0, t.length);
+
+                  holder.mapView.setImageBitmap(bitmap);
+                  holder.mapView.setOnClickListener(new View.OnClickListener() {
+                    @Override public void onClick(View v) {
+                      Intent intent = new Intent(activity, MapViewActivity.class);
+                      intent.putExtra(MainActivity.FILE_PATH, mmpkFilePath);
+                      intent.putExtra("INDEX", position);
+                      startActivity(intent);
+                    }
+                  });
+
+                } catch (Exception e) {
+                  e.printStackTrace();
+
+                }
               }
             });
           }
+
+
         }
       });
       map.loadAsync();
 
-
-      holder.bookmarkCount.setText("Bookmark Count " + map.getBookmarks().size());
-      holder.layerCount.setText("Layer Count " + map.getOperationalLayers().size());
-      holder.button.setText("View");
-      holder.button.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
-          Intent intent = new Intent(activity, MapViewActivity.class);
-          intent.putExtra(MainActivity.FILE_PATH, mmpkFilePath);
-          intent.putExtra("INDEX", position);
-          startActivity(intent);
-        }
-      });
     }
 
 
     @Override public int getItemCount() {
       return maps.size();
+    }
+
+    public void setMaps(List<ArcGISMap> mapList){
+      maps = mapList;
     }
   }
   public class RecycleViewHolder extends RecyclerView.ViewHolder{
@@ -270,17 +286,18 @@ public class MapbookActivity extends AppCompatActivity {
     public final ImageView mapView;
     public final TextView mapName;
     public final TextView layerCount;
-    public final TextView bookmarkCount;
-    public final Button button;
+    public final TextView snippet;
+    public final TextView description;
+    public final TextView mapCreateDate;
 
     public RecycleViewHolder(final View view){
       super(view);
       mapView = (ImageView) view.findViewById(R.id.mapThumbnail);
       mapName = (TextView) view.findViewById(R.id.mapName);
       layerCount = (TextView) view.findViewById(R.id.txtLayerCount);
-      bookmarkCount = (TextView) view.findViewById(R.id.txtBookmarkCount);
-      button = (Button) view.findViewById(R.id.btnView);
-
+      snippet = (TextView) view.findViewById(R.id.txtMapSnippet);
+      description = (TextView) view.findViewById(R.id.txtMapDescription);
+      mapCreateDate = (TextView) view.findViewById(R.id.txtMapCreateDate);
     }
   }
 
