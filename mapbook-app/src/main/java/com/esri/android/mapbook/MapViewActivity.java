@@ -43,7 +43,11 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.data.FeatureTable;
+import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
@@ -57,10 +61,7 @@ import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 import com.esri.arcgisruntime.tasks.geocode.ReverseGeocodeParameters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 
@@ -84,6 +85,7 @@ public class MapViewActivity extends AppCompatActivity {
   private GraphicsOverlay graphicsOverlay;
   private GeocodeParameters mGeocodeParameters;
   private PictureMarkerSymbol mPinSourceSymbol;
+  private DataManager mDataManager = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -110,9 +112,6 @@ public class MapViewActivity extends AppCompatActivity {
           if (item.getTitle().toString().equalsIgnoreCase( "Layers" )) {
             toggleLayerList();
           }
-          if (item.getTitle().toString().equalsIgnoreCase("Main Menu")){
-            finish();
-          }
           return false;
         }
       });
@@ -122,6 +121,7 @@ public class MapViewActivity extends AppCompatActivity {
     Intent intent = getIntent();
     String mmpkPath = intent.getStringExtra(MainActivity.FILE_PATH);
     int index = intent.getIntExtra("INDEX",0);
+    mDataManager = new DataManager();
     loadMapInView(mmpkPath, index);
 
   }
@@ -301,6 +301,24 @@ public class MapViewActivity extends AppCompatActivity {
   private int manageLayerSelection(String layerName){
     int result = -1;
     LayerList layers = mMap.getOperationalLayers();
+    Iterator<Layer> layerIterator = layers.iterator();
+    while (layerIterator.hasNext()){
+      Layer l = layerIterator.next();
+      if (l instanceof FeatureLayer){
+        FeatureLayer fL = (FeatureLayer) l;
+        if (fL != null){
+          FeatureTable table = fL.getFeatureTable();
+          List<Field> fields = table.getFields();
+          for (Field f : fields){
+            Log.i("MapViewActivity", l.getName() + " Field = " + f.getName());
+          }
+        }
+      }
+
+    }
+
+
+
     Layer foundLayer = null;
     Iterator<Layer> iterator = layers.iterator();
     while (iterator.hasNext()){
@@ -355,7 +373,9 @@ public class MapViewActivity extends AppCompatActivity {
           Iterator<Layer> iter = layers.iterator();
           while (iter.hasNext()){
             Layer layer = iter.next();
-            mLayerNameList.add(layer.getName());
+            if (layer instanceof FeatureLayer){
+              mLayerNameList.add(layer.getName());
+            }
           }
           mContentAdapter.setLayerList(mLayerNameList);
 
@@ -500,6 +520,23 @@ public class MapViewActivity extends AppCompatActivity {
       // get the screen point where user tapped
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
 
+      Point geometry = mMapView.screenToLocation(screenPoint);
+
+      mDataManager.queryForFeatures(geometry, mMap.getOperationalLayers(), new Callbacks.FeatureCallback() {
+        @Override public void onFeaturesFound(List<Feature> featureList, FeatureLayer featureLayer) {
+          Log.i("MapViewActivity", "Features returned " + featureList.size());
+          featureLayer.clearSelection();
+          for (Feature f : featureList){
+            featureLayer.selectFeature(f);
+            Map<String,Object> attributes = f.getAttributes();
+            Log.i("MapViewActivity", "Feature layer = " + featureLayer.getName()+  " , keys = " + attributes.toString());
+          }
+        }
+
+        @Override public void onNoFeaturesFound() {
+          Log.i("MapViewActivity", "No features found");
+        }
+      });
       // identify graphics on the graphics overlay
       final ListenableFuture<IdentifyGraphicsOverlayResult> identifyGraphic = mMapView.identifyGraphicsOverlayAsync(graphicsOverlay, screenPoint, 1.0, false, 1);
 

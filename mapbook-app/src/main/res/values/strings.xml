@@ -3,7 +3,7 @@
     <string name="title">My Offline Map</string>
     <string name="portal">https://www.arcgis.com</string>
     <string name="portalId">52346d5fc4c348589f976b6a279ec3e6</string>
-    <string name="mapName">OfflineMapbook_rd2</string>
+    <string name="mapName">OfflineMapbook_v3</string>
     <string name="offlineDirectory">Data</string>
     <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
     <string name="wireless_problem">Wireless Connectivity Problem</string>

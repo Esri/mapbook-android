@@ -32,7 +32,6 @@ dependencies {
     compile "com.android.support:support-v4:$rootProject.supportLibraryVersion"
     compile "com.google.dagger:dagger:$rootProject.daggerVerison"
     apt "com.google.dagger:dagger-compiler:$rootProject.daggerVerison"
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     compile "com.google.guava:guava:$rootProject.guavaVersion"
     provided 'javax.annotation:jsr250-api:1.0'
 
@@ -41,4 +40,5 @@ dependencies {
     })
 
     testCompile "junit:junit:$rootProject.ext.junitVersion"
+    compile 'com.android.support.constraint:constraint-layout:1.0.0'
 }
