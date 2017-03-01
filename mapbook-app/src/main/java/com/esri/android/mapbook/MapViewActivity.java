@@ -23,15 +23,20 @@
  */
 package com.esri.android.mapbook;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -44,8 +49,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.FeatureTable;
-import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
@@ -56,10 +59,7 @@ import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
-import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
-import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
-import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
-import com.esri.arcgisruntime.tasks.geocode.ReverseGeocodeParameters;
+import com.esri.arcgisruntime.tasks.geocode.*;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -70,7 +70,6 @@ public class MapViewActivity extends AppCompatActivity {
   MapContentAdapter mContentAdapter = null;
   ArcGISMap mMap =null;
   MapView mMapView = null;
-  private List<Layer> mRemovedLayers = new ArrayList<>();
   private List<String> mLayerNameList  = null;
   private LocatorTask mLocatorTask = null;
   private ReverseGeocodeParameters mReverseGeocodeParameters = null;
@@ -79,13 +78,18 @@ public class MapViewActivity extends AppCompatActivity {
   private String mGraphicPointAddress;
   private Point mGraphicPoint;
   private GeocodeResult mGeocodedLocation;
-  Spinner mSpinner;
   private boolean isPinSelected;
   private TextView mCalloutContent;
   private GraphicsOverlay graphicsOverlay;
   private GeocodeParameters mGeocodeParameters;
   private PictureMarkerSymbol mPinSourceSymbol;
   private DataManager mDataManager = null;
+  private LayerList mLayerList = null;
+  private static final String COLUMN_NAME_ADDRESS = "address";
+  private static final String COLUMN_NAME_X = "x";
+  private static final String COLUMN_NAME_Y = "y";
+  private MatrixCursor mSuggestionCursor;
+  private List<SuggestResult> mSuggestionList = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -100,16 +104,21 @@ public class MapViewActivity extends AppCompatActivity {
     mContentAdapter = new MapContentAdapter();
     mRecycleMapContentView.setAdapter(mContentAdapter);
 
+    final Intent intent = getIntent();
+    final String mmpkPath = intent.getStringExtra(MainActivity.FILE_PATH);
+    int index = intent.getIntExtra("INDEX",0);
+    final String title = intent.getStringExtra("TITLE");
+
     if (toolbar != null) {
       setSupportActionBar(toolbar);
       final ActionBar actionBar = (this).getSupportActionBar();
       if (actionBar != null) {
-        actionBar.setTitle(R.string.title);
+        actionBar.setTitle(title );
       }
       toolbar.setNavigationIcon(null);
       toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
         @Override public boolean onMenuItemClick(MenuItem item) {
-          if (item.getTitle().toString().equalsIgnoreCase( "Layers" )) {
+          if (item.getTitle().toString().equalsIgnoreCase( getString(R.string.layer_action) )) {
             toggleLayerList();
           }
           return false;
@@ -118,9 +127,7 @@ public class MapViewActivity extends AppCompatActivity {
 
     }
 
-    Intent intent = getIntent();
-    String mmpkPath = intent.getStringExtra(MainActivity.FILE_PATH);
-    int index = intent.getIntExtra("INDEX",0);
+
     mDataManager = new DataManager();
     loadMapInView(mmpkPath, index);
 
@@ -141,8 +148,6 @@ public class MapViewActivity extends AppCompatActivity {
     mPinSourceSymbol.setHeight(90);
     mPinSourceSymbol.setWidth(20);
     mPinSourceSymbol.loadAsync();
-  //  mPinSourceSymbol.setLeaderOffsetY(45);
-
 
     mReverseGeocodeParameters = new ReverseGeocodeParameters();
     mReverseGeocodeParameters.getResultAttributeNames().add("*");
@@ -200,7 +205,35 @@ public class MapViewActivity extends AppCompatActivity {
       }
 
       @Override public boolean onQueryTextChange(final String newText) {
+
+        if (mLocatorTask == null)
+          return false;
+        getSuggestions(newText);
+        return true;
+      }
+    });
+
+    applySuggestionCursor();
+
+    mSearchview.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+      @Override public boolean onSuggestionSelect(int position) {
         return false;
+      }
+
+      @Override public boolean onSuggestionClick(int position) {
+        // Obtain the content of the selected suggesting place via
+        // cursor
+        MatrixCursor cursor = (MatrixCursor) mSearchview.getSuggestionsAdapter().getItem(position);
+        int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
+        final String address = cursor.getString(indexColumnSuggestion);
+
+        // Find the Location of the suggestion
+        geoCodeTypedAddress(address);
+
+        cursor.close();
+        mSearchview.setQuery(address,false);
+        hideKeyboard();
+        return true;
       }
     });
     return true;
@@ -298,55 +331,25 @@ public class MapViewActivity extends AppCompatActivity {
    * @param  layerName - String name to toggle
    * @return int - 0 for removal of feature layer, 1 for addition of feature layer
    */
-  private int manageLayerSelection(String layerName){
+  private int manageLayerVisibility(String layerName){
     int result = -1;
     LayerList layers = mMap.getOperationalLayers();
-    Iterator<Layer> layerIterator = layers.iterator();
-    while (layerIterator.hasNext()){
-      Layer l = layerIterator.next();
-      if (l instanceof FeatureLayer){
-        FeatureLayer fL = (FeatureLayer) l;
-        if (fL != null){
-          FeatureTable table = fL.getFeatureTable();
-          List<Field> fields = table.getFields();
-          for (Field f : fields){
-            Log.i("MapViewActivity", l.getName() + " Field = " + f.getName());
-          }
-        }
-      }
 
-    }
-
-
-
-    Layer foundLayer = null;
     Iterator<Layer> iterator = layers.iterator();
     while (iterator.hasNext()){
       Layer l = iterator.next();
       if (l.getName().equalsIgnoreCase(layerName)){
-        foundLayer = l; // Layer is currently in the map and visible
-        Log.i("MapViewActivity", "Found layer in map...");
-        break;
-      }
-    }
-    if (foundLayer != null){
-      mRemovedLayers.add(foundLayer);
-      mMap.getOperationalLayers().remove(foundLayer);
-      result = 0;
-    }else{ // Layer has been previously removed
-      for (Layer layer : mRemovedLayers){
-        if (layer.getName().equalsIgnoreCase(layerName)){
-          foundLayer = layer;
+        if (l.isVisible()){
+          Log.i("MapViewActivity", layerName + " is visible...");
+          l.setVisible(false);
+          result = 0;
+          break;
+        }else{
+          Log.i("MapViewActivity", layerName + " is NOT visible...");
+          l.setVisible(true);
+          result = 1;
           break;
         }
-      }
-      if (foundLayer != null){
-        Log.i("MapViewActivity", "Found layer in removed layers...");
-        mRemovedLayers.remove(foundLayer);
-        mMap.getOperationalLayers().add(foundLayer);
-        result = 1;
-      }else{
-        Log.e("MapViewActivity", "Programming error!");
       }
     }
     return result;
@@ -368,14 +371,12 @@ public class MapViewActivity extends AppCompatActivity {
 
           mLocatorTask = mmp.getLocatorTask();
 
-          LayerList layers = mMap.getOperationalLayers();
-          mLayerNameList = new ArrayList<String>(layers.size());
-          Iterator<Layer> iter = layers.iterator();
+          mLayerList = mMap.getOperationalLayers();
+          mLayerNameList = new ArrayList<String>(mLayerList.size());
+          Iterator<Layer> iter = mLayerList.iterator();
           while (iter.hasNext()){
             Layer layer = iter.next();
-            if (layer instanceof FeatureLayer){
-              mLayerNameList.add(layer.getName());
-            }
+            mLayerNameList.add(layer.getName());
           }
           mContentAdapter.setLayerList(mLayerNameList);
 
@@ -412,6 +413,94 @@ public class MapViewActivity extends AppCompatActivity {
     }
   }
 
+  /**
+   * Initialize Suggestion Cursor
+   */
+  private void initSuggestionCursor() {
+    String[] cols = { BaseColumns._ID, COLUMN_NAME_ADDRESS, COLUMN_NAME_X, COLUMN_NAME_Y};
+    mSuggestionCursor = new MatrixCursor(cols);
+  }
+
+  /**
+   * Set the suggestion cursor to an Adapter then set it to the search view
+   */
+  private void applySuggestionCursor() {
+    String[] cols = { COLUMN_NAME_ADDRESS};
+    int[] to = {R.id.suggestion_item_address};
+    SimpleCursorAdapter mSuggestionAdapter = new SimpleCursorAdapter(getApplicationContext(),
+        R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
+    mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
+    mSuggestionAdapter.notifyDataSetChanged();
+  }
+
+  /**
+   * Provide a character by character suggestions for the search string
+   *
+   * @param query
+   *            String typed so far by the user to fetch the suggestions
+   */
+  private void getSuggestions(final String query) {
+    if (query == null || query.isEmpty()) {
+      return;
+    }
+    // Attach a listener to the locator task since
+    // the LocatorTask may or may not be loaded the
+    // the very first time a user types text into the search box.
+    // If the Locator is already loaded, the following listener
+    // is invoked immediately.
+
+    mLocatorTask.addDoneLoadingListener(new Runnable() {
+      @Override public void run() {
+        // Does this locator support suggestions?
+        if (mLocatorTask.getLoadStatus().name() != LoadStatus.LOADED.name()){
+        } else if (!mLocatorTask.getLocatorInfo().isSupportsSuggestions()){
+          return;
+        }
+
+        SuggestParameters suggestParameters = new SuggestParameters();
+        suggestParameters.setSearchArea(mMapView.getVisibleArea());
+        final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocatorTask.suggestAsync(query, suggestParameters);
+        // Attach a done listener that executes upon completion of the async call
+        suggestionsFuture.addDoneListener(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              // Get the suggestions returned from the locator task.
+              // Store retrieved suggestions for future use (e.g. if the user
+              // selects a retrieved suggestion, it can easily be
+              // geocoded).
+              List<SuggestResult> suggestResults = suggestionsFuture.get();
+              Log.i("MapViewActivity", "Suggestions returned " + suggestResults.size());
+              for (SuggestResult result : suggestResults){
+                Log.i("MapViewActivity", result.getLabel());
+              }
+
+              showSuggestedPlaceNames(suggestResults);
+
+            } catch (Exception e) {
+              Log.e("MapViewActivity", "Error on getting suggestions " + e.getMessage());
+            }
+          }
+        });
+      }
+    });
+    // Initiate the asynchronous call
+    mLocatorTask.loadAsync();
+  }
+  private void showSuggestedPlaceNames(List<SuggestResult> suggestions){
+    if (suggestions == null || suggestions.isEmpty()){
+      return;
+    }
+    mSuggestionList = suggestions;
+    initSuggestionCursor();
+    int key = 0;
+    for (SuggestResult result : suggestions) {
+      // Add the suggestion results to the cursor
+      mSuggestionCursor.addRow(new Object[]{key++, result.getLabel(), "0", "0"});
+    }
+    applySuggestionCursor();
+  }
+
   public class MapContentAdapter extends RecyclerView.Adapter<RecycleViewContentHolder>{
 
     private List<String> mLayers ;
@@ -419,7 +508,9 @@ public class MapViewActivity extends AppCompatActivity {
     public MapContentAdapter(){}
 
     public void setLayerList(List layers){
+
       mLayers = layers;
+
     }
 
     @Override public RecycleViewContentHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -431,31 +522,15 @@ public class MapViewActivity extends AppCompatActivity {
     }
 
     @Override public void onBindViewHolder(final RecycleViewContentHolder holder, final int position) {
-      if (holder != null && holder.mapContentName!= null){
-
-        holder.mapContentName.setText(mLayers.get(position));
-        holder.mapContentName.setOnClickListener(new View.OnClickListener() {
-          @Override public void onClick(View v) {
-            int visibility = manageLayerSelection(mLayers.get(position));
-            if (visibility  == 0){
-              holder.button.setBackgroundResource(R.drawable.ic_visibility_black_36px);
-            } else if (visibility == 1){
-              holder.button.setBackgroundResource(R.drawable.ic_visibility_off_black_36px);
-            }
-          }
-        });
-        holder.button.setOnClickListener(new View.OnClickListener() {
-          @Override public void onClick(View v) {
-            int visibility = manageLayerSelection(mLayers.get(position));
-            if (visibility  == 0){
-              holder.button.setBackgroundResource(R.drawable.ic_visibility_black_36px);
-            } else if (visibility == 1){
-              holder.button.setBackgroundResource(R.drawable.ic_visibility_off_black_36px);
-            }
-          }
-        });
-      }
-
+      final String layerName = mLayers.get(position);
+      holder.mapContentName.setText(layerName);
+      boolean layerVisible = (mLayerList.get(position).isVisible());
+      holder.checkBox.setChecked(layerVisible);
+      holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+          manageLayerVisibility(layerName);
+        }
+      });
     }
 
     @Override public int getItemCount() {
@@ -469,17 +544,14 @@ public class MapViewActivity extends AppCompatActivity {
   }
   public class RecycleViewContentHolder extends RecyclerView.ViewHolder{
 
-    public final LinearLayout linearLayout;
     public final TextView mapContentName;
-    public final Button button;
+  //  public final Button button;
+    public final CheckBox checkBox;
 
     public RecycleViewContentHolder(final View view){
       super(view);
-
+      checkBox = (CheckBox) view.findViewById(R.id.cbLayer) ;
       mapContentName = (TextView) view.findViewById(R.id.txtMapContentName);
-      button = (Button) view.findViewById(R.id.btnHide);
-      linearLayout = (LinearLayout) findViewById(R.id.mapContentLinearLayout);
-
     }
   }
 
@@ -534,6 +606,9 @@ public class MapViewActivity extends AppCompatActivity {
         }
 
         @Override public void onNoFeaturesFound() {
+          Toast.makeText(getApplicationContext(),
+              getString(R.string.feature_not_found),
+              Toast.LENGTH_SHORT).show();
           Log.i("MapViewActivity", "No features found");
         }
       });
