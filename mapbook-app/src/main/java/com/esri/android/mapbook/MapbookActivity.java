@@ -234,10 +234,10 @@ public class MapbookActivity extends AppCompatActivity {
           Log.i("MapbookActivity", "Description " + i.getDescription()  );
           final String title = i.getTitle();
           holder.mapName.setText(title);
-          final String description = i.getDescription();
-          final String extractedDescription = description.replaceAll("<[^>]*>", "");
-          Log.i("MapbookActivity", "Description " + extractedDescription );
-          holder.description.setText(extractedDescription);
+//          final String description = i.getDescription();
+//          final String extractedDescription = description.replaceAll("<[^>]*>", "");
+//          Log.i("MapbookActivity", "Description " + extractedDescription );
+//          holder.description.setText(extractedDescription);
           holder.snippet.setText(i.getSnippet());
           String dateCreated = getDateString(i.getCreated());
           Log.i("MapbookActivity", "Date created " + dateCreated );
@@ -291,7 +291,6 @@ public class MapbookActivity extends AppCompatActivity {
     public final ImageView mapView;
     public final TextView mapName;
     public final TextView snippet;
-    public final TextView description;
     public final TextView mapCreateDate;
 
     public RecycleViewHolder(final View view){
@@ -299,7 +298,6 @@ public class MapbookActivity extends AppCompatActivity {
       mapView = (ImageView) view.findViewById(R.id.mapThumbnail);
       mapName = (TextView) view.findViewById(R.id.mapName);
       snippet = (TextView) view.findViewById(R.id.txtMapSnippet);
-      description = (TextView) view.findViewById(R.id.txtMapDescription);
       mapCreateDate = (TextView) view.findViewById(R.id.txtMapCreateDate);
     }
   }
