@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
       }else{
         // Kick off the sign in activity
         Intent intent = new Intent(this, SignInActivity.class);
+        intent.putExtra(FILE_PATH, mmpkFilePath);
         startActivityForResult(intent, MainActivity.REQUEST_DOWNLOAD);
       }
     }else{

@@ -277,7 +277,7 @@ public class MapViewActivity extends AppCompatActivity {
                   // Use the first result - for example
                   // display on the map
                   mGeocodedLocation = geocodeResults.get(0);
-                  displaySearchResult(mGeocodedLocation.getDisplayLocation(), mGeocodedLocation.getLabel());
+                  displaySearchResult(mGeocodedLocation.getDisplayLocation(), mGeocodedLocation.getLabel(), true);
 
                 } else {
                   Toast.makeText(getApplicationContext(),
@@ -307,7 +307,7 @@ public class MapViewActivity extends AppCompatActivity {
     mLocatorTask.loadAsync();
   }
 
-  private void displaySearchResult(Point resultPoint, String address) {
+  private void displaySearchResult(Point resultPoint, String address, boolean zoomOut) {
 
 
     if (mMapView.getCallout().isShowing()) {
@@ -320,8 +320,11 @@ public class MapViewActivity extends AppCompatActivity {
     // add graphic to location layer
     graphicsOverlay.getGraphics().add(resultLocGraphic);
 
-    // Zoom map to geocode result location
-    mMapView.setViewpointAsync(new Viewpoint(resultPoint, 8000), 3);
+    if (zoomOut){
+      // Zoom map to geocode result location
+      mMapView.setViewpointAsync(new Viewpoint(resultPoint, 8000), 3);
+    }
+
 
     mGraphicPoint = resultPoint;
     mGraphicPointAddress = address;
@@ -340,12 +343,10 @@ public class MapViewActivity extends AppCompatActivity {
       Layer l = iterator.next();
       if (l.getName().equalsIgnoreCase(layerName)){
         if (l.isVisible()){
-          Log.i("MapViewActivity", layerName + " is visible...");
           l.setVisible(false);
           result = 0;
           break;
         }else{
-          Log.i("MapViewActivity", layerName + " is NOT visible...");
           l.setVisible(true);
           result = 1;
           break;
@@ -376,6 +377,10 @@ public class MapViewActivity extends AppCompatActivity {
           Iterator<Layer> iter = mLayerList.iterator();
           while (iter.hasNext()){
             Layer layer = iter.next();
+            if (layer instanceof FeatureLayer){
+              ((FeatureLayer) layer).setSelectionWidth(3.0d);
+            }
+
             mLayerNameList.add(layer.getName());
           }
           mContentAdapter.setLayerList(mLayerNameList);
@@ -458,6 +463,7 @@ public class MapViewActivity extends AppCompatActivity {
         }
 
         SuggestParameters suggestParameters = new SuggestParameters();
+        suggestParameters.setMaxResults(5);
         suggestParameters.setSearchArea(mMapView.getVisibleArea());
         final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocatorTask.suggestAsync(query, suggestParameters);
         // Attach a done listener that executes upon completion of the async call
@@ -592,16 +598,24 @@ public class MapViewActivity extends AppCompatActivity {
       // get the screen point where user tapped
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
 
-      Point geometry = mMapView.screenToLocation(screenPoint);
+      final Point geometry = mMapView.screenToLocation(screenPoint);
 
       mDataManager.queryForFeatures(geometry, mMap.getOperationalLayers(), new Callbacks.FeatureCallback() {
         @Override public void onFeaturesFound(List<Feature> featureList, FeatureLayer featureLayer) {
           Log.i("MapViewActivity", "Features returned " + featureList.size());
+
           featureLayer.clearSelection();
           for (Feature f : featureList){
             featureLayer.selectFeature(f);
             Map<String,Object> attributes = f.getAttributes();
             Log.i("MapViewActivity", "Feature layer = " + featureLayer.getName()+  " , keys = " + attributes.toString());
+
+            if(attributes.containsKey("FACILITYID")){
+              String facility = attributes.get("FACILITYID").toString();
+              Point center = f.getGeometry().getExtent().getCenter();
+              displaySearchResult(center, facility,false);
+              break;
+            }
           }
         }
 
@@ -624,16 +638,6 @@ public class MapViewActivity extends AppCompatActivity {
             List<Graphic> graphic = grOverlayResult.getGraphics();
             // if identified graphic is not empty, start DragTouchListener
             if (!graphic.isEmpty()) {
-
-              if (!isPinSelected) {
-                isPinSelected = true;
-                graphic.get(0).setSelected(true);
-                Toast.makeText(getApplicationContext(),
-                    getString(R.string.reverse_geocode_message),
-                    Toast.LENGTH_SHORT).show();
-
-              }
-
               mCalloutContent.setText(mGraphicPointAddress);
               // get callout, set content and show
               mCallout = mMapView.getCallout();

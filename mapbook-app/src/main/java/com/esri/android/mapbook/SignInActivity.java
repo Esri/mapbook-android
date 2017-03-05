@@ -47,11 +47,15 @@ import java.util.concurrent.ExecutionException;
 
 public class SignInActivity extends AppCompatActivity {
   Portal mPortal = null;
+  String mFileName = null;
+  ProgressDialog mProgressDialog = null;
+  long mPortalItemSize;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    mFileName =  getIntent().getStringExtra(MainActivity.FILE_PATH);
     // Set up an authentication handler
     // to be used when loading remote
     // resources or services.
@@ -72,17 +76,18 @@ public class SignInActivity extends AppCompatActivity {
 
   private void signIn(){
     final Activity  activity= this;
-    final ProgressDialog progressDialog = new ProgressDialog(this);
-    progressDialog.setMessage("Trying to connect to your portal...");
-    progressDialog.setTitle("Authenticating");
-    progressDialog.show();
+    mProgressDialog = new ProgressDialog(this);
+    mProgressDialog.setMessage("Trying to connect to your portal...");
+    mProgressDialog.setTitle("Authenticating");
+    mProgressDialog.show();
     mPortal = new Portal(getString(R.string.portal));
     mPortal.addDoneLoadingListener(new Runnable() {
       @Override
       public void run() {
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
 
-          progressDialog.dismiss();
+          mProgressDialog.setMessage("Connected to your portal...");
+          mProgressDialog.setTitle("Downloading mapbook");
 
           Handler handler = new Handler() ;
           handler.post(new Runnable() {
@@ -100,17 +105,23 @@ public class SignInActivity extends AppCompatActivity {
           Log.i("SignInActivity", message);
           Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
           Log.e("SignInActivity", message);
+          mProgressDialog.dismiss();
         }
-        progressDialog.dismiss();
+
       }
     });
     mPortal.loadAsync();
   }
 
   private void downloadMapBook(){
+    final Activity activity = this;
     final ProgressDialog progressDialog = new ProgressDialog(this);
     progressDialog.setMessage("Please wait... ");
     progressDialog.setTitle("Downloading Mapbook");
+    progressDialog.setIndeterminate(false);
+    progressDialog.setMax(100);
+    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+    progressDialog.setCancelable(true);
     progressDialog.show();
     final PortalItem portalItem = new PortalItem(mPortal, getString(R.string.portalId));
     portalItem.loadAsync();
@@ -118,38 +129,23 @@ public class SignInActivity extends AppCompatActivity {
       @Override public void run() {
         progressDialog.dismiss();
         final ListenableFuture<InputStream> future = portalItem.fetchDataAsync();
+        mPortalItemSize = portalItem.getSize();
+        Log.i("SignInActivity", "Portal item size = " + mPortalItemSize);
         future.addDoneListener(new Runnable() {
           @Override public void run() {
-            Intent intent = new Intent();
+
             try {
               InputStream inputStream = future.get();
               new DownloadMobileMapPackage().execute(inputStream);
-//              Log.i("SignInActivity", "Total bytes = " + inputStream.available());
-//              File storageDirectory = Environment.getExternalStorageDirectory();
-//              File data = new File(storageDirectory, "/Data/Risk_Data.mmpk");
-//              OutputStream os = new FileOutputStream(data);
-//              byte[] buffer = new byte[1024];
-//              int bytesRead;
-//              //read from is to buffer
-//              while((bytesRead = inputStream.read(buffer)) !=-1){
-//                os.write(buffer, 0, bytesRead);
-//              }
-//
-//              inputStream.close();
-//              Log.i("SignInActivity", "Input stream closed");
-//              //flush OutputStream to write any buffered data to file
-//              os.flush();
-//              os.close();
-//              intent.putExtra("FILE_NAME", data.getAbsolutePath());
-//              setResult(RESULT_OK, intent);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-           //   setResult(RESULT_CANCELED, intent);
-            } catch (ExecutionException e) {
-              e.printStackTrace();
-            //  setResult(RESULT_CANCELED, intent);
+
+            } catch (Exception e) {
+              mProgressDialog.dismiss();
+
+              Intent intent = new Intent();
+              Toast.makeText(activity, "Problem downloading file, " + e.getMessage(), Toast.LENGTH_LONG);
+              setResult(RESULT_CANCELED, intent);
+              finish();
             }
-           // finish();
           }
         });
       }
@@ -159,40 +155,53 @@ public class SignInActivity extends AppCompatActivity {
   private void setProgressPercent(Integer progressPercent){
     Log.i("SignInActivity", "Progress " + progressPercent);
   }
-  private class DownloadMobileMapPackage extends AsyncTask<InputStream, Integer, String> {
+  private class DownloadMobileMapPackage extends AsyncTask<InputStream, String, String> {
 
     @Override protected String doInBackground(InputStream... params) {
       String path = null;
       try {
         InputStream inputStream = params[0];
         File storageDirectory = Environment.getExternalStorageDirectory();
-        File data = new File(storageDirectory, "/Data/OfflineMap.mmpk");
+        File data = new File(mFileName);
         OutputStream os = new FileOutputStream(data);
         byte[] buffer = new byte[1024];
         int bytesRead;
         //read from is to buffer
+        int y = 1;
         while ((bytesRead = inputStream.read(buffer)) != -1) {
           os.write(buffer, 0, bytesRead);
+          publishProgress(""+(int)((y*100)/mPortalItemSize));
+          y = y + 1;
+
         }
 
         inputStream.close();
-        Log.i("SignInActivity", "Input stream closed");
+
         //flush OutputStream to write any buffered data to file
         os.flush();
         os.close();
 
         path =  data.getPath();
-      }catch (IOException io){
+
+      }catch (Exception io){
         Log.i("SignInActivity", "Async Task Exception " + io.getMessage());
       }
       return path;
     }
-    protected void onProgressUpdate(Integer... progress) {
-      setProgressPercent(progress[0]);
+    protected void onProgressUpdate(String... progress) {
+      super.onProgressUpdate(progress);
+      Log.i("SignInActivity","Progress..." + progress[0]);
+      mProgressDialog.setProgress(Integer.parseInt(progress[0]));
     }
 
-    protected void onPostExecute(Long result) {
-      Log.i("SignInActivity" ,"Downloaded " + result + " bytes");
+    protected void onPostExecute(String result) {
+      Log.i("SignInActivity" ,"Downloaded " + result);
+      Log.i("SignInActivity" ,"Portal item size = " + mPortalItemSize);
+      mProgressDialog.dismiss();
+      Intent intent = new Intent();
+      setResult(RESULT_OK, intent);
+      finish();
+
     }
   }
 }
