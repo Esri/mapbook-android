@@ -4,5 +4,11 @@
               android:id="@+id/downloadLayout"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
+    <TextView android:layout_width="match_parent"
+              android:visibility="invisible"
+              android:id="@+id/txtError"
+              android:layout_height="match_parent"
+              android:textAppearance="@style/TextAppearance.AppCompat.Display2" android:elevation="14dp"
+              android:gravity="center" android:fontFamily="sans-serif" android:textStyle="normal|bold"/>
 
 </LinearLayout>

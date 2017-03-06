@@ -17,6 +17,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
   private View mLayout = null;
   private static final String FILE_EXTENSION = ".mmpk";
   public static final String FILE_PATH = "mmpk file path";
+  public static final String ERROR_STRING = "error string";
   public static File extStorDir;
   public static String extSDCardDirName;
   private static String filename;
@@ -90,11 +93,21 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_DOWNLOAD){
       if (resultCode == RESULT_OK){
-        Log.i("MainActivity", "Retrieved file = " + data.getStringExtra("FILE_NAME"));
+        String fileName = data.getStringExtra(FILE_PATH);
+        Log.i("MainActivity", "Retrieved file = " + data.getStringExtra(FILE_PATH));
         Intent mapbookIntent = new Intent(this, MapbookActivity.class);
+        mapbookIntent.putExtra(FILE_PATH, fileName);
         startActivity(mapbookIntent);
       }else if (resultCode == RESULT_CANCELED){
-        Log.i("MainActivity", "RESULT_CANCELED");
+        if (data.hasExtra(ERROR_STRING)){
+          String error = data.getStringExtra(ERROR_STRING);
+          Toast.makeText(this,error, Toast.LENGTH_LONG).show();
+          final TextView errorText = (TextView) findViewById(R.id.txtError);
+          errorText.setText("There was a problem downloading the mapbook");
+          errorText.setVisibility(View.VISIBLE);
+
+        }
+
       }
     }
   }
