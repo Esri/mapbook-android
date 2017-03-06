@@ -94,7 +94,14 @@ public class MapbookActivity extends AppCompatActivity {
       mapbookModified = f.lastModified();
 
       loadMapBookThumbnails(mmpkFilePath);
+    }else{
+      final TextView txtDescription = (TextView) findViewById(R.id.txtDescription);
+      txtDescription.setText("Unable to download the mobile map package");
+
+      final ImageView btnRefresh = (ImageView) findViewById(R.id.imageView2);
+      btnRefresh.setVisibility(View.INVISIBLE);
     }
+
   }
 
   /**
