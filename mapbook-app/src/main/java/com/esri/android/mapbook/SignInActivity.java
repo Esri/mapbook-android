@@ -80,7 +80,7 @@ public class SignInActivity extends AppCompatActivity {
     progressDialog.setMessage("Trying to connect to your portal...");
     progressDialog.setTitle("Portal");
     progressDialog.show();
-    mPortal = new Portal(getString(R.string.portal));
+    mPortal = new Portal(getString(R.string.portal), true);
     mPortal.addDoneLoadingListener(new Runnable() {
       @Override
       public void run() {
