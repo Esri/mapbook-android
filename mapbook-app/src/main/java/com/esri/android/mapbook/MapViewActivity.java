@@ -52,6 +52,7 @@ import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
+import com.esri.arcgisruntime.layers.LegendInfo;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.LayerList;
@@ -61,6 +62,7 @@ import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.tasks.geocode.*;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -83,7 +85,7 @@ public class MapViewActivity extends AppCompatActivity {
   private GraphicsOverlay graphicsOverlay;
   private GeocodeParameters mGeocodeParameters;
   private PictureMarkerSymbol mPinSourceSymbol;
-  private DataManager mDataManager = null;
+
   private LayerList mLayerList = null;
   private static final String COLUMN_NAME_ADDRESS = "address";
   private static final String COLUMN_NAME_X = "x";
@@ -91,9 +93,14 @@ public class MapViewActivity extends AppCompatActivity {
   private MatrixCursor mSuggestionCursor;
   private List<SuggestResult> mSuggestionList = null;
 
+  @Inject DataManager mDataManager;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    // Ask the component to inject this activity
+    ((MapBookApplication)getApplication()).getComponent().inject(this);
 
     setContentView(R.layout.map_view);
 
@@ -128,7 +135,6 @@ public class MapViewActivity extends AppCompatActivity {
     }
 
 
-    mDataManager = new DataManager();
     loadMapInView(mmpkPath, index);
 
   }
@@ -379,6 +385,21 @@ public class MapViewActivity extends AppCompatActivity {
             Layer layer = iter.next();
             if (layer instanceof FeatureLayer){
               ((FeatureLayer) layer).setSelectionWidth(3.0d);
+              final ListenableFuture<List<LegendInfo>> legendInfoFuture = layer.fetchLegendInfosAsync();
+              legendInfoFuture.addDoneListener(new Runnable() {
+                @Override public void run() {
+                  try {
+                    List<LegendInfo> legendList = legendInfoFuture.get();
+                    Log.i("MapViewActivity", "Legend list size " + legendList.size());
+                  } catch (InterruptedException e) {
+                    e.printStackTrace();
+                  } catch (ExecutionException e) {
+                    e.printStackTrace();
+                  }
+                }
+              });
+
+
             }
 
             mLayerNameList.add(layer.getName());
