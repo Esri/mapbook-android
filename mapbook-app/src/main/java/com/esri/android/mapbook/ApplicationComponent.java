@@ -26,10 +26,16 @@ package com.esri.android.mapbook;
 import dagger.Component;
 import javax.inject.Singleton;
 
+/**
+ * An interface associating injections with targets.
+ * It provides a call and scope to where we want to inject.
+ * Associate module with targets.
+ */
 @Singleton
 @Component (modules = {ApplicationModule.class})
 
+
 public interface ApplicationComponent {
   void inject(MapBookApplication target);
-  void inject(MainActivity target);
+  void inject(MapViewActivity target);
 }

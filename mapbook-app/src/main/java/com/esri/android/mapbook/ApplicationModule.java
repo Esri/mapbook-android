@@ -25,22 +25,34 @@ package com.esri.android.mapbook;
 
 import android.app.Application;
 import android.content.Context;
+import android.provider.ContactsContract;
 import dagger.Module;
 import dagger.Provides;
 
 import javax.inject.Singleton;
 
+/**
+ * All provider methods included here
+ */
 @Module
 public class ApplicationModule {
 
   private Application application;
-  public ApplicationModule(Application application){
+
+  public ApplicationModule(Application application)
+  {
     this.application = application;
   }
 
-  //Provider methods
-  @Provides @Singleton
+  @Provides
+  @Singleton
   public Context provideContext(){
     return application;
+  }
+
+  @Provides
+  @Singleton
+  public DataManager provideDataManager(){
+    return new DataManager();
   }
 }

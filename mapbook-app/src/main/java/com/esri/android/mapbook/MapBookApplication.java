@@ -28,7 +28,7 @@ import android.content.Context;
 
 public class MapBookApplication extends Application {
 
-  private ApplicationComponent component;
+  private ApplicationComponent component; // app works as a container for component.  Component is used for entire app.
 
   @Override
   public void onCreate(){
