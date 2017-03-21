@@ -23,15 +23,7 @@
  */
 package com.esri.android.mapbook;
 
-import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.layers.FeatureLayer;
 
-import java.util.List;
-
-public interface Callbacks {
-  interface FeatureCallback{
-    void onFeaturesFound(List<Feature> featureList, FeatureLayer layer);
-    void onNoFeaturesFound();
-  }
-
+public interface BasePresenter {
+  void start();
 }
