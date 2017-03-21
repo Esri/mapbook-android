@@ -1,31 +1,37 @@
-/* Copyright 2017 Esri
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * For additional information, contact:
- * Environmental Systems Research Institute, Inc.
- * Attn: Contracts Dept
- * 380 New York Street
- * Redlands, California, USA 92373
- *
- * email: contracts@esri.com
+/*
+ *  Copyright 2017 Esri
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *  *
+ *  * For additional information, contact:
+ *  * Environmental Systems Research Institute, Inc.
+ *  * Attn: Contracts Dept
+ *  * 380 New York Street
+ *  * Redlands, California, USA 92373
+ *  *
+ *  * email: contracts@esri.com
+ *  *
  *
  */
-package com.esri.android.mapbook;
+
+package com.esri.android.mapbook.download;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,6 +39,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
+import com.esri.android.mapbook.MainActivity;
+import com.esri.android.mapbook.R;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
@@ -43,13 +51,13 @@ import com.esri.arcgisruntime.security.OAuthConfiguration;
 
 import java.io.*;
 import java.net.MalformedURLException;
-import java.util.concurrent.ExecutionException;
 
-public class SignInActivity extends AppCompatActivity {
+public class DownloadActivity extends AppCompatActivity {
   Portal mPortal = null;
   String mFileName = null;
   long mPortalItemSize;
   final Activity activity = this;
+  public static final String ERROR_STRING = "error string";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +114,7 @@ public class SignInActivity extends AppCompatActivity {
 
           Intent intent = new Intent();
           setResult(RESULT_CANCELED,intent );
-          intent.putExtra(MainActivity.ERROR_STRING, message);
+          intent.putExtra(ERROR_STRING, message);
           finish();
 
         }
@@ -152,6 +160,19 @@ public class SignInActivity extends AppCompatActivity {
   private void setProgressPercent(Integer progressPercent){
     Log.i("SignInActivity", "Progress " + progressPercent);
   }
+
+
+  /**
+   * Get the state of the network info
+   * @return - boolean, false if network state is unavailable
+   * and true if device is connected to a network.
+   */
+  private boolean checkForInternetConnectivity(){
+    final ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    final NetworkInfo wifi = connManager.getActiveNetworkInfo();
+    return  wifi != null && wifi.isConnected();
+  }
+
   private class DownloadMobileMapPackage extends AsyncTask<InputStream, Long, String> {
 
     ProgressDialog mProgressDialog = null;

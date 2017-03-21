@@ -1,3 +1,27 @@
+/* Copyright 2017 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * For additional information, contact:
+ * Environmental Systems Research Institute, Inc.
+ * Attn: Contracts Dept
+ * 380 New York Street
+ * Redlands, California, USA 92373
+ *
+ * email: contracts@esri.com
+ *
+ */
+
 package com.esri.android.mapbook;
 
 import android.Manifest;
@@ -19,7 +43,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.esri.android.mapbook.download.DownloadActivity;
+import com.esri.android.mapbook.mapbook.MapbookActivity;
 
+import javax.inject.Inject;
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -27,148 +54,55 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
   private static final int PERMISSION_TO_READ_EXTERNAL_STORAGE = 5;
   private static final int REQUEST_DOWNLOAD = 1;
   private View mLayout = null;
-  private static final String FILE_EXTENSION = ".mmpk";
   public static final String FILE_PATH = "mmpk file path";
-  public static final String ERROR_STRING = "error string";
-  public static File extStorDir;
-  public static String extSDCardDirName;
-  private static String filename;
-  public static String locatorName;
-  private static String mmpkFilePath;
+
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+
     setContentView(R.layout.download);
 
     mLayout = findViewById(R.id.downloadLayout);
 
-    // get sdcard resource name
-    extStorDir = Environment.getExternalStorageDirectory();
-    // get the directory
-    extSDCardDirName = this.getResources().getString(R.string.offlineDirectory);
-    // get mobile map package filename
-    filename = this.getResources().getString(R.string.mapName);
-    // create the full path to the mobile map package file
-    mmpkFilePath = createMobileMapPackageFilePath();
-    Log.i("MainActivity", "Expecting a file here: " +  mmpkFilePath);
 
-    // Can we read external storage?
-    checkForReadStoragePermissions();
   }
 
   /**
    * Logic for checking external storage for mapbook
    */
   private void checkForMapBook(){
-    File mapBook = getMapBook(mmpkFilePath);
-
-    if (mapBook == null){
-      // Check for internet connectivity
-      if (!checkForInternetConnectivity()){
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.internet_connectivity));
-        progressDialog.setTitle(getString(R.string.wireless_problem));
-        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
-          @Override public void onClick(final DialogInterface dialog, final int which) {
-            progressDialog.dismiss();
-            finish();
-          }
-        });
-        progressDialog.show();
-
-      }else{
-        // Kick off the sign in activity
-        Intent intent = new Intent(this, SignInActivity.class);
-        intent.putExtra(FILE_PATH, mmpkFilePath);
-        startActivityForResult(intent, MainActivity.REQUEST_DOWNLOAD);
-      }
-    }else{
-      Intent mapbookIntent = new Intent(this, MapbookActivity.class);
-      mapbookIntent.putExtra(FILE_PATH, mmpkFilePath);
-      startActivity(mapbookIntent);
-    }
-  }
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == REQUEST_DOWNLOAD){
-      if (resultCode == RESULT_OK){
-        String fileName = data.getStringExtra(FILE_PATH);
-        Log.i("MainActivity", "Retrieved file = " + data.getStringExtra(FILE_PATH));
-        Intent mapbookIntent = new Intent(this, MapbookActivity.class);
-        mapbookIntent.putExtra(FILE_PATH, fileName);
-        startActivity(mapbookIntent);
-      }else if (resultCode == RESULT_CANCELED){
-        if (data.hasExtra(ERROR_STRING)){
-          String error = data.getStringExtra(ERROR_STRING);
-          Toast.makeText(this,error, Toast.LENGTH_LONG).show();
-          final TextView errorText = (TextView) findViewById(R.id.txtError);
-          errorText.setText("There was a problem downloading the mapbook");
-          errorText.setVisibility(View.VISIBLE);
-
-        }
-
-      }
-    }
-  }
-  /**
-   * Once the app has prompted for permission to read external storage, the response
-   * from the user is handled here.
-   *
-   * @param requestCode
-   *            int: The request code passed into requestPermissions
-   * @param permissions
-   *            String: The requested permission(s).
-   * @param grantResults
-   *            int: The grant results for the permission(s). This will be
-   *            either PERMISSION_GRANTED or PERMISSION_DENIED
-   */
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (requestCode == PERMISSION_TO_READ_EXTERNAL_STORAGE) {
-
-      // Request for reading external storage
-      if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        // Permission has been granted
-        checkForMapBook();
-
-      } else {
-        // Permission request was denied.
-        Snackbar.make(mLayout, "Permission to read external storage was denied.", Snackbar.LENGTH_SHORT).show();
-      }
-    }
-
-  }
-  /**
-   * Get the state of the network info
-   * @return - boolean, false if network state is unavailable
-   * and true if device is connected to a network.
-   */
-  private boolean checkForInternetConnectivity(){
-    final ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    final NetworkInfo wifi = connManager.getActiveNetworkInfo();
-    return  wifi != null && wifi.isConnected();
+//    File mapBook = getMapBook(mmpkFilePath);
+//
+//    if (mapBook == null){
+//      // Check for internet connectivity
+//      if (!checkForInternetConnectivity()){
+//        final ProgressDialog progressDialog = new ProgressDialog(this);
+//        progressDialog.setMessage(getString(R.string.internet_connectivity));
+//        progressDialog.setTitle(getString(R.string.wireless_problem));
+//        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
+//          @Override public void onClick(final DialogInterface dialog, final int which) {
+//            progressDialog.dismiss();
+//            finish();
+//          }
+//        });
+//        progressDialog.show();
+//
+//      }else{
+//        // Kick off the sign in activity
+//        Intent intent = new Intent(this, DownloadActivity.class);
+//        intent.putExtra(FILE_PATH, mmpkFilePath);
+//        startActivityForResult(intent, MainActivity.REQUEST_DOWNLOAD);
+//      }
+//    }else{
+//      Intent mapbookIntent = new Intent(this, MapbookActivity.class);
+//      mapbookIntent.putExtra(FILE_PATH, mmpkFilePath);
+//      startActivity(mapbookIntent);
+//    }
   }
 
-  /**
-   * Determine if we're able to read external storage
-    */
-  private void checkForReadStoragePermissions(){
-    // Explicitly check for file system privs
-    int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-    if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-      Log.i("MainActivity", "This application has proper permissions for reading external storage...");
-
-      // Proceed with remaining logic
-      checkForMapBook();
-
-    } else {
-      Log.i("MainActivity", "This application DOES NOT have appropriate permissions for reading external storage");
-      ActivityCompat.requestPermissions(this,
-          new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-          PERMISSION_TO_READ_EXTERNAL_STORAGE);
-    }
-  }
   /**
    * Do we have a copy of the mapbook?
    * @param  path String representing full path of mapbook
@@ -191,11 +125,5 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     return mapBook;
-  }
-  /**
-   * Create the mobile map package file location and name structure
-   */
-  private static String createMobileMapPackageFilePath(){
-    return extStorDir.getAbsolutePath() + File.separator + extSDCardDirName + File.separator + filename + FILE_EXTENSION;
   }
 }

@@ -25,34 +25,39 @@ package com.esri.android.mapbook;
 
 import android.app.Application;
 import android.content.Context;
-import android.provider.ContactsContract;
+import android.os.Environment;
+import com.esri.android.mapbook.data.DataManager;
+import com.esri.android.mapbook.data.FileManager;
 import dagger.Module;
 import dagger.Provides;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.File;
 
 /**
- * All provider methods included here
+ * This is a Dagger module.  We use this to pass in the DataManager dependency to
  */
 @Module
 public class ApplicationModule {
 
-  private Application application;
+  private Context mContext;
 
-  public ApplicationModule(Application application)
+  public ApplicationModule(Context context)
   {
-    this.application = application;
+    mContext = context;
   }
 
   @Provides
-  @Singleton
   public Context provideContext(){
-    return application;
+    return mContext;
   }
 
   @Provides
   @Singleton
-  public DataManager provideDataManager(){
-    return new DataManager();
-  }
+  public DataManager provideDataManager(){ return new DataManager();}
+
+
+
+
 }

@@ -3,7 +3,7 @@
     <string name="title">My Offline Map Book</string>
     <string name="portal">https://www.arcgis.com</string>
     <string name="portalId">219e6bc23dc64b3696ab6bc4f09deadb</string>
-    <string name="mapName">OfflineMapbook_v4</string>
+    <string name="mobileMapPackageName">OfflineMapbook_v4</string>
     <string name="offlineDirectory">Data</string>
     <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
     <string name="wireless_problem">Wireless Connectivity Problem</string>
@@ -16,4 +16,6 @@
     <string name="reverse_geocode_message">Drag the pin to reverse-geocode</string>
     <string name="feature_not_found">No feature found</string>
     <string name="layer_action">Layers</string>
+    <string name="data_directory">MobileMaps</string>
+    <string name="mmpk_extension">.mmpk</string>
 </resources>

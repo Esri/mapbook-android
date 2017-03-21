@@ -22,11 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"
+        <activity android:name=".mapbook.MapbookActivity"
                   android:configChanges="orientation|screenSize"/>
-        <activity android:name=".MapbookActivity"
-                  android:configChanges="orientation|screenSize"/>
-        <activity android:name=".SignInActivity"
+        <activity android:name=".download.DownloadActivity"
                   android:launchMode="standard"
                   android:uiOptions="splitActionBarWhenNarrow"
                   android:windowSoftInputMode="adjustResize">
@@ -36,7 +34,7 @@
 
             </intent-filter>
         </activity>
-        <activity android:name=".MapViewActivity"
+        <activity android:name=".map.MapActivity"
                   android:configChanges="orientation|screenSize"/>
         <activity
                 android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"

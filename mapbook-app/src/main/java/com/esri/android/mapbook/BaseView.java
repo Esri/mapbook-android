@@ -1,4 +1,4 @@
-/* Copyright 2017 Esri
+/* Copyright 2016 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,10 @@
  * email: contracts@esri.com
  *
  */
+
 package com.esri.android.mapbook;
 
-import com.esri.android.mapbook.map.MapActivity;
-import com.esri.android.mapbook.mapbook.MapbookActivity;
-import com.esri.android.mapbook.mapbook.MapbookPresenter;
-import dagger.Component;
-import javax.inject.Singleton;
+public interface BaseView<T> {
 
-/**
- * An interface associating injections with targets.
- * It provides a call and scope to where we want to inject.
- * Associate module with targets.
- */
-
-@Component (modules = {ApplicationModule.class})
-
-
-public interface ApplicationComponent {
-  void inject(MapBookApplication target);
-//  void inject(MapActivity target);
-//  void inject(MapbookActivity target);
-//  void inject (MapbookPresenter target);
+  void setPresenter(T presenter);
 }

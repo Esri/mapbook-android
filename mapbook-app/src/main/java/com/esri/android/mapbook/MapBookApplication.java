@@ -21,10 +21,18 @@
  * email: contracts@esri.com
  *
  */
+
 package com.esri.android.mapbook;
 
 import android.app.Application;
 import android.content.Context;
+
+/**
+ *
+ * Even though Dagger2 allows annotating a {@link dagger.Component} as a singleton, the code itself
+ * must ensure only one instance of the class is created. Therefore, we create a custom
+ * {@link Application} class to store a singleton reference to the {@link ApplicationComponent}.
+ */
 
 public class MapBookApplication extends Application {
 
@@ -33,16 +41,15 @@ public class MapBookApplication extends Application {
   @Override
   public void onCreate(){
     super.onCreate();
-    buildComponentAndInject();
+   // buildComponentAndInject();
+    component = DaggerApplicationComponent.builder().applicationModule(new ApplicationModule(getApplicationContext())).build();
 
   }
   private void buildComponentAndInject(){
     component = DaggerComponentInitializer.init(this);
   }
 
-  public static ApplicationComponent component(Context context){
-    return ((MapBookApplication) context.getApplicationContext()).getComponent();
-  }
+
   public ApplicationComponent getComponent(){
     return component;
   }
@@ -50,7 +57,7 @@ public class MapBookApplication extends Application {
   private final static class DaggerComponentInitializer {
     public static ApplicationComponent init (MapBookApplication app){
       return DaggerApplicationComponent.builder()
-          .applicationModule(new ApplicationModule(app))
+          .applicationModule(new ApplicationModule(app.getApplicationContext()))
           .build();
     }
   }

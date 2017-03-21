@@ -1,30 +1,31 @@
-/* Copyright 2017 Esri
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * For additional information, contact:
- * Environmental Systems Research Institute, Inc.
- * Attn: Contracts Dept
- * 380 New York Street
- * Redlands, California, USA 92373
- *
- * email: contracts@esri.com
+/*
+ *  Copyright 2017 Esri
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  * http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *  *
+ *  * For additional information, contact:
+ *  * Environmental Systems Research Institute, Inc.
+ *  * Attn: Contracts Dept
+ *  * 380 New York Street
+ *  * Redlands, California, USA 92373
+ *  *
+ *  * email: contracts@esri.com
+ *  *
  *
  */
-package com.esri.android.mapbook;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
+package com.esri.android.mapbook.map;
+
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +48,12 @@ import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.esri.android.mapbook.*;
+import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.android.mapbook.data.DataManager;
+import com.esri.android.mapbook.mapbook.DaggerMapbookComponent;
+import com.esri.android.mapbook.mapbook.MapbookModule;
+import com.esri.android.mapbook.mapbook.MapbookPresenter;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.geometry.Point;
@@ -67,7 +74,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 
-public class MapViewActivity extends AppCompatActivity {
+public class MapActivity extends AppCompatActivity {
   RecyclerView mRecycleMapContentView = null;
   MapContentAdapter mContentAdapter = null;
   ArcGISMap mMap =null;
@@ -93,6 +100,7 @@ public class MapViewActivity extends AppCompatActivity {
   private MatrixCursor mSuggestionCursor;
   private List<SuggestResult> mSuggestionList = null;
 
+
   @Inject DataManager mDataManager;
 
   @Override
@@ -100,7 +108,7 @@ public class MapViewActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     // Ask the component to inject this activity
-    ((MapBookApplication)getApplication()).getComponent().inject(this);
+    //DaggerMapbookComponent.builder().mapbookModule(new MapbookModule())
 
     setContentView(R.layout.map_view);
 
@@ -117,7 +125,6 @@ public class MapViewActivity extends AppCompatActivity {
     final String title = intent.getStringExtra("TITLE");
 
     if (toolbar != null) {
-      setSupportActionBar(toolbar);
       final ActionBar actionBar = (this).getSupportActionBar();
       if (actionBar != null) {
         actionBar.setTitle(title );
@@ -621,7 +628,7 @@ public class MapViewActivity extends AppCompatActivity {
 
       final Point geometry = mMapView.screenToLocation(screenPoint);
 
-      mDataManager.queryForFeatures(geometry, mMap.getOperationalLayers(), new Callbacks.FeatureCallback() {
+      mDataManager.queryForFeatures(geometry, mMap.getOperationalLayers(), new DataManagerCallbacks.FeatureCallback() {
         @Override public void onFeaturesFound(List<Feature> featureList, FeatureLayer featureLayer) {
           Log.i("MapViewActivity", "Features returned " + featureList.size());
 
