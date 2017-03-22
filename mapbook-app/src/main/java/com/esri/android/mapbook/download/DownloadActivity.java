@@ -39,8 +39,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
-import com.esri.android.mapbook.MainActivity;
 import com.esri.android.mapbook.R;
+import com.esri.android.mapbook.mapbook.MapbookFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
@@ -58,12 +58,13 @@ public class DownloadActivity extends AppCompatActivity {
   long mPortalItemSize;
   final Activity activity = this;
   public static final String ERROR_STRING = "error string";
+  private final String TAG = DownloadActivity.class.getSimpleName();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    mFileName =  getIntent().getStringExtra(MainActivity.FILE_PATH);
+    mFileName =  getIntent().getStringExtra(MapbookFragment.FILE_PATH);
     // Set up an authentication handler
     // to be used when loading remote
     // resources or services.
@@ -77,7 +78,7 @@ public class DownloadActivity extends AppCompatActivity {
       AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
       signIn();
     } catch (MalformedURLException e) {
-      Log.i("MainActivity","OAuth problem : " + e.getMessage());
+      Log.i(TAG,"OAuth problem : " + e.getMessage());
       Toast.makeText(this, "The was a problem authenticating against the portal.", Toast.LENGTH_LONG).show();
     }
   }
@@ -136,7 +137,7 @@ public class DownloadActivity extends AppCompatActivity {
 
         final ListenableFuture<InputStream> future = portalItem.fetchDataAsync();
         mPortalItemSize = portalItem.getSize();
-        Log.i("SignInActivity", "Portal item size = " + mPortalItemSize);
+        Log.i(TAG, "Portal item size = " + mPortalItemSize);
         future.addDoneListener(new Runnable() {
           @Override public void run() {
 
@@ -158,7 +159,7 @@ public class DownloadActivity extends AppCompatActivity {
   }
 
   private void setProgressPercent(Integer progressPercent){
-    Log.i("SignInActivity", "Progress " + progressPercent);
+    Log.i(TAG, "Progress " + progressPercent);
   }
 
 
@@ -206,7 +207,7 @@ public class DownloadActivity extends AppCompatActivity {
         path =  data.getPath();
 
       }catch (Exception io){
-        Log.i("SignInActivity", "Async Task Exception " + io.getMessage());
+        Log.i(TAG, "Async Task Exception " + io.getMessage());
       }
       return path;
     }
@@ -228,17 +229,16 @@ public class DownloadActivity extends AppCompatActivity {
       Long p = progress[0];
       if (p <= Integer.MAX_VALUE){
          mProgressDialog.setProgress(p.intValue());
-        Log.i("SignInActivity","Progress..." + p);
+        Log.i(TAG,"Progress..." + p);
       }
 
     }
 
     protected void onPostExecute(String result) {
-      Log.i("SignInActivity" ,"Portal item size = " + mPortalItemSize);
+      Log.i(TAG ,"Portal item size = " + mPortalItemSize);
       mProgressDialog.dismiss();
       Intent intent = new Intent();
       setResult(RESULT_OK, intent);
-      intent.putExtra(MainActivity.FILE_PATH, result);
       finish();
 
     }
