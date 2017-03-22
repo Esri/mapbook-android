@@ -42,7 +42,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.esri.android.mapbook.MainActivity;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.download.DownloadActivity;
 import com.esri.android.mapbook.map.MapActivity;

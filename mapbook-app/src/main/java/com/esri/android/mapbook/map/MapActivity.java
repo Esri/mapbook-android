@@ -52,6 +52,7 @@ import com.esri.android.mapbook.*;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
 import com.esri.android.mapbook.data.DataManager;
 import com.esri.android.mapbook.mapbook.DaggerMapbookComponent;
+import com.esri.android.mapbook.mapbook.MapbookFragment;
 import com.esri.android.mapbook.mapbook.MapbookModule;
 import com.esri.android.mapbook.mapbook.MapbookPresenter;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
@@ -120,7 +121,7 @@ public class MapActivity extends AppCompatActivity {
     mRecycleMapContentView.setAdapter(mContentAdapter);
 
     final Intent intent = getIntent();
-    final String mmpkPath = intent.getStringExtra(MainActivity.FILE_PATH);
+    final String mmpkPath = intent.getStringExtra(MapbookFragment.FILE_PATH);
     int index = intent.getIntExtra("INDEX",0);
     final String title = intent.getStringExtra("TITLE");
 

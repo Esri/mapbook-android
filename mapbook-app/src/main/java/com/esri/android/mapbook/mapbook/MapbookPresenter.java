@@ -37,7 +37,6 @@ import com.esri.arcgisruntime.mapping.MobileMapPackage;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class MapbookPresenter implements MapbookContract.Presenter {
 
@@ -48,7 +47,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
   private final String TAG = MapbookPresenter.class.getSimpleName();
 
   @Inject
-  MapbookPresenter (FileManager manager, MapbookContract.View view) {
+  MapbookPresenter (final FileManager manager, final MapbookContract.View view) {
     mFileManager = manager;
     mView = view;
   }
@@ -62,20 +61,25 @@ public class MapbookPresenter implements MapbookContract.Presenter {
     mView.setPresenter(this);
   }
 
-  @Override public void start() {
+  @Override public final void start() {
     checkForMapbook();
 
   }
 
   /**
-   * Check that the mapbook file exists on the device
+   * If mapbook exists on the device, populate the UI
+   * otherwise try to download it from the portal.
    */
-  @Override public void checkForMapbook() {
+  @Override public final void checkForMapbook() {
 
     if (mFileManager.fileExists()){
 
       loadMapbook(new DataManagerCallbacks.MapbookCallback() {
-        @Override public void onMapbookLoaded(MobileMapPackage mobileMapPackage) {
+        /**
+         * If successfully loaded, populate view
+         * @param mobileMapPackage - MobileMapPackage
+         */
+        @Override public void onMapbookLoaded(final MobileMapPackage mobileMapPackage) {
           List<ArcGISMap> maps = mobileMapPackage.getMaps();
           mView.setMaps(maps);
           Item item = mobileMapPackage.getItem();
@@ -97,17 +101,20 @@ public class MapbookPresenter implements MapbookContract.Presenter {
                 try {
                   final byte[] itemThumbnailData = futureThumbnail.get();
                   mView.setThumbnailBitmap(itemThumbnailData);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                   e.printStackTrace();
-                } catch (ExecutionException e) {
-                  e.printStackTrace();
+                  mView.showMessage("There were problems obtaining thumbnail images for maps in mapbook.");
                 }
               }
             });
           }
         }
 
-        @Override public void onMapbookNotLoaded(Throwable error) {
+        /**
+         * If the mapbook fails to load, show a message
+         * @param error - Throwable
+         */
+        @Override public void onMapbookNotLoaded(final Throwable error) {
           Log.e(TAG, "Problem loading map book " + error.getMessage());
           mView.showMapbookNotFound();
           mView.showMessage("There was a problem loading the mapbook");
@@ -122,6 +129,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
 
   /**
    * Load the mobile map package
+   * @param callback- MapbookCallback to handle async response.
    */
   @Override public void loadMapbook(final DataManagerCallbacks.MapbookCallback callback) {
     String mmpkPath = mFileManager.createMobileMapPackageFilePath();

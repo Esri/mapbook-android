@@ -28,6 +28,7 @@ package com.esri.android.mapbook.mapbook;
 
 import com.esri.android.mapbook.ApplicationComponent;
 import com.esri.android.mapbook.ApplicationModule;
+import com.esri.android.mapbook.download.DownloadActivity;
 import com.esri.android.mapbook.util.FragmentScoped;
 import dagger.Component;
 
