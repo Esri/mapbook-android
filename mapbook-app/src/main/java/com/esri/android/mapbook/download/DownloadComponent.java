@@ -26,25 +26,25 @@
 
 package com.esri.android.mapbook.download;
 
-import android.content.Intent;
-import com.esri.android.mapbook.BasePresenter;
-import com.esri.android.mapbook.BaseView;
+import com.esri.android.mapbook.ApplicationComponent;
+import com.esri.android.mapbook.ApplicationModule;
+import dagger.Component;
 
-import java.io.InputStream;
+import javax.inject.Singleton;
 
-public interface DownloadContract {
+/**
+ * This is a Dagger component. Refer to {@link com.esri.android.mapbook.MapBookApplication} for the list of Dagger components
+ * used in this application.
+ * <P>
+ * Because this component depends on the {@link ApplicationComponent}, which is a singleton, a
+ * scope must be specified. All fragment components use a custom scope for this purpose.
+ */
 
-  interface Presenter extends BasePresenter {
-    void downloadMapbook();
-    void signIn();
-    boolean checkForInternetConnectivity();
-  }
-  interface View extends BaseView<DownloadContract.Presenter> {
-    void showMessage(String message);
-    void sendResult( int resultCode, String key, String message);
-    void showProgressDialog(String title, String message);
-    void dismissProgressDialog();
-     void promptForInternetConnectivity();
-    void executeDownload(long itemSize, InputStream inputStream);
-  }
+@Singleton
+@Component(dependencies = ApplicationComponent.class, modules = {DownloadModule.class, ApplicationModule.class})
+public interface DownloadComponent {
+
+  void inject (DownloadActivity activity);
+  void inject (DownloadPresenter presenter);
+
 }

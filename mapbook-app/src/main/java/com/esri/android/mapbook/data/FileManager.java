@@ -26,6 +26,8 @@
 
 package com.esri.android.mapbook.data;
 
+import android.util.Log;
+
 import java.io.File;
 
 public class FileManager {
@@ -65,6 +67,8 @@ public class FileManager {
     return size;
   }
   public boolean fileExists(){
+    file = new File(createMobileMapPackageFilePath());
+    Log.i("FileManager", "Searching for file " + createMobileMapPackageFilePath());
     return file.exists();
   }
 }

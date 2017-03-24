@@ -51,10 +51,8 @@ import android.widget.*;
 import com.esri.android.mapbook.*;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
 import com.esri.android.mapbook.data.DataManager;
-import com.esri.android.mapbook.mapbook.DaggerMapbookComponent;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
-import com.esri.android.mapbook.mapbook.MapbookModule;
-import com.esri.android.mapbook.mapbook.MapbookPresenter;
+
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.geometry.Point;

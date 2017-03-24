@@ -26,8 +26,133 @@
 
 package com.esri.android.mapbook.download;
 
-public class DownloadPresenter implements DownloadContract.Presenter {
-  @Override public void start() {
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Handler;
+import android.util.Log;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.loadable.LoadStatus;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalItem;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.InputStream;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
+
+public class DownloadPresenter implements DownloadContract.Presenter {
+
+  private final String TAG = DownloadPresenter.class.getSimpleName();
+  @Inject ConnectivityManager mConnectivityManager;
+  @Inject Portal mPortal;
+  @Inject @Named("mPortalItemId") String mPortalItemId;
+
+  private final DownloadContract.View mView;
+  private boolean mSignInStarted = false;
+
+  @Inject
+  DownloadPresenter (final DownloadContract.View view){
+    mView = view;
+  }
+  /**
+   * Method injection is used here to safely reference {@code this} after the object is created.
+   * For more information, see Java Concurrency in Practice.
+   */
+  @Inject
+  void setupListeners() {
+    mView.setPresenter(this);
+  }
+
+
+  @Override public void start() {
+    Log.i(TAG, "Starting presenter and checking for internet connectivity");
+    boolean isConnected = checkForInternetConnectivity();
+    if (isConnected ){
+      // If we've returned to the fragment after signing in, don't sign in again
+      if (!mSignInStarted){
+        signIn();
+      }
+
+    }else{
+      // Prompt user about wireless connectivity
+      mView.promptForInternetConnectivity();
+    }
+
+  }
+
+  @Override public void downloadMapbook() {
+
+    Log.i(TAG, "Downloading mapbook");
+    final PortalItem portalItem = new PortalItem(mPortal, mPortalItemId);
+    portalItem.loadAsync();
+    portalItem.addDoneLoadingListener(new Runnable() {
+      @Override public void run() {
+
+        final ListenableFuture<InputStream> future = portalItem.fetchDataAsync();
+        final long portalItemSize = portalItem.getSize();
+        future.addDoneListener(new Runnable() {
+          @Override public void run() {
+
+            try {
+              InputStream inputStream = future.get();
+              mView.executeDownload(portalItemSize, inputStream);
+
+
+            } catch (Exception e) {
+              mView.showMessage("There was a problem downloading the file");
+              Log.e(TAG, "Problem downloading file " + e.getMessage());
+              mView.sendResult(RESULT_CANCELED, ERROR_STRING,  e.getMessage());
+            }
+          }
+        });
+      }
+    });
+  }
+
+  @Override public void signIn() {
+    mSignInStarted = true;
+    Log.i(TAG, "Signing In");
+    mView.showProgressDialog("Portal", "Trying to connect to your portal...");
+
+    mPortal.addDoneLoadingListener(new Runnable() {
+      @Override
+      public void run() {
+
+        mView.dismissProgressDialog();
+
+        if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
+
+          Handler handler = new Handler() ;
+          handler.post(new Runnable() {
+            @Override public void run() {
+              // Download map book
+              downloadMapbook();
+            }
+          });
+
+        }else{
+          String errorMessage = mPortal.getLoadError().getMessage();
+          String cause = mPortal.getLoadError().getCause().getMessage();
+          String message = "Error accessing portal, " + errorMessage +". " + cause;
+          Log.e(TAG, message);
+          mView.sendResult(RESULT_CANCELED, ERROR_STRING, cause);
+        }
+      }
+    });
+    mPortal.loadAsync();
+  }
+
+
+
+  /**
+   * Get the state of the network info
+   * @return - boolean, false if network state is unavailable
+   * and true if device is connected to a network.
+   */
+  @Override public boolean checkForInternetConnectivity() {
+    final NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
+    return  networkInfo != null && networkInfo.isConnected();
   }
 }

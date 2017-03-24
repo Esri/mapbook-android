@@ -27,220 +27,99 @@
 package com.esri.android.mapbook.download;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
-import com.esri.android.mapbook.R;
+import com.esri.android.mapbook.ApplicationModule;
+import com.esri.android.mapbook.MapBookApplication;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
-import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.loadable.LoadStatus;
+import com.esri.android.mapbook.util.ActivityUtils;
 import com.esri.arcgisruntime.portal.Portal;
-import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.security.OAuthConfiguration;
 
-import java.io.*;
-import java.net.MalformedURLException;
+import javax.inject.Inject;
 
 public class DownloadActivity extends AppCompatActivity {
+
+  @Inject DefaultAuthenticationChallengeHandler defaultAuthenticationChallengeHandler;
+  @Inject OAuthConfiguration oAuthConfiguration;
+  @Inject DownloadPresenter mPresenter;
+
   Portal mPortal = null;
-  String mFileName = null;
   long mPortalItemSize;
   final Activity activity = this;
   public static final String ERROR_STRING = "error string";
   private final String TAG = DownloadActivity.class.getSimpleName();
+ // private  NetworkReceiver receiver = new NetworkReceiver();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    mFileName =  getIntent().getStringExtra(MapbookFragment.FILE_PATH);
-    // Set up an authentication handler
-    // to be used when loading remote
-    // resources or services.
-    try {
-      OAuthConfiguration oAuthConfiguration = new OAuthConfiguration(getString(R.string.portal),
-          getString( R.string.client_id),
-          getString(R.string.redirect_uri));
-      DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
-          this);
-      AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
-      AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
-      signIn();
-    } catch (MalformedURLException e) {
-      Log.i(TAG,"OAuth problem : " + e.getMessage());
-      Toast.makeText(this, "The was a problem authenticating against the portal.", Toast.LENGTH_LONG).show();
-    }
+    initialize();
+
+    // Registers BroadcastReceiver to track network connection changes.
+    //registerReceiver();
   }
-
-  private void signIn(){
-    final Activity  activity= this;
-    final ProgressDialog progressDialog = new ProgressDialog(this);
-    progressDialog.setMessage("Trying to connect to your portal...");
-    progressDialog.setTitle("Portal");
-    progressDialog.show();
-    mPortal = new Portal(getString(R.string.portal), true);
-    mPortal.addDoneLoadingListener(new Runnable() {
-      @Override
-      public void run() {
-
-        progressDialog.dismiss();
-
-        if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
-
-          Handler handler = new Handler() ;
-          handler.post(new Runnable() {
-            @Override public void run() {
-              // Download map book
-              downloadMapBook();
-            }
-          });
-
-        }else{
-          String errorMessage = mPortal.getLoadError().getMessage();
-          String cause = mPortal.getLoadError().getCause().getMessage();
-          String message = "Error accessing " + getString(R.string.portal) + ". " + errorMessage +". " + cause;
-          Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
-          Log.e("SignInActivity", message);
-
-          Intent intent = new Intent();
-          setResult(RESULT_CANCELED,intent );
-          intent.putExtra(ERROR_STRING, message);
-          finish();
-
-        }
-
-      }
-    });
-    mPortal.loadAsync();
-  }
-
-  private void downloadMapBook(){
-    final Activity activity = this;
-    final ProgressDialog mProgressDialog = new ProgressDialog(this);
-
-
-    final PortalItem portalItem = new PortalItem(mPortal, getString(R.string.portalId));
-    portalItem.loadAsync();
-    portalItem.addDoneLoadingListener(new Runnable() {
-      @Override public void run() {
-
-        final ListenableFuture<InputStream> future = portalItem.fetchDataAsync();
-        mPortalItemSize = portalItem.getSize();
-        Log.i(TAG, "Portal item size = " + mPortalItemSize);
-        future.addDoneListener(new Runnable() {
-          @Override public void run() {
-
-            try {
-              InputStream inputStream = future.get();
-              new DownloadMobileMapPackage().execute(inputStream);
-
-            } catch (Exception e) {
-
-              Intent intent = new Intent();
-              Toast.makeText(activity, "Problem downloading file, " + e.getMessage(), Toast.LENGTH_LONG);
-              setResult(RESULT_CANCELED, intent);
-              finish();
-            }
-          }
-        });
-      }
-    });
-  }
-
-  private void setProgressPercent(Integer progressPercent){
-    Log.i(TAG, "Progress " + progressPercent);
-  }
-
 
   /**
-   * Get the state of the network info
-   * @return - boolean, false if network state is unavailable
-   * and true if device is connected to a network.
+   * Registers BroadcastReceiver to track network connection changes
    */
-  private boolean checkForInternetConnectivity(){
-    final ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    final NetworkInfo wifi = connManager.getActiveNetworkInfo();
-    return  wifi != null && wifi.isConnected();
+  private void registerReceiver(){
+//    IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+//    receiver = new NetworkReceiver();
+//    registerReceiver(receiver, filter);
+  }
+  /**
+   * Configure AuthenticationManager for portal access
+   */
+  private void initialize(){
+
+    DownloadFragment fragment = (DownloadFragment) getSupportFragmentManager().findFragmentByTag("downloadFragment");
+    if (fragment == null){
+      fragment = DownloadFragment.newInstance();
+      String fileName =  getIntent().getStringExtra(MapbookFragment.FILE_PATH);
+      Bundle args = fragment.getArguments();
+      args.putString(MapbookFragment.FILE_PATH, fileName);
+      ActivityUtils.addFragmentToActivity(getSupportFragmentManager(), fragment, "downloadFragment");
+    }
+    Log.i(TAG, "Initializing Dagger component...");
+    DaggerDownloadComponent.builder().applicationComponent(((MapBookApplication) getApplication())
+        .getComponent())
+        .applicationModule(new ApplicationModule(getApplicationContext()))
+        .downloadModule(new DownloadModule(fragment, this))
+        .build()
+        .inject(this);
+    AuthenticationManager.setAuthenticationChallengeHandler(defaultAuthenticationChallengeHandler);
+    AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
   }
 
-  private class DownloadMobileMapPackage extends AsyncTask<InputStream, Long, String> {
-
-    ProgressDialog mProgressDialog = null;
-
-    @Override protected String doInBackground(InputStream... params) {
-      String path = null;
-
-      try {
-        InputStream inputStream = params[0];
-        File storageDirectory = Environment.getExternalStorageDirectory();
-        File data = new File(mFileName);
-        OutputStream os = new FileOutputStream(data);
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        //read from is to buffer
-        int total = 0;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-          total = total + bytesRead;
-
-          Long progress = (total*100)/mPortalItemSize;
-          publishProgress(progress);
-          os.write(buffer, 0, bytesRead);
-        }
-
-        inputStream.close();
-
-        //flush OutputStream to write any buffered data to file
-        os.flush();
-        os.close();
-
-        path =  data.getPath();
-
-      }catch (Exception io){
-        Log.i(TAG, "Async Task Exception " + io.getMessage());
-      }
-      return path;
-    }
-    @Override
-    protected void onPreExecute() {
-      super.onPreExecute();
-      mProgressDialog = new ProgressDialog(activity);
-      mProgressDialog.setIndeterminate(false);
-      mProgressDialog.setMax(100);
-      mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-      mProgressDialog.setCancelable(true);
-      mProgressDialog.setMessage("Please wait... ");
-      mProgressDialog.setTitle("Downloading Mapbook");
-      mProgressDialog.show();
-    }
-    protected void onProgressUpdate(Long... progress) {
-      super.onProgressUpdate(progress);
-
-      Long p = progress[0];
-      if (p <= Integer.MAX_VALUE){
-         mProgressDialog.setProgress(p.intValue());
-        Log.i(TAG,"Progress..." + p);
-      }
-
-    }
-
-    protected void onPostExecute(String result) {
-      Log.i(TAG ,"Portal item size = " + mPortalItemSize);
-      mProgressDialog.dismiss();
-      Intent intent = new Intent();
-      setResult(RESULT_OK, intent);
-      finish();
-
-    }
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    // Unregisters BroadcastReceiver when activity is destroyed.
+//    if (receiver != null) {
+//      this.unregisterReceiver(receiver);
+//    }
   }
+
+//  public class NetworkReceiver extends BroadcastReceiver {
+//
+//    @Override public void onReceive(Context context, Intent intent) {
+//      ConnectivityManager conn =  (ConnectivityManager)
+//          context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//      NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+//
+//      // Just log behavior for now (do we really need a BroadcastReceiver?
+//      Log.i(TAG, "Network info received...");
+//    }
+//  }
 }

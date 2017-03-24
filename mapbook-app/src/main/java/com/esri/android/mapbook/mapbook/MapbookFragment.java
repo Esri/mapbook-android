@@ -92,7 +92,6 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     mapAdapter = new MapAdapter(new MapAdapter.OnItemClickListener() {
       @Override public void onItemClick(ImageView image, String title, int position) {
         Intent intent = new Intent(getContext(), MapActivity.class);
-       // intent.putExtra(MainActivity.FILE_PATH, mmpkFilePath);
         intent.putExtra("INDEX", position);
         intent.putExtra("TITLE", title);
         startActivity(intent);
@@ -194,9 +193,9 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         if (data.hasExtra(ERROR_STRING)){
           String error = data.getStringExtra(ERROR_STRING);
           Toast.makeText(getActivity(),error, Toast.LENGTH_LONG).show();
-          final TextView errorText = (TextView) mRoot.findViewById(R.id.txtError);
-          errorText.setText("There was a problem downloading the mapbook");
-          errorText.setVisibility(View.VISIBLE);
+       //   final TextView errorText = (TextView) mRoot.findViewById(R.id.txtError);
+      //    errorText.setText("There was a problem downloading the mapbook");
+       //   errorText.setVisibility(View.VISIBLE);
         }
 
       }
