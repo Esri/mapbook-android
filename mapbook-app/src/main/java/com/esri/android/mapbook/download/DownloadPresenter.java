@@ -42,7 +42,7 @@ import java.io.InputStream;
 import static android.app.Activity.RESULT_CANCELED;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 
-public class DownloadPresenter implements DownloadContract.Presenter {
+public final class DownloadPresenter implements DownloadContract.Presenter {
 
   private final String TAG = DownloadPresenter.class.getSimpleName();
   @Inject ConnectivityManager mConnectivityManager;
@@ -61,12 +61,12 @@ public class DownloadPresenter implements DownloadContract.Presenter {
    * For more information, see Java Concurrency in Practice.
    */
   @Inject
-  void setupListeners() {
+  final void setupListeners() {
     mView.setPresenter(this);
   }
 
 
-  @Override public void start() {
+  @Override final public void start() {
     Log.i(TAG, "Starting presenter and checking for internet connectivity");
     boolean isConnected = checkForInternetConnectivity();
     if (isConnected ){
@@ -82,7 +82,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
 
   }
 
-  @Override public void downloadMapbook() {
+  @Override final public void downloadMapbook() {
 
     Log.i(TAG, "Downloading mapbook");
     final PortalItem portalItem = new PortalItem(mPortal, mPortalItemId);
@@ -96,7 +96,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
           @Override public void run() {
 
             try {
-              InputStream inputStream = future.get();
+              final InputStream inputStream = future.get();
               mView.executeDownload(portalItemSize, inputStream);
 
 
@@ -111,7 +111,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
     });
   }
 
-  @Override public void signIn() {
+  @Override final public void signIn() {
     mSignInStarted = true;
     Log.i(TAG, "Signing In");
     mView.showProgressDialog("Portal", "Trying to connect to your portal...");
@@ -124,7 +124,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
 
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
 
-          Handler handler = new Handler() ;
+          final Handler handler = new Handler() ;
           handler.post(new Runnable() {
             @Override public void run() {
               // Download map book
@@ -133,9 +133,9 @@ public class DownloadPresenter implements DownloadContract.Presenter {
           });
 
         }else{
-          String errorMessage = mPortal.getLoadError().getMessage();
-          String cause = mPortal.getLoadError().getCause().getMessage();
-          String message = "Error accessing portal, " + errorMessage +". " + cause;
+          final String errorMessage = mPortal.getLoadError().getMessage();
+          final String cause = mPortal.getLoadError().getCause().getMessage();
+          final String message = "Error accessing portal, " + errorMessage +". " + cause;
           Log.e(TAG, message);
           mView.sendResult(RESULT_CANCELED, ERROR_STRING, cause);
         }
@@ -151,7 +151,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
    * @return - boolean, false if network state is unavailable
    * and true if device is connected to a network.
    */
-  @Override public boolean checkForInternetConnectivity() {
+  @Override final public boolean checkForInternetConnectivity() {
     final NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
     return  networkInfo != null && networkInfo.isConnected();
   }

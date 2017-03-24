@@ -29,12 +29,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import com.esri.android.mapbook.mapbook.MapbookActivity;
 
-public class SplashActivity extends AppCompatActivity {
+public final class SplashActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    Intent intent = new Intent(this, MapbookActivity.class);
+    final Intent intent = new Intent(this, MapbookActivity.class);
     startActivity(intent);
     finish();
   }

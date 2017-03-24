@@ -18,4 +18,8 @@
     <string name="layer_action">Layers</string>
     <string name="data_directory">MobileMaps</string>
     <string name="mmpk_extension">.mmpk</string>
+    <string name="wait">Please wait</string>
+    <string name="downloading_mapbook">Downloading Mapbook</string>
+    <string name="index">INDEX</string>
+    <string name="map_title">TITLE</string>
 </resources>

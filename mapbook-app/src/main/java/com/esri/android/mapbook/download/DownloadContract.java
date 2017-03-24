@@ -26,7 +26,6 @@
 
 package com.esri.android.mapbook.download;
 
-import android.content.Intent;
 import com.esri.android.mapbook.BasePresenter;
 import com.esri.android.mapbook.BaseView;
 
@@ -44,7 +43,7 @@ public interface DownloadContract {
     void sendResult( int resultCode, String key, String message);
     void showProgressDialog(String title, String message);
     void dismissProgressDialog();
-     void promptForInternetConnectivity();
+    void promptForInternetConnectivity();
     void executeDownload(long itemSize, InputStream inputStream);
   }
 }

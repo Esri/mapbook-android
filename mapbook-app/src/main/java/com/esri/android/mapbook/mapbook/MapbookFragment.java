@@ -56,7 +56,7 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 
-public class MapbookFragment extends Fragment implements MapbookContract.View {
+public final class MapbookFragment extends Fragment implements MapbookContract.View {
 
   MapbookContract.Presenter mPresenter;
   private RecyclerView mRecyclerView;
@@ -70,7 +70,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
 
   public static MapbookFragment newInstance() {
 
-    Bundle args = new Bundle();
+    final Bundle args = new Bundle();
 
     MapbookFragment fragment = new MapbookFragment();
     fragment.setArguments(args);
@@ -78,22 +78,22 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   }
 
   @Override
-  public void onCreate(@Nullable Bundle savedInstanceState) {
+  final public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+  final public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
     mRoot = (ConstraintLayout) container;
     mRecyclerView = (RecyclerView) mRoot.findViewById(R.id.recyclerView) ;
-    LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+    final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager( layoutManager);
     mapAdapter = new MapAdapter(new MapAdapter.OnItemClickListener() {
       @Override public void onItemClick(ImageView image, String title, int position) {
-        Intent intent = new Intent(getContext(), MapActivity.class);
-        intent.putExtra("INDEX", position);
-        intent.putExtra("TITLE", title);
+        final Intent intent = new Intent(getContext(), MapActivity.class);
+        intent.putExtra(getString(R.string.index), position);
+        intent.putExtra(getString(R.string.map_title), title);
         startActivity(intent);
       }
     });
@@ -104,12 +104,12 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   }
 
   @Override
-  public void onResume() {
+  final public void onResume() {
     super.onResume();
     mPresenter.start();
   }
 
-  @Override public void setPresenter(MapbookContract.Presenter presenter) {
+  @Override final public void setPresenter(MapbookContract.Presenter presenter) {
 
     mPresenter = presenter;
   }
@@ -118,7 +118,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
    * Populate the layout with item details
    * @param item - Portal Item
    */
-  @Override public void populateMapbookLayout(Item item) {
+  @Override final public void populateMapbookLayout(Item item) {
     final String description = item.getDescription();
     final String name = item.getTitle();
 
@@ -132,22 +132,22 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     txtName.setText(name);
   }
 
-  @Override public void setThumbnailBitmap(byte[] bytes) {
-    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-    ImageView image = (ImageView) mRoot.findViewById(R.id.mapBookThumbnail);
+  @Override final public void setThumbnailBitmap(byte[] bytes) {
+    final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    final ImageView image = (ImageView) mRoot.findViewById(R.id.mapBookThumbnail);
     image.setImageBitmap(bitmap);
   }
 
-  @Override public void showMessage(String message) {
+  @Override final public void showMessage(String message) {
     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
   }
 
-  @Override public void setMapbookMetatdata(long size, long modifiedDate, int mapCount) {
+  @Override final public void setMapbookMetatdata(long size, long modifiedDate, int mapCount) {
     final TextView txtCount = (TextView) mRoot.findViewById(R.id.txtMapCount);
     txtCount.setText(""+ mapCount+ " Maps");
 
     if (size > 0){
-      TextView txtSize = (TextView) mRoot.findViewById(R.id.txtFileSize);
+      final TextView txtSize = (TextView) mRoot.findViewById(R.id.txtFileSize);
       final long fileSizeInKB = size / 1024;
       // Convert the KB to MegaBytes (1 MB = 1024 KBytes)
       final long fileSizeInMB = fileSizeInKB / 1024;
@@ -162,7 +162,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     }
   }
 
-  @Override public void showMapbookNotFound() {
+  @Override final public void showMapbookNotFound() {
 
     final TextView txtDescription = (TextView) mRoot.findViewById(R.id.txtDescription);
     txtDescription.setText("Unable to download the mobile map package");
@@ -171,28 +171,30 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     btnRefresh.setVisibility(View.INVISIBLE);
   }
 
-  @Override public void setMaps(List<ArcGISMap> maps) {
+  @Override final public void setMaps(List<ArcGISMap> maps) {
     mapAdapter.setMaps(maps);
     mapAdapter.notifyDataSetChanged();
   }
 
-  @Override public void downloadMapbook(String mmpkFilePath) {
+  @Override final public void downloadMapbook(String mmpkFilePath) {
     // Kick off the DownloadActivity
-    Intent intent = new Intent(getActivity(), DownloadActivity.class);
+    final Intent intent = new Intent(getActivity(), DownloadActivity.class);
     intent.putExtra(FILE_PATH, mmpkFilePath);
     startActivityForResult(intent, REQUEST_DOWNLOAD);
   }
   @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+  final public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_DOWNLOAD){
       if (resultCode == RESULT_OK){
-        String fileName = data.getStringExtra(FILE_PATH);
+        final String fileName = data.getStringExtra(FILE_PATH);
         Log.i(TAG, "Retrieved file = " + data.getStringExtra(FILE_PATH));
 
       }else if (resultCode == RESULT_CANCELED){
         if (data.hasExtra(ERROR_STRING)){
           String error = data.getStringExtra(ERROR_STRING);
           Toast.makeText(getActivity(),error, Toast.LENGTH_LONG).show();
+          //TODO:  Better view needed here for displaying errors
+
        //   final TextView errorText = (TextView) mRoot.findViewById(R.id.txtError);
       //    errorText.setText("There was a problem downloading the mapbook");
        //   errorText.setVisibility(View.VISIBLE);

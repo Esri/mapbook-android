@@ -45,7 +45,7 @@ import java.net.MalformedURLException;
  * {@link DownloadPresenter}.
  */
 @Module
-public class DownloadModule {
+public final class DownloadModule {
 
   private final Activity mActivity;
   private final DownloadContract.View mView;

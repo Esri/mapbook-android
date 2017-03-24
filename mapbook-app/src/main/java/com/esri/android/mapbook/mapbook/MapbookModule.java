@@ -44,7 +44,7 @@ import java.io.File;
  */
 
 @Module
-public class MapbookModule {
+public final class MapbookModule {
 
   private final MapbookContract.View mView;
   private  FileManager mFilemanager;

@@ -27,14 +27,7 @@
 package com.esri.android.mapbook.mapbook;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -42,32 +35,18 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-
-import android.widget.TextView;
-import com.esri.android.mapbook.*;
+import com.esri.android.mapbook.ApplicationModule;
+import com.esri.android.mapbook.MapBookApplication;
+import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.FileManager;
-import com.esri.android.mapbook.map.MapActivity;
 import com.esri.android.mapbook.util.ActivityUtils;
-import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.loadable.LoadStatus;
-import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.Item;
-import com.esri.arcgisruntime.mapping.MobileMapPackage;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
 
-public class MapbookActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+public final class MapbookActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
   private static final int PERMISSION_TO_READ_EXTERNAL_STORAGE = 5;
   private View mLayout = null;
@@ -77,7 +56,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
   @Inject MapbookPresenter mMapbookPresenter;
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  final protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_main);
@@ -87,7 +66,6 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     if (toolbar != null){
       final ActionBar actionBar = (this).getSupportActionBar();
       if (actionBar != null){
-        Log.i(TAG, "Action bar height " + actionBar.getHeight());
         actionBar.setTitle(R.string.title);
       }
       toolbar.setNavigationIcon(null);
@@ -96,7 +74,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     checkForReadStoragePermissions();
 
   }
-  private void initialize(){
+  final private void initialize(){
     MapbookFragment mapbookFragment = (MapbookFragment) getSupportFragmentManager().findFragmentById(R.id.mapbookViewFragment);
     if (mapbookFragment == null){
       mapbookFragment = MapbookFragment.newInstance();
@@ -120,7 +98,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
    *            either PERMISSION_GRANTED or PERMISSION_DENIED
    */
   @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+  final public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     if (requestCode == PERMISSION_TO_READ_EXTERNAL_STORAGE) {
 
       // Request for reading external storage
@@ -138,9 +116,9 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
   /**
    * Determine if we're able to read external storage
    */
-  private void checkForReadStoragePermissions(){
+  final private void checkForReadStoragePermissions(){
     // Explicitly check for file system privs
-    int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+    final int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
       Log.i(TAG, "This application has proper permissions for reading external storage...");
 

@@ -49,7 +49,9 @@ import java.util.List;
  * The adapter used by the recycler view to display maps in the mapbook
  */
 
-public class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolder>{
+public final class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolder>{
+
+  private final static String TAG = MapAdapter.class.getSimpleName();
 
   public interface OnItemClickListener{
     void onItemClick(ImageView image, String mapTitle, int position);
@@ -64,14 +66,14 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolde
   }
 
 
-  @Override public RecycleViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+  @Override final public RecycleViewHolder onCreateViewHolder(final ViewGroup viewGroup, final int i) {
     View itemView = LayoutInflater.
         from(viewGroup.getContext()).
         inflate(R.layout.card_view, viewGroup, false);
     return new RecycleViewHolder(itemView);
   }
 
-  @Override public void onBindViewHolder(final RecycleViewHolder holder, final int position) {
+  @Override final public void onBindViewHolder(final RecycleViewHolder holder, final int position) {
     holder.mapName.setText("Map "+ (position+1));
     final ArcGISMap map = maps.get(position);
     map.addDoneLoadingListener(new Runnable() {
@@ -84,7 +86,6 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolde
       }
     });
     map.loadAsync();
-
   }
 
 
@@ -92,10 +93,10 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolde
     return maps.size();
   }
 
-  public void setMaps(List<ArcGISMap> mapList){
+  final public void setMaps(List<ArcGISMap> mapList){
     maps = mapList;
   }
-  public class RecycleViewHolder extends RecyclerView.ViewHolder{
+  final public class RecycleViewHolder extends RecyclerView.ViewHolder{
 
     public final ImageView mapView;
     public final TextView mapName;
@@ -116,14 +117,14 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolde
      // final String description = item.getDescription();
     //  final String extractedDescription = description.replaceAll("<[^>]*>", "");
 
-      String dateCreated = ActivityUtils.getDateString(item.getCreated());
+      final String dateCreated = ActivityUtils.getDateString(item.getCreated());
       mapCreateDate.setText(dateCreated);
       if (item != null){
         final ListenableFuture<byte[]> future = item.fetchThumbnailAsync();
         future.addDoneListener(new Runnable() {
           @Override public void run() {
             try {
-              byte[] t = future.get();
+              final byte[] t = future.get();
 
               final Bitmap bitmap = BitmapFactory.decodeByteArray(t, 0, t.length);
               mapView.setImageBitmap(bitmap);
@@ -135,9 +136,7 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolde
               });
 
             } catch (Exception e) {
-              e.printStackTrace();
-
-
+              Log.e(TAG, e.getMessage());
             }
           }
         });

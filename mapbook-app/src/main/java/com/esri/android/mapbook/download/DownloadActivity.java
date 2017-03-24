@@ -26,13 +26,6 @@
 
 package com.esri.android.mapbook.download;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -40,48 +33,33 @@ import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.MapBookApplication;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
 import com.esri.android.mapbook.util.ActivityUtils;
-import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.security.OAuthConfiguration;
 
 import javax.inject.Inject;
 
-public class DownloadActivity extends AppCompatActivity {
+public final class DownloadActivity extends AppCompatActivity {
 
   @Inject DefaultAuthenticationChallengeHandler defaultAuthenticationChallengeHandler;
   @Inject OAuthConfiguration oAuthConfiguration;
   @Inject DownloadPresenter mPresenter;
 
-  Portal mPortal = null;
-  long mPortalItemSize;
-  final Activity activity = this;
+
   public static final String ERROR_STRING = "error string";
   private final String TAG = DownloadActivity.class.getSimpleName();
- // private  NetworkReceiver receiver = new NetworkReceiver();
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  final protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     initialize();
-
-    // Registers BroadcastReceiver to track network connection changes.
-    //registerReceiver();
   }
 
-  /**
-   * Registers BroadcastReceiver to track network connection changes
-   */
-  private void registerReceiver(){
-//    IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-//    receiver = new NetworkReceiver();
-//    registerReceiver(receiver, filter);
-  }
   /**
    * Configure AuthenticationManager for portal access
    */
-  private void initialize(){
+  final private void initialize(){
 
     DownloadFragment fragment = (DownloadFragment) getSupportFragmentManager().findFragmentByTag("downloadFragment");
     if (fragment == null){
@@ -101,25 +79,4 @@ public class DownloadActivity extends AppCompatActivity {
     AuthenticationManager.setAuthenticationChallengeHandler(defaultAuthenticationChallengeHandler);
     AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
   }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-    // Unregisters BroadcastReceiver when activity is destroyed.
-//    if (receiver != null) {
-//      this.unregisterReceiver(receiver);
-//    }
-  }
-
-//  public class NetworkReceiver extends BroadcastReceiver {
-//
-//    @Override public void onReceive(Context context, Intent intent) {
-//      ConnectivityManager conn =  (ConnectivityManager)
-//          context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//      NetworkInfo networkInfo = conn.getActiveNetworkInfo();
-//
-//      // Just log behavior for now (do we really need a BroadcastReceiver?
-//      Log.i(TAG, "Network info received...");
-//    }
-//  }
 }

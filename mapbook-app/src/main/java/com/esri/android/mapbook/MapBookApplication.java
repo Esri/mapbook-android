@@ -34,7 +34,7 @@ import android.content.Context;
  * {@link Application} class to store a singleton reference to the {@link ApplicationComponent}.
  */
 
-public class MapBookApplication extends Application {
+public final class MapBookApplication extends Application {
 
   private ApplicationComponent component; // app works as a container for component.  Component is used for entire app.
 
