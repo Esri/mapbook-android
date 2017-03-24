@@ -39,7 +39,7 @@ import java.io.File;
  * This is a Dagger module.  We use this to pass in the DataManager dependency to
  */
 @Module
-public class ApplicationModule {
+public final class ApplicationModule {
 
   private Context mContext;
 

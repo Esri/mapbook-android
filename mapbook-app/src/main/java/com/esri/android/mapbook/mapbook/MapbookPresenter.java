@@ -57,11 +57,11 @@ public class MapbookPresenter implements MapbookContract.Presenter {
    * For more information, see Java Concurrency in Practice.
    */
   @Inject
-  void setupListeners() {
+  final void setupListeners() {
     mView.setPresenter(this);
   }
 
-  @Override public final void start() {
+  @Override final public void start() {
     checkForMapbook();
 
   }
@@ -70,7 +70,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
    * If mapbook exists on the device, populate the UI
    * otherwise try to download it from the portal.
    */
-  @Override public final void checkForMapbook() {
+  @Override final public void checkForMapbook() {
 
     if (mFileManager.fileExists()){
 
@@ -79,15 +79,15 @@ public class MapbookPresenter implements MapbookContract.Presenter {
          * If successfully loaded, populate view
          * @param mobileMapPackage - MobileMapPackage
          */
-        @Override public void onMapbookLoaded(final MobileMapPackage mobileMapPackage) {
-          List<ArcGISMap> maps = mobileMapPackage.getMaps();
+        @Override final public void onMapbookLoaded(final MobileMapPackage mobileMapPackage) {
+          final List<ArcGISMap> maps = mobileMapPackage.getMaps();
           mView.setMaps(maps);
-          Item item = mobileMapPackage.getItem();
+          final Item item = mobileMapPackage.getItem();
           mView.populateMapbookLayout(item);
 
           // Get the file size and date
-          long mapbookSize = mFileManager.getSize();
-          long mapbookModified = mFileManager.getModifiedDate();
+          final long mapbookSize = mFileManager.getSize();
+          final long mapbookModified = mFileManager.getModifiedDate();
 
           mView.setMapbookMetatdata(mapbookSize, mapbookModified, maps.size());
 
@@ -102,7 +102,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
                   final byte[] itemThumbnailData = futureThumbnail.get();
                   mView.setThumbnailBitmap(itemThumbnailData);
                 } catch (Exception e) {
-                  e.printStackTrace();
+                  Log.e(TAG,e.getMessage());
                   mView.showMessage("There were problems obtaining thumbnail images for maps in mapbook.");
                 }
               }
@@ -114,7 +114,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
          * If the mapbook fails to load, show a message
          * @param error - Throwable
          */
-        @Override public void onMapbookNotLoaded(final Throwable error) {
+        @Override final public void onMapbookNotLoaded(final Throwable error) {
           Log.e(TAG, "Problem loading map book " + error.getMessage());
           mView.showMapbookNotFound();
           mView.showMessage("There was a problem loading the mapbook");
@@ -131,15 +131,15 @@ public class MapbookPresenter implements MapbookContract.Presenter {
    * Load the mobile map package
    * @param callback- MapbookCallback to handle async response.
    */
-  @Override public void loadMapbook(final DataManagerCallbacks.MapbookCallback callback) {
-    String mmpkPath = mFileManager.createMobileMapPackageFilePath();
+  @Override final public void loadMapbook(final DataManagerCallbacks.MapbookCallback callback) {
+    final String mmpkPath = mFileManager.createMobileMapPackageFilePath();
 
     final MobileMapPackage mmp = new MobileMapPackage(mmpkPath);
 
     mmp.addDoneLoadingListener(new Runnable() {
-      @Override public void run() {
+      @Override final public void run() {
         if (mmp.getLoadStatus() == LoadStatus.LOADED) {
-          List<ArcGISMap> maps = mmp.getMaps();
+          final List<ArcGISMap> maps = mmp.getMaps();
           callback.onMapbookLoaded(mmp);
 
         }else{

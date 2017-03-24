@@ -30,7 +30,7 @@ import android.util.Log;
 
 import java.io.File;
 
-public class FileManager {
+public final class FileManager {
   private static File extStorDir;
   private static String  extSDCardDirName;
   private static String fileName;
@@ -47,11 +47,11 @@ public class FileManager {
   /**
    * Create the mobile map package file location and name structure
    */
-  public  String createMobileMapPackageFilePath(){
+  final public String createMobileMapPackageFilePath(){
     return extStorDir.getAbsolutePath() + File.separator + extSDCardDirName + File.separator + fileName + extension;
   }
 
-  public long getModifiedDate(){
+  final public long getModifiedDate(){
     long modifiedDate = 0;
     if (file!= null){
       modifiedDate =  file.lastModified();
@@ -59,14 +59,14 @@ public class FileManager {
     return modifiedDate;
   }
 
-  public long getSize(){
+  final public long getSize(){
     long size = 0;
     if (file != null){
       size = file.length();
     }
     return size;
   }
-  public boolean fileExists(){
+  final public boolean fileExists(){
     file = new File(createMobileMapPackageFilePath());
     Log.i("FileManager", "Searching for file " + createMobileMapPackageFilePath());
     return file.exists();
