@@ -55,6 +55,19 @@ public class ActivityUtils {
   }
 
   /**
+   * The {@code fragment} is added to the container view with id {@code tag}. The operation is
+   * performed by the {@code fragmentManager}.
+   *
+   */
+  public static void addFragmentToActivity (FragmentManager fragmentManager,
+      Fragment fragment, String tag) {
+    checkNotNull(fragmentManager);
+    checkNotNull(fragment);
+    FragmentTransaction transaction = fragmentManager.beginTransaction();
+    transaction.add(fragment, tag);
+    transaction.commit();
+  }
+  /**
    * Retrun a date string for given Calendar object
    * @param calendar - Calendar
    * @return String with date format YEAR/MONTH/DAY

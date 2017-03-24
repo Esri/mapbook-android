@@ -40,7 +40,4 @@ import javax.inject.Singleton;
 
 public interface ApplicationComponent {
   void inject(MapBookApplication target);
-//  void inject(MapActivity target);
-//  void inject(MapbookActivity target);
-//  void inject (MapbookPresenter target);
 }
