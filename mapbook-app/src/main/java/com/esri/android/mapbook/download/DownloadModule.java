@@ -42,7 +42,7 @@ import java.net.MalformedURLException;
 /**
  * This is a Dagger module. We use this to pass in the DefaultAuthenticationHandler
  * dependencies to the
- * {@link DownloadPresenter}.
+ * {@link DownloadActivity}.
  */
 @Module
 public final class DownloadModule {

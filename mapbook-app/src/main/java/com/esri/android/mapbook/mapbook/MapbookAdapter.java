@@ -39,7 +39,6 @@ import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.util.ActivityUtils;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.BookmarkList;
 import com.esri.arcgisruntime.mapping.Item;
 
 import java.util.Collections;
@@ -49,9 +48,9 @@ import java.util.List;
  * The adapter used by the recycler view to display maps in the mapbook
  */
 
-public final class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleViewHolder>{
+public final class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleViewHolder>{
 
-  private final static String TAG = MapAdapter.class.getSimpleName();
+  private final static String TAG = MapbookAdapter.class.getSimpleName();
 
   public interface OnItemClickListener{
     void onItemClick(ImageView image, String mapTitle, int position);
@@ -60,7 +59,7 @@ public final class MapAdapter extends RecyclerView.Adapter<MapAdapter.RecycleVie
   private  List<ArcGISMap> maps = Collections.emptyList();
   private final OnItemClickListener mListener;
 
-  public MapAdapter( OnItemClickListener listener){
+  public MapbookAdapter( OnItemClickListener listener){
 
     mListener = listener;
   }

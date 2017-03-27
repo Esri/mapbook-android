@@ -30,6 +30,8 @@ import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
+import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
 
@@ -48,6 +50,20 @@ public interface DataManagerCallbacks {
   interface MapbookCallback{
     void onMapbookLoaded(MobileMapPackage mobileMapPackage);
     void onMapbookNotLoaded(Throwable error);
+  }
+
+  /**
+   * Handle async calls for geocoding
+   */
+  interface GeocodingCallback{
+    void onGeocodingTaskLoaded(List<GeocodeResult> results);
+    void onGeocodingTaskNotLoaded(Throwable error);
+    void onNoGeocodingTask(String message);
+    void onGeocodingError(Throwable error);
+  }
+
+  interface SuggestionCallback{
+    void onSuggestionsComplete(List<SuggestResult> suggestResults);
   }
 
 }
