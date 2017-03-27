@@ -53,11 +53,5 @@ public final class ApplicationModule {
     return mContext;
   }
 
-  @Provides
-  @Singleton
-  public DataManager provideDataManager(){ return new DataManager();}
-
-
-
 
 }

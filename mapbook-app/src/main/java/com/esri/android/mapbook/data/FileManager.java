@@ -66,9 +66,13 @@ public final class FileManager {
     }
     return size;
   }
-  final public boolean fileExists(){
+  final public String fileExists(){
+    String path = null;
     file = new File(createMobileMapPackageFilePath());
     Log.i("FileManager", "Searching for file " + createMobileMapPackageFilePath());
-    return file.exists();
+    if (file.exists()){
+      path = createMobileMapPackageFilePath();
+    }
+    return path;
   }
 }

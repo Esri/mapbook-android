@@ -52,6 +52,8 @@ public final class DownloadFragment extends Fragment implements DownloadContract
   private ProgressDialog mProgressDialog = null;
   private String mFileName = null;
 
+  public DownloadFragment(){}
+
   public static DownloadFragment newInstance(){
     final Bundle args = new Bundle();
 

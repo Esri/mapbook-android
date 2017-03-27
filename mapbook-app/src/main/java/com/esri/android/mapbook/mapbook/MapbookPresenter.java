@@ -44,6 +44,8 @@ public class MapbookPresenter implements MapbookContract.Presenter {
 
   private final MapbookContract.View mView;
 
+  private String mPath = null;
+
   private final String TAG = MapbookPresenter.class.getSimpleName();
 
   @Inject
@@ -72,7 +74,8 @@ public class MapbookPresenter implements MapbookContract.Presenter {
    */
   @Override final public void checkForMapbook() {
 
-    if (mFileManager.fileExists()){
+    mPath = mFileManager.fileExists();
+    if (mPath != null){
 
       loadMapbook(new DataManagerCallbacks.MapbookCallback() {
         /**
@@ -148,5 +151,9 @@ public class MapbookPresenter implements MapbookContract.Presenter {
       }
     });
     mmp.loadAsync();
+  }
+
+  @Override public String getMapbookPath() {
+    return mPath;
   }
 }

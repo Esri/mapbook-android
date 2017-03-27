@@ -61,7 +61,7 @@ public final class MapbookFragment extends Fragment implements MapbookContract.V
   MapbookContract.Presenter mPresenter;
   private RecyclerView mRecyclerView;
   private ConstraintLayout mRoot = null;
-  private MapAdapter mapAdapter = null;
+  private MapbookAdapter mapAdapter = null;
   private static final int REQUEST_DOWNLOAD = 1;
   public static final String FILE_PATH = "mmpk file path";
   private final String TAG = MapbookFragment.class.getSimpleName();
@@ -89,11 +89,12 @@ public final class MapbookFragment extends Fragment implements MapbookContract.V
     mRecyclerView = (RecyclerView) mRoot.findViewById(R.id.recyclerView) ;
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager( layoutManager);
-    mapAdapter = new MapAdapter(new MapAdapter.OnItemClickListener() {
+    mapAdapter = new MapbookAdapter(new MapbookAdapter.OnItemClickListener() {
       @Override public void onItemClick(ImageView image, String title, int position) {
         final Intent intent = new Intent(getContext(), MapActivity.class);
         intent.putExtra(getString(R.string.index), position);
         intent.putExtra(getString(R.string.map_title), title);
+        intent.putExtra(MapbookFragment.FILE_PATH, mPresenter.getMapbookPath());
         startActivity(intent);
       }
     });
@@ -182,11 +183,11 @@ public final class MapbookFragment extends Fragment implements MapbookContract.V
     intent.putExtra(FILE_PATH, mmpkFilePath);
     startActivityForResult(intent, REQUEST_DOWNLOAD);
   }
+
   @Override
   final public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_DOWNLOAD){
       if (resultCode == RESULT_OK){
-        final String fileName = data.getStringExtra(FILE_PATH);
         Log.i(TAG, "Retrieved file = " + data.getStringExtra(FILE_PATH));
 
       }else if (resultCode == RESULT_CANCELED){

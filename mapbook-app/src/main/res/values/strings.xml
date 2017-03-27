@@ -11,6 +11,7 @@
     <string name="main_menu">Main Menu</string>
     <string name="layers">Layers</string>
     <string name="search">Search</string>
+    <string name="bookmarks">Bookmarks</string>
     <string name="geo_locate_error">Geocode failed on address</string>
     <string name="location_not_foud">We are sorry, we couldn\'t find a location with the name - </string>
     <string name="reverse_geocode_message">Drag the pin to reverse-geocode</string>

@@ -24,34 +24,30 @@
  *
  */
 
-package com.esri.android.mapbook.mapbook;
+package com.esri.android.mapbook.map;
 
 import com.esri.android.mapbook.BasePresenter;
 import com.esri.android.mapbook.BaseView;
-import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.Item;
+import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
 
-public interface MapbookContract {
-
-  interface View extends BaseView<Presenter> {
-
-    void populateMapbookLayout(Item item);
-    void setThumbnailBitmap(byte[] bytes);
-    void showMessage(String message);
-    void setMapbookMetatdata(long size, long modifiedDate, int mapCount);
-    void showMapbookNotFound();
-    void setMaps(List<ArcGISMap> maps);
-    void downloadMapbook(String path);
-  }
-
+public interface MapContract {
   interface Presenter extends BasePresenter {
+    void geoCodeAddress(String address);
+    void getSuggestions(String query);
+    boolean hasLocatorTask();
+    void loadMap(String path, int mapIndex);
 
-    void checkForMapbook();
-    void loadMapbook( DataManagerCallbacks.MapbookCallback callback);
-    String getMapbookPath();
-
+  }
+  interface View extends BaseView<Presenter>{
+    void showMap(ArcGISMap map);
+    void displaySearchResult(Point resultpoint, String address, boolean zoomOut);
+    void displayBookmarks();
+    void setUpMap();
+    void showSuggestedPlaceNames(List<SuggestResult> suggestResultList);
+    void showMessage(String message);
   }
 }
