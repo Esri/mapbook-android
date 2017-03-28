@@ -64,6 +64,8 @@ public interface DataManagerCallbacks {
 
   interface SuggestionCallback{
     void onSuggestionsComplete(List<SuggestResult> suggestResults);
+    void onSuggetionFailure(Throwable error);
+    void noSuggestionSupport();
   }
 
 }

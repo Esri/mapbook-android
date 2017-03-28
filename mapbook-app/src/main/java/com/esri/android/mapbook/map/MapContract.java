@@ -28,8 +28,11 @@ package com.esri.android.mapbook.map;
 
 import com.esri.android.mapbook.BasePresenter;
 import com.esri.android.mapbook.BaseView;
+import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
@@ -37,9 +40,10 @@ import java.util.List;
 public interface MapContract {
   interface Presenter extends BasePresenter {
     void geoCodeAddress(String address);
-    void getSuggestions(String query);
+    void getSuggestions(Geometry geometry, String query);
     boolean hasLocatorTask();
     void loadMap(String path, int mapIndex);
+    void queryForFeatures(Geometry geometry, LayerList layers);
 
   }
   interface View extends BaseView<Presenter>{
@@ -49,5 +53,6 @@ public interface MapContract {
     void setUpMap();
     void showSuggestedPlaceNames(List<SuggestResult> suggestResultList);
     void showMessage(String message);
+    void getSuggestions(Geometry geometry, String query);
   }
 }

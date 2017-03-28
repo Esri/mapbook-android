@@ -50,22 +50,33 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.esri.android.mapbook.R;
+import com.esri.android.mapbook.data.DataManagerCallbacks;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
+import com.esri.arcgisruntime.arcgisservices.ArcGISFeatureLayerInfo;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.data.ArcGISFeatureTable;
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.data.FeatureTable;
+import com.esri.arcgisruntime.data.Field;
+import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.LegendInfo;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.GeoElement;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.popup.Popup;
+import com.esri.arcgisruntime.mapping.popup.PopupField;
+import com.esri.arcgisruntime.mapping.popup.PopupFieldFormat;
+import com.esri.arcgisruntime.mapping.popup.PopupManager;
+import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
-import java.util.Iterator;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class MapFragment extends Fragment implements MapContract.View {
@@ -89,6 +100,7 @@ public class MapFragment extends Fragment implements MapContract.View {
   private TextView mCalloutContent = null;
   private int mMapIndex = -1;
   private String mPath = null;
+  private Callout mCallout = null;
 
   public MapFragment(){}
 
@@ -115,6 +127,8 @@ public class MapFragment extends Fragment implements MapContract.View {
     mRecycleMapContentView.setAdapter(mContentAdapter);
 
     mMapView= (MapView) mRoot.findViewById(R.id.mapView);
+
+    mMapView.setOnTouchListener(new MapTouchListener(getActivity().getApplicationContext(), mMapView));
 
     // Enable fragment to have options menu
     setHasOptionsMenu(true);
@@ -160,9 +174,11 @@ public class MapFragment extends Fragment implements MapContract.View {
 
       @Override public boolean onQueryTextChange(final String newText) {
 
-        if (!mPresenter.hasLocatorTask())
+        if (!mPresenter.hasLocatorTask()){
           return false;
-        mPresenter.getSuggestions(newText);
+        }else{
+          getSuggestions(mMapView.getVisibleArea(), newText);
+        }
         return true;
       }
     });
@@ -205,6 +221,22 @@ public class MapFragment extends Fragment implements MapContract.View {
     return true;
   }
 
+  /**
+   * Provide a character by character suggestions for the search string
+   * within the given area.
+   *
+   * @param geometry
+   *            Geometry representing area to search
+   * @param query
+   *            String typed so far by the user to fetch the suggestions
+   *
+   */
+  @Override public void getSuggestions(Geometry geometry, String query) {
+    if (query == null || query.trim().length() ==0){
+      return;
+    }
+    mPresenter.getSuggestions(geometry, query);
+  }
 
   /**
    * Initialize Suggestion Cursor
@@ -356,6 +388,8 @@ public class MapFragment extends Fragment implements MapContract.View {
     Toast.makeText(getActivity().getApplicationContext(), message,Toast.LENGTH_LONG).show();
   }
 
+
+
   /**
    * Resume map view
    */
@@ -376,6 +410,126 @@ public class MapFragment extends Fragment implements MapContract.View {
     super.onPause();
     if (mMapView != null){
       mMapView.pause();
+    }
+  }
+
+  private class MapTouchListener extends DefaultMapViewOnTouchListener {
+
+    public MapTouchListener(Context context, MapView mapView) {
+      super(context, mapView);
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+      android.graphics.Point screenPoint = new android.graphics.Point(Math.round(e.getX()),
+          Math.round(e.getY()));
+
+      Point longPressPoint = mMapView.screenToLocation(screenPoint);
+
+//      ListenableFuture<List<GeocodeResult>> results = mLocatorTask.reverseGeocodeAsync(longPressPoint,
+//          mReverseGeocodeParameters);
+//      results.addDoneListener(new MapActivity.ResultsLoadedListener(results));
+
+    }
+
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+
+
+      if (mMapView.getCallout().isShowing()) {
+        mMapView.getCallout().dismiss();
+      }
+
+      if (mGraphicsOverlay.getGraphics().size() > 0) {
+        if (mGraphicsOverlay.getGraphics().get(0).isSelected()) {
+          //isPinSelected = false;
+          mGraphicsOverlay.getGraphics().get(0).setSelected(false);
+        }
+      }
+      // get the screen point where user tapped
+      final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
+
+      final Point geometry = mMapView.screenToLocation(screenPoint);
+
+      final ListenableFuture<List<IdentifyLayerResult>> identifyLayers = mMapView.identifyLayersAsync(screenPoint,5d,true);
+
+      identifyLayers.addDoneListener(new Runnable() {
+        @Override
+        public void run() {
+          try {
+
+            List<IdentifyLayerResult> results = identifyLayers.get();
+
+            for (IdentifyLayerResult result : results){
+
+              // a reference to the feature layer can be used, for example, to select identified features
+              FeatureLayer featureLayer = null;
+              String displayFieldName = null;
+              if (result.getLayerContent() instanceof FeatureLayer) {
+                featureLayer = (FeatureLayer) result.getLayerContent();
+                FeatureTable table = featureLayer.getFeatureTable();
+                if (table instanceof ArcGISFeatureTable){
+                  ArcGISFeatureTable arcGISFeatureTable = (ArcGISFeatureTable) table;
+                  ArcGISFeatureLayerInfo info  = arcGISFeatureTable.getLayerInfo();
+                  displayFieldName = info.getDisplayFieldName();
+                  Log.i(TAG, "Display field name "+ displayFieldName);
+                }
+              }
+
+              List<Popup> popups = result.getPopups();
+              Log.i(TAG,"Number of popups = " + popups.size());
+              SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+              for (Popup popup : popups){
+
+                PopupManager manager = new PopupManager(getActivity().getApplicationContext(), popup);
+
+                List<PopupField> popupFields = manager.getDisplayedFields();
+                for (PopupField field : popupFields){
+                  PopupFieldFormat dateFormat = new PopupFieldFormat();
+                  dateFormat.setDateFormat( PopupFieldFormat.DateFormat.SHORT_DATE_SHORT_TIME);
+                  field.setPopupFieldFormat(dateFormat);
+                  Object fieldValue = manager.getFieldValue(field);
+                  String value = "";
+                  Field.Type type = manager.getFieldType(field);
+                  if (type == Field.Type.DATE && fieldValue !=null){
+                    GregorianCalendar date = (GregorianCalendar) fieldValue;
+                    value = format.format(date.getTime());
+                    Log.i(TAG, "Field name = " +field.getLabel() + " value " + value);
+                  }else if (type == Field.Type.TEXT && fieldValue != null){
+                    value = fieldValue.toString();
+                    Log.i(TAG, "Field name = " +field.getLabel() + " value " + value);
+                  }
+
+                }
+
+                GeoElement element = popup.getGeoElement();
+                if (element instanceof Feature){
+                  Feature ft = (Feature) element;
+
+                  if (featureLayer != null){
+                    featureLayer.clearSelection();
+                    featureLayer.selectFeature(ft);
+                  }
+                  Map<String,Object> attributes = ft.getAttributes();
+                  if(displayFieldName !=null && attributes.containsKey(displayFieldName)){
+                    String placeInfo = attributes.get(displayFieldName).toString();
+                    Point center = ft.getGeometry().getExtent().getCenter();
+                    displaySearchResult(center, placeInfo,false);
+                    break;
+                  }
+                }
+              }
+              Log.i(TAG, "<--------------------------------------------------->");
+            }
+          } catch (InterruptedException | ExecutionException ie) {
+            ie.printStackTrace();
+          }
+
+        }
+      });
+
+      return super.onSingleTapConfirmed(e);
     }
   }
 }

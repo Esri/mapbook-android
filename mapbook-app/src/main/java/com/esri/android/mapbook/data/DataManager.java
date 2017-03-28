@@ -26,6 +26,7 @@
 
 package com.esri.android.mapbook.data;
 
+import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
@@ -59,6 +60,7 @@ public final class DataManager implements DataManagerContract {
     mGeocodeParameters.getResultAttributeNames().add("*");
     mGeocodeParameters.setMaxResults(1);
   }
+
 
 
   @Override
@@ -176,16 +178,49 @@ public final class DataManager implements DataManagerContract {
     return mMobileMapPackage.getLocatorTask() != null;
   }
 
-  @Override public boolean supportsSuggestions() {
-    return (mMobileMapPackage.getLocatorTask() != null &&
-        mMobileMapPackage.getLocatorTask().getLocatorInfo().isSupportsAddresses());
+
+
+  @Override public void getSuggestions(final Geometry searchArea, final String query, final DataManagerCallbacks.SuggestionCallback callback) {
+
+    if (mLocatorTask == null) {
+      mLocatorTask = mMobileMapPackage.getLocatorTask();
+    }
+    mLocatorTask.addDoneLoadingListener(new Runnable() {
+      @Override public void run() {
+        if (mLocatorTask.getLoadStatus() == LoadStatus.LOADED) {
+          if (mLocatorTask.getLocatorInfo().isSupportsSuggestions()) {
+            SuggestParameters suggestParameters = new SuggestParameters();
+            suggestParameters.setMaxResults(5);
+            suggestParameters.setSearchArea(searchArea);
+
+            final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocatorTask
+                .suggestAsync(query, suggestParameters);
+            suggestionsFuture.addDoneListener(new Runnable() {
+              @Override public void run() {
+                try {
+                  List<SuggestResult> results = suggestionsFuture.get();
+                  callback.onSuggestionsComplete(results);
+                } catch (InterruptedException e) {
+                  Log.e(TAG, "InterruptedException " + e.getMessage());
+                  callback.onSuggetionFailure(e.getCause());
+                } catch (ExecutionException e) {
+                  Log.e(TAG, "ExecutionException " + e.getMessage());
+                  callback.onSuggetionFailure(e.getCause());
+                }
+              }
+            });
+          } else {
+            callback.noSuggestionSupport();
+
+          }
+        }
+
+      }
+
+    });
+    mLocatorTask.loadAsync();
   }
 
-  @Override public void getSuggestions(Geometry searchArea, DataManagerCallbacks.SuggestionCallback callback) {
-    SuggestParameters suggestParameters = new SuggestParameters();
-    suggestParameters.setMaxResults(5);
-    suggestParameters.setSearchArea(searchArea);
-  }
 
 }
 

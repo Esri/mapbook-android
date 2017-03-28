@@ -26,14 +26,20 @@
 
 package com.esri.android.mapbook.map;
 
+import android.util.Log;
 import android.widget.Toast;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.DataManager;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
+import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -97,8 +103,24 @@ public class MapPresenter implements MapContract.Presenter {
     });
   }
 
-  @Override public void getSuggestions(String query) {
+  @Override public void getSuggestions(Geometry geometry, String query) {
+      mDataManager.getSuggestions(geometry, query, new DataManagerCallbacks.SuggestionCallback() {
+        @Override public void onSuggestionsComplete(List<SuggestResult> suggestResults) {
+          if (suggestResults.size() > 0){
+            mView.showSuggestedPlaceNames(suggestResults);
+          }else{
+            Log.i(TAG, "No suggestions returned");
+          }
+        }
 
+        @Override public void onSuggetionFailure(Throwable error) {
+          Log.i(TAG, "Suggestion error " +  error.getMessage());
+        }
+
+        @Override public void noSuggestionSupport(){
+          Log.i(TAG,"No suggestion support");
+        }
+      });
   }
 
   @Override public boolean hasLocatorTask() {
@@ -115,6 +137,18 @@ public class MapPresenter implements MapContract.Presenter {
 
       @Override public void onMapbookNotLoaded(Throwable error) {
 
+      }
+    });
+  }
+
+  @Override public void queryForFeatures(Geometry geometry, LayerList layers) {
+    mDataManager.queryForFeatures(geometry, layers, new DataManagerCallbacks.FeatureCallback() {
+      @Override public void onFeaturesFound(List<Feature> featureList, FeatureLayer layer) {
+
+      }
+
+      @Override public void onNoFeaturesFound() {
+        mView.showMessage("No features found");
       }
     });
   }
