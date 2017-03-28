@@ -26,6 +26,7 @@
 
 package com.esri.android.mapbook.data;
 
+import android.graphics.Point;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.mapping.LayerList;
 
@@ -36,7 +37,7 @@ public interface DataManagerContract {
   void loadMobileMapPackage(String mobileMapPackagePath, DataManagerCallbacks.MapbookCallback callback);
   void geocodeAddress(String address, DataManagerCallbacks.GeocodingCallback geocodingCallback);
   boolean hasLocatorTask();
-  boolean supportsSuggestions();
-  void getSuggestions(Geometry searchArea, DataManagerCallbacks.SuggestionCallback callback);
+  //boolean supportsSuggestions();
+  void getSuggestions(Geometry searchArea, String query, DataManagerCallbacks.SuggestionCallback callback);
 
 }
