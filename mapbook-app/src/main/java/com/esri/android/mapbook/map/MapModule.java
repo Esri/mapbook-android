@@ -26,8 +26,10 @@
 
 package com.esri.android.mapbook.map;
 
+import android.content.Context;
 import com.esri.android.mapbook.data.DataManager;
 import com.esri.android.mapbook.download.DownloadActivity;
+import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Module;
 import dagger.Provides;
 
@@ -48,9 +50,14 @@ public class MapModule {
   }
 
   @Provides
-  @Singleton
+  @MapbookApplicationScope
   public DataManager provideDataManager(){ return new DataManager();}
 
   @Provides
+  @MapbookApplicationScope
   public MapContract.View providesMapContractView(){ return mView; }
+
+  @Provides
+  public PopupInteractorContract providesPopupInteractor(Context context){ return new PopupInteractor(context); }
+
 }

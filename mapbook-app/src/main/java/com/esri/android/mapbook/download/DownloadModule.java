@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import com.esri.android.mapbook.R;
+import com.esri.android.mapbook.util.MapbookApplicationScope;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.security.OAuthConfiguration;
@@ -56,32 +57,39 @@ public final class DownloadModule {
   }
 
   @Provides
+  @MapbookApplicationScope
   DownloadContract.View providesDownloadContractView(){return mView;}
 
   @Provides
+  @MapbookApplicationScope
   public DefaultAuthenticationChallengeHandler providesDefaultAuthenticationChallengeHandler( ){
     return new DefaultAuthenticationChallengeHandler( mActivity);
   }
 
   @Provides
   @Named("mPortalItemId")
+  @MapbookApplicationScope
   public String providesPortalItemId(Context context) {
     return context.getString(R.string.portalId);
   }
 
   @Provides
   @Named("clientId")
+  @MapbookApplicationScope
   public String providesClientId(Context context){return context.getString(R.string.client_id);}
 
   @Provides
   @Named("redirectUri")
+  @MapbookApplicationScope
   public String providesRedirectUri(Context context){ return context.getString(R.string.redirect_uri);}
 
   @Provides
   @Named("portalUrl")
+  @MapbookApplicationScope
   public String providesPortalUrl(Context context){return context.getString(R.string.portal);}
 
   @Provides
+  @MapbookApplicationScope
   public OAuthConfiguration providesOAuthConfiguration(@Named("clientId") String clientId,
       @Named("redirectUri") String redirectUri,
       @Named("portalUrl") String portalUrl){
@@ -95,12 +103,14 @@ public final class DownloadModule {
   }
 
   @Provides
+  @MapbookApplicationScope
   public Portal providesPortal(@Named("portalUrl") String portalUrl){
     return new Portal(portalUrl,true);
   }
 
 
   @Provides
+  @MapbookApplicationScope
   public ConnectivityManager providesNetworkInfo(){
     final ConnectivityManager connManager = (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
     return connManager;

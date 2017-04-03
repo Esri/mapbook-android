@@ -26,24 +26,26 @@
 
 package com.esri.android.mapbook.map;
 
-import com.esri.android.mapbook.ApplicationComponent;
-import com.esri.android.mapbook.ApplicationModule;
-import com.esri.android.mapbook.util.MapbookApplicationScope;
-import dagger.Component;
+import com.esri.android.mapbook.data.Entry;
+import com.esri.arcgisruntime.data.Field;
+import com.esri.arcgisruntime.mapping.popup.Popup;
+import com.esri.arcgisruntime.mapping.popup.PopupField;
 
-import javax.inject.Singleton;
+import java.util.List;
 
 /**
- * This is a Dagger component. Refer to {@link com.esri.android.mapbook.MapBookApplication} for the list of Dagger components
- * used in this application.
- * <P>
- * Because this component depends on the {@link ApplicationComponent}, which is a singleton, a
- * scope must be specified. All fragment components use a custom scope for this purpose.
+ * An interface for wrapping interactions with the PopupManager.  The PopupManager
+ * relies on a Context object.  Application logic in the MapPresenter needs a PopupManager but
+ * should have no knowledge of Android specific objects (like Context), so this interface
+ * is used to interact with the PopupManager.
+ *
+ * See this link for more:
+ * http://stackoverflow.com/questions/34303510/does-the-presenter-having-knowledge-of-the-activity-context-a-bad-idea-in-the/34664466#34664466
  */
-@MapbookApplicationScope
-@Component(dependencies = ApplicationComponent.class, modules = {MapModule.class, ApplicationModule.class})
-public interface MapComponent {
 
-  void inject (MapActivity activity);
-  void inject (MapFragment fragment);
+public interface PopupInteractorContract {
+
+  List<Entry> getPopupFields(Popup popup);
+
+
 }

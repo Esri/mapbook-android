@@ -28,6 +28,7 @@ package com.esri.android.mapbook.mapbook;
 
 import com.esri.android.mapbook.ApplicationComponent;
 import com.esri.android.mapbook.ApplicationModule;
+import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Component;
 
 import javax.inject.Singleton;
@@ -39,7 +40,7 @@ import javax.inject.Singleton;
  * Because this component depends on the {@link ApplicationComponent}, which is a singleton, a
  * scope must be specified. All fragment components use a custom scope for this purpose.
  */
-@Singleton
+@MapbookApplicationScope
 @Component(dependencies = ApplicationComponent.class, modules = {MapbookModule.class, ApplicationModule.class})
 
 public interface MapbookComponent {

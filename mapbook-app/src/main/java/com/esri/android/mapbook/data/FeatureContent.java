@@ -24,16 +24,33 @@
  *
  */
 
-package com.esri.android.mapbook.util;
+package com.esri.android.mapbook.data;
 
-import javax.inject.Scope;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
-@Documented
-@Scope
-@Retention(RetentionPolicy.RUNTIME)
+public class FeatureContent {
+  private final String mLayerName;
+  private List<Entry> entries;
 
-public @interface FragmentScoped {
+  public FeatureContent(String layerName){
+    mLayerName = layerName;
+    setEntries(new ArrayList<Entry>());
+  }
+
+  public String getLayerName() {
+    return mLayerName;
+  }
+
+  public List<Entry> getEntries() {
+    return entries;
+  }
+
+  public void addEntry(Entry entry){
+    entries.add(entry);
+  }
+
+  public void setEntries(List<Entry> entries) {
+    this.entries = entries;
+  }
 }

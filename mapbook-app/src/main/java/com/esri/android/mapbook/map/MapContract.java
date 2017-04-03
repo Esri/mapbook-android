@@ -26,29 +26,33 @@
 
 package com.esri.android.mapbook.map;
 
+import android.view.View;
 import com.esri.android.mapbook.BasePresenter;
 import com.esri.android.mapbook.BaseView;
-import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.android.mapbook.data.FeatureContent;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.LayerList;
+import com.esri.arcgisruntime.mapping.view.Callout;
+import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
 
 public interface MapContract {
+
   interface Presenter extends BasePresenter {
     void geoCodeAddress(String address);
     void getSuggestions(Geometry geometry, String query);
     boolean hasLocatorTask();
     void loadMap(String path, int mapIndex);
-    void queryForFeatures(Geometry geometry, LayerList layers);
+    List<FeatureContent> identifyFeatures(Point point, List<IdentifyLayerResult> results);
 
   }
   interface View extends BaseView<Presenter>{
     void showMap(ArcGISMap map);
-    void displaySearchResult(Point resultpoint, String address, boolean zoomOut);
+    void displaySearchResult(Point resultpoint, android.view.View calloutContent, boolean zoomOut);
     void displayBookmarks();
     void setUpMap();
     void showSuggestedPlaceNames(List<SuggestResult> suggestResultList);

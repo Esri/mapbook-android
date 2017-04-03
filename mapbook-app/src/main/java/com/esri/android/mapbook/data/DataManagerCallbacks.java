@@ -53,19 +53,29 @@ public interface DataManagerCallbacks {
   }
 
   /**
-   * Handle async calls for geocoding
+   * Handle async calls for geo coding
    */
-  interface GeocodingCallback{
-    void onGeocodingTaskLoaded(List<GeocodeResult> results);
-    void onGeocodingTaskNotLoaded(Throwable error);
-    void onNoGeocodingTask(String message);
-    void onGeocodingError(Throwable error);
+  interface GeoCodingCallback {
+    void onGeoCodingTaskCompleted(List<GeocodeResult> results);
+    void onGeoCodingTaskNotLoaded(Throwable error);
+    void onNoGeoCodingTask(String message);
+    void onGeoCodingError(Throwable error);
   }
 
+  /**
+   * Callbacks for async suggestion methods
+   */
   interface SuggestionCallback{
     void onSuggestionsComplete(List<SuggestResult> suggestResults);
-    void onSuggetionFailure(Throwable error);
+    void onSuggestionFailure(Throwable error);
     void noSuggestionSupport();
+  }
+
+  /**
+   * Callback for identify actions
+   */
+  interface IdentifyCallback{
+
   }
 
 }

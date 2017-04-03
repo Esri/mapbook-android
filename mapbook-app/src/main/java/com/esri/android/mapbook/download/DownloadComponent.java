@@ -28,6 +28,7 @@ package com.esri.android.mapbook.download;
 
 import com.esri.android.mapbook.ApplicationComponent;
 import com.esri.android.mapbook.ApplicationModule;
+import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Component;
 
 import javax.inject.Singleton;
@@ -40,7 +41,7 @@ import javax.inject.Singleton;
  * scope must be specified. All fragment components use a custom scope for this purpose.
  */
 
-@Singleton
+@MapbookApplicationScope
 @Component(dependencies = ApplicationComponent.class, modules = {DownloadModule.class, ApplicationModule.class})
 public interface DownloadComponent {
 

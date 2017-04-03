@@ -27,28 +27,50 @@
 package com.esri.android.mapbook.map;
 
 import android.util.Log;
-import android.widget.Toast;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.DataManager;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.android.mapbook.data.Entry;
+import com.esri.android.mapbook.data.FeatureContent;
+import com.esri.arcgisruntime.arcgisservices.ArcGISFeatureLayerInfo;
+import com.esri.arcgisruntime.data.ArcGISFeatureTable;
 import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.data.FeatureTable;
+import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.GeoElement;
 import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
+import com.esri.arcgisruntime.mapping.popup.Popup;
+import com.esri.arcgisruntime.mapping.popup.PopupField;
+import com.esri.arcgisruntime.mapping.popup.PopupFieldFormat;
+import com.esri.arcgisruntime.mapping.popup.PopupManager;
+import com.esri.arcgisruntime.mapping.view.Callout;
+import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 
 public class MapPresenter implements MapContract.Presenter {
 
   private final DataManager mDataManager;
 
   private final MapContract.View mView;
+
+
+
+  @Inject
+  PopupInteractor popupInteractor;
 
   private final String TAG = MapPresenter.class.getSimpleName();
 
@@ -73,15 +95,15 @@ public class MapPresenter implements MapContract.Presenter {
   }
 
   @Override public void geoCodeAddress(final String address) {
-    mDataManager.geocodeAddress(address, new DataManagerCallbacks.GeocodingCallback() {
-      @Override public void onGeocodingTaskLoaded(List<GeocodeResult> geocodeResults) {
+    mDataManager.geocodeAddress(address, new DataManagerCallbacks.GeoCodingCallback() {
+      @Override public void onGeoCodingTaskCompleted(List<GeocodeResult> geocodeResults) {
         if (geocodeResults.size() > 0) {
           // Use the first result - for example
           // display on the map
           GeocodeResult result = geocodeResults.get(0);
           Point displayLocation = result.getDisplayLocation();
 
-          mView.displaySearchResult(displayLocation, result.getLabel(), true);
+        //  mView.displaySearchResult(displayLocation, result.getLabel(), true);
 
         } else {
           mView.showMessage( "Location not found for " + address);
@@ -89,19 +111,20 @@ public class MapPresenter implements MapContract.Presenter {
         }
       }
 
-      @Override public void onGeocodingTaskNotLoaded(Throwable error) {
+      @Override public void onGeoCodingTaskNotLoaded(Throwable error) {
         mView.showMessage("An error was encountered when trying to search for the address " + error.getMessage());
       }
 
-      @Override public void onNoGeocodingTask(String message) {
+      @Override public void onNoGeoCodingTask(String message) {
         mView.showMessage(message);
       }
 
-      @Override public void onGeocodingError(Throwable error) {
+      @Override public void onGeoCodingError(Throwable error) {
 
       }
     });
   }
+
 
   @Override public void getSuggestions(Geometry geometry, String query) {
       mDataManager.getSuggestions(geometry, query, new DataManagerCallbacks.SuggestionCallback() {
@@ -113,7 +136,7 @@ public class MapPresenter implements MapContract.Presenter {
           }
         }
 
-        @Override public void onSuggetionFailure(Throwable error) {
+        @Override public void onSuggestionFailure(Throwable error) {
           Log.i(TAG, "Suggestion error " +  error.getMessage());
         }
 
@@ -141,15 +164,46 @@ public class MapPresenter implements MapContract.Presenter {
     });
   }
 
-  @Override public void queryForFeatures(Geometry geometry, LayerList layers) {
-    mDataManager.queryForFeatures(geometry, layers, new DataManagerCallbacks.FeatureCallback() {
-      @Override public void onFeaturesFound(List<Feature> featureList, FeatureLayer layer) {
+  @Override public List<FeatureContent> identifyFeatures(Point point, List<IdentifyLayerResult> results) {
+    List<FeatureContent> content = new ArrayList<>();
 
+    for (IdentifyLayerResult result : results){
+
+      // Create an object for each layer returned
+      FeatureContent featureContent = new FeatureContent(result.getLayerContent().getName());
+
+      // a reference to the feature layer can be used, for example, to select identified features
+      FeatureLayer featureLayer = null;
+
+      // Dig to find the display field for the layer
+      if (result.getLayerContent() instanceof FeatureLayer) {
+        featureLayer = (FeatureLayer) result.getLayerContent();
       }
 
-      @Override public void onNoFeaturesFound() {
-        mView.showMessage("No features found");
+
+      List<Popup> popups = result.getPopups();
+      Log.i(TAG, "Popups found = " + popups.size());
+
+      for (Popup popup : popups){
+
+        List<Entry> entries = popupInteractor.getPopupFields(popup);
+        featureContent.setEntries(entries);
+        // Select feature
+        GeoElement element = popup.getGeoElement();
+        if (element instanceof Feature){
+          Feature ft = (Feature) element;
+          if (featureLayer != null){
+            featureLayer.clearSelection();
+            featureLayer.selectFeature(ft);
+          }
+        }
       }
-    });
+
+      content.add(featureContent);
+    }
+
+    return content;
   }
+
+
 }
