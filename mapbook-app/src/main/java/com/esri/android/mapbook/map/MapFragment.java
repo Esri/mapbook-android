@@ -26,14 +26,12 @@
 
 package com.esri.android.mapbook.map;
 
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
@@ -41,19 +39,14 @@ import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.Entry;
 import com.esri.android.mapbook.data.FeatureContent;
@@ -65,6 +58,7 @@ import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.LegendInfo;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.BookmarkList;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
@@ -77,18 +71,18 @@ import java.util.concurrent.ExecutionException;
 
 public class MapFragment extends Fragment implements MapContract.View {
 
-  private RecyclerView mRecycleMapContentView = null;
-  private  MapContentAdapter mContentAdapter = null;
+  private RecyclerView mLayerRecyclerView = null;
+  private RecyclerView mBookmarkRecyclerView = null;
+  private MapLayerAdapter mContentAdapter = null;
+  private MapBookmarkAdapter mBookmarkAdapter = null;
   MapContract.Presenter mPresenter;
   private MapView mMapView = null;
   private SearchView mSearchview;
   private LinearLayout mRoot = null;
   private GraphicsOverlay mGraphicsOverlay = null;
   private static final String TAG = MapbookFragment.class.getSimpleName();
-  private ProgressDialog mProgressDialog = null;
   private PictureMarkerSymbol mPinSourceSymbol;
-  private String mGraphicPointAddress = null;
-  private Point mGraphicPoint = null;
+
   private static final String COLUMN_NAME_ADDRESS = "address";
   private static final String COLUMN_NAME_X = "x";
   private static final String COLUMN_NAME_Y = "y";
@@ -117,10 +111,22 @@ public class MapFragment extends Fragment implements MapContract.View {
   final public android.view.View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
     mRoot = (LinearLayout) container;
-    mRecycleMapContentView = (RecyclerView) mRoot.findViewById(R.id.mapContentRecyclerView);
-    mRecycleMapContentView.setLayoutManager(new LinearLayoutManager(getActivity()));
-    mContentAdapter = new MapContentAdapter();
-    mRecycleMapContentView.setAdapter(mContentAdapter);
+
+    // View for map layers (visibility set to "gone" by default)
+    mLayerRecyclerView = (RecyclerView) mRoot.findViewById(R.id.mapLayerRecyclerView);
+    mLayerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    mContentAdapter = new MapLayerAdapter();
+    mLayerRecyclerView.setAdapter(mContentAdapter);
+
+    // View for map bookmars (visibility set to "gone" by default)
+    mBookmarkRecyclerView = (RecyclerView) mRoot.findViewById(R.id.mapBookmarkRecyclerView) ;
+    mBookmarkRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    mBookmarkAdapter = new MapBookmarkAdapter(new MapBookmarkAdapter.OnBookmarkClickListener() {
+      @Override public void onItemClick(Viewpoint viewpoint) {
+        mMapView.setViewpoint(viewpoint);
+      }
+    });
+    mBookmarkRecyclerView.setAdapter(mBookmarkAdapter);
 
     mMapView= (MapView) mRoot.findViewById(R.id.mapView);
 
@@ -129,7 +135,6 @@ public class MapFragment extends Fragment implements MapContract.View {
     // Enable fragment to have options menu
     setHasOptionsMenu(true);
 
-    mProgressDialog = new ProgressDialog(getActivity());
 
     // Calling activity should pass the index and map title
     Bundle args = getArguments();
@@ -212,7 +217,7 @@ public class MapFragment extends Fragment implements MapContract.View {
       toggleLayerList();
     }
     if (menuItem.getItemId() == R.id.bookmarks){
-
+      toggleBookmarkList();
     }
     return true;
   }
@@ -263,20 +268,44 @@ public class MapFragment extends Fragment implements MapContract.View {
     //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
     LinearLayout transitionsContainer = mRoot;
     TransitionManager.beginDelayedTransition(transitionsContainer);
-    if (mRecycleMapContentView.getVisibility() == android.view.View.GONE){
-      ViewGroup.LayoutParams params = mRecycleMapContentView.getLayoutParams();
-      mRecycleMapContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+    mBookmarkRecyclerView.setVisibility(View.GONE);
+    if (mLayerRecyclerView.getVisibility() == android.view.View.GONE){
+      ViewGroup.LayoutParams params = mLayerRecyclerView.getLayoutParams();
+      mLayerRecyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
           ViewGroup.LayoutParams.MATCH_PARENT, 4));
-      mRecycleMapContentView.requestLayout();
-      mRecycleMapContentView.setVisibility(android.view.View.VISIBLE);
+      mLayerRecyclerView.requestLayout();
+      mLayerRecyclerView.setVisibility(android.view.View.VISIBLE);
     }else{
-      mRecycleMapContentView.setVisibility(android.view.View.GONE);
-      mRecycleMapContentView.setLayoutParams(new LinearLayout.LayoutParams(0,
+      mLayerRecyclerView.setVisibility(android.view.View.GONE);
+      mLayerRecyclerView.setLayoutParams(new LinearLayout.LayoutParams(0,
           ViewGroup.LayoutParams.MATCH_PARENT, 4));
-      mRecycleMapContentView.requestLayout();
+      mLayerRecyclerView.requestLayout();
     }
   }
 
+  /**
+   * Show/hide the list of bookmarks
+   * by adjusting the layout
+   */
+  private void toggleBookmarkList() {
+
+    //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
+    LinearLayout transitionsContainer = mRoot;
+    TransitionManager.beginDelayedTransition(transitionsContainer);
+    mLayerRecyclerView.setVisibility(View.GONE);
+    if (mBookmarkRecyclerView.getVisibility() == android.view.View.GONE){
+      ViewGroup.LayoutParams params = mBookmarkRecyclerView.getLayoutParams();
+      mBookmarkRecyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+          ViewGroup.LayoutParams.MATCH_PARENT, 4));
+      mBookmarkRecyclerView.requestLayout();
+      mBookmarkRecyclerView.setVisibility(android.view.View.VISIBLE);
+    }else{
+      mBookmarkRecyclerView.setVisibility(android.view.View.GONE);
+      mBookmarkRecyclerView.setLayoutParams(new LinearLayout.LayoutParams(0,
+          ViewGroup.LayoutParams.MATCH_PARENT, 4));
+      mBookmarkRecyclerView.requestLayout();
+    }
+  }
   /**
    * Hides soft keyboard
    */
@@ -293,8 +322,13 @@ public class MapFragment extends Fragment implements MapContract.View {
 
   @Override public void showMap(ArcGISMap map) {
     mMapView.setMap(map);
+
+    // Set the layer and bookmarks up
     List<Layer> layerList = map.getOperationalLayers();
     mContentAdapter.setLayerList(layerList);
+    BookmarkList bookmarks = map.getBookmarks();
+    mBookmarkAdapter.setBoomarks(bookmarks);
+
     Iterator<Layer> iter = layerList.iterator();
     while (iter.hasNext()) {
       Layer layer = iter.next();
@@ -337,7 +371,6 @@ public class MapFragment extends Fragment implements MapContract.View {
     if (calloutContent == null){
       return;
     }
-    mGraphicPoint = resultPoint;
 
     mCallout = mMapView.getCallout();
 

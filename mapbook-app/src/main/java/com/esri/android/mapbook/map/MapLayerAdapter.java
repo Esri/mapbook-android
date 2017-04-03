@@ -38,11 +38,11 @@ import com.esri.arcgisruntime.layers.Layer;
 
 import java.util.List;
 
-public class MapContentAdapter extends RecyclerView.Adapter<MapContentAdapter.MapRecycleViewContentHolder> {
+public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLayerViewHolder> {
   private List<Layer> mLayers ;
 
 
-  public MapContentAdapter(){}
+  public MapLayerAdapter(){}
 
   public void setLayerList(List layers){
 
@@ -50,15 +50,15 @@ public class MapContentAdapter extends RecyclerView.Adapter<MapContentAdapter.Ma
 
   }
 
-  @Override public MapRecycleViewContentHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+  @Override public MapLayerViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
     View itemView = LayoutInflater.
         from(viewGroup.getContext()).
-        inflate(R.layout.map_content, viewGroup, false);
+        inflate(R.layout.map_layer_view, viewGroup, false);
 
-    return new MapRecycleViewContentHolder(itemView);
+    return new MapLayerViewHolder(itemView);
   }
 
-  @Override public void onBindViewHolder(final MapRecycleViewContentHolder holder, final int position) {
+  @Override public void onBindViewHolder(final MapLayerViewHolder holder, final int position) {
     final Layer layer = mLayers.get(position);
     holder.mapContentName.setText(layer.getName());
 
@@ -83,12 +83,12 @@ public class MapContentAdapter extends RecyclerView.Adapter<MapContentAdapter.Ma
     }
   }
 
-  public class MapRecycleViewContentHolder extends RecyclerView.ViewHolder{
+  public class MapLayerViewHolder extends RecyclerView.ViewHolder{
 
     public final TextView mapContentName;
     public final CheckBox checkBox;
 
-    public MapRecycleViewContentHolder(final View view){
+    public MapLayerViewHolder(final View view){
       super(view);
       checkBox = (CheckBox) view.findViewById(R.id.cbLayer) ;
       mapContentName = (TextView) view.findViewById(R.id.txtMapContentName);

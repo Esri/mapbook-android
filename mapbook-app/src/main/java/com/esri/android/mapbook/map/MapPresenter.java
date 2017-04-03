@@ -159,7 +159,7 @@ public class MapPresenter implements MapContract.Presenter {
       }
 
       @Override public void onMapbookNotLoaded(Throwable error) {
-
+        mView.showMessage("There was a problem loading the map");
       }
     });
   }
