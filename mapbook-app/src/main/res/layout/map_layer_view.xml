@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
-              android:layout_width="wrap_content"
+              android:layout_width="match_parent"
               android:id="@+id/mapContentLinearLayout"
               android:layout_height="wrap_content" android:padding="10dp">
     <CheckBox android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:id="@+id/cbLayer"/>
-    <!--<Button android:layout_height="36dp"-->
-            <!--android:layout_width="36dp"-->
-            <!--android:id="@+id/btnHide" android:padding="5dp"-->
-            <!--android:background="@drawable/ic_visibility_off_black_36px"/>-->
+
     <TextView android:layout_width="wrap_content"
               android:id="@+id/txtMapContentName"
               android:layout_height="wrap_content" android:padding="5dp"/>

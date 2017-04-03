@@ -97,14 +97,14 @@ public final class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.Re
   }
   final public class RecycleViewHolder extends RecyclerView.ViewHolder{
 
-    public final ImageView mapView;
+    public final ImageView mapThumbnail;
     public final TextView mapName;
     public final TextView snippet;
     public final TextView mapCreateDate;
 
     public RecycleViewHolder(final View view){
       super(view);
-      mapView = (ImageView) view.findViewById(R.id.mapThumbnail);
+      mapThumbnail = (ImageView) view.findViewById(R.id.mapThumbnail);
       mapName = (TextView) view.findViewById(R.id.mapName);
       snippet = (TextView) view.findViewById(R.id.txtMapSnippet);
       mapCreateDate = (TextView) view.findViewById(R.id.txtMapCreateDate);
@@ -126,11 +126,11 @@ public final class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.Re
               final byte[] t = future.get();
 
               final Bitmap bitmap = BitmapFactory.decodeByteArray(t, 0, t.length);
-              mapView.setImageBitmap(bitmap);
+              mapThumbnail.setImageBitmap(bitmap);
 
-              mapView.setOnClickListener(new View.OnClickListener() {
+              mapThumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
-                  mListener.onItemClick(mapView, title, getAdapterPosition());
+                  mListener.onItemClick(mapThumbnail, title, getAdapterPosition());
                 }
               });
 

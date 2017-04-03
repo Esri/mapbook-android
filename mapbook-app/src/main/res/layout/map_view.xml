@@ -14,14 +14,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/mapAppBar">
 
-        <!--<android.support.v7.widget.Toolbar-->
-                <!--android:id="@+id/mapToolbar"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="?attr/actionBarSize"-->
-                <!--android:background="?attr/colorPrimary"-->
-                <!--android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
-                <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light">-->
-        <!--</android.support.v7.widget.Toolbar>-->
 
     </android.support.design.widget.AppBarLayout>
 
@@ -38,11 +30,20 @@
                 android:layout_height="match_parent"
                 android:id="@+id/mapView" android:layout_weight="1"/>
 
+        <!-- Layer list -->
         <android.support.v7.widget.RecyclerView
                 android:layout_width="wrap_content" android:visibility="gone"
                 android:layout_height="match_parent"
 
-                android:id="@+id/mapContentRecyclerView" android:layout_weight="4">
+                android:id="@+id/mapLayerRecyclerView" android:layout_weight="4">
+        </android.support.v7.widget.RecyclerView>
+
+        <!-- Bookmark list -->
+        <android.support.v7.widget.RecyclerView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/mapBookmarkRecyclerView"
+                android:visibility="gone">
 
         </android.support.v7.widget.RecyclerView>
 
