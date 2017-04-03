@@ -30,7 +30,7 @@ import android.content.Context;
 import android.os.Environment;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.FileManager;
-import com.esri.android.mapbook.util.FragmentScoped;
+import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Module;
 import dagger.Provides;
 
@@ -55,9 +55,11 @@ public final class MapbookModule {
   }
 
   @Provides
+  @MapbookApplicationScope
   MapbookContract.View providesMapbookContractView() { return mView; }
 
   @Provides
+  @MapbookApplicationScope
   public FileManager providesFileManager(@Named("storageDirectory") final File storageDirectory,
       @Named("dataDirectory") final String subfolderName,
       @Named("mmpkName") final String fileName,
@@ -66,20 +68,24 @@ public final class MapbookModule {
   }
 
   @Provides
+  @MapbookApplicationScope
   @Named("dataDirectory")
   public String providesDataDirectory(Context context) {
     return context.getString(R.string.offlineDirectory);
   }
 
   @Provides
+  @MapbookApplicationScope
   @Named("mmpkName")
   public String providesMobileMapPackageName(Context context) { return context.getString(R.string.mobileMapPackageName); }
 
   @Provides
+  @MapbookApplicationScope
   @Named("mmpkExtension")
   public String providesMobileMapExtension(Context context) { return context.getString(R.string.mmpk_extension); }
 
   @Provides
+  @MapbookApplicationScope
   @Named("storageDirectory")
   public File providesStorageDirectory() { return Environment.getExternalStorageDirectory(); }
 }

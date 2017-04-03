@@ -28,6 +28,7 @@ import android.content.Context;
 import android.os.Environment;
 import com.esri.android.mapbook.data.DataManager;
 import com.esri.android.mapbook.data.FileManager;
+import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Module;
 import dagger.Provides;
 
@@ -36,7 +37,7 @@ import javax.inject.Singleton;
 import java.io.File;
 
 /**
- * This is a Dagger module.  We use this to pass in the DataManager dependency to
+ * This is a Dagger module.
  */
 @Module
 public final class ApplicationModule {
@@ -49,6 +50,7 @@ public final class ApplicationModule {
   }
 
   @Provides
+  @MapbookApplicationScope
   public Context provideContext(){
     return mContext;
   }

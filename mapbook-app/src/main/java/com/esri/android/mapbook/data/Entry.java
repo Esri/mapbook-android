@@ -24,26 +24,22 @@
  *
  */
 
-package com.esri.android.mapbook.map;
+package com.esri.android.mapbook.data;
 
-import com.esri.android.mapbook.ApplicationComponent;
-import com.esri.android.mapbook.ApplicationModule;
-import com.esri.android.mapbook.util.MapbookApplicationScope;
-import dagger.Component;
+public class Entry{
+  private String mField;
+  private String mValue;
 
-import javax.inject.Singleton;
+  public Entry(String field, String value){
+    mField = field;
+    mValue = value;
+  }
 
-/**
- * This is a Dagger component. Refer to {@link com.esri.android.mapbook.MapBookApplication} for the list of Dagger components
- * used in this application.
- * <P>
- * Because this component depends on the {@link ApplicationComponent}, which is a singleton, a
- * scope must be specified. All fragment components use a custom scope for this purpose.
- */
-@MapbookApplicationScope
-@Component(dependencies = ApplicationComponent.class, modules = {MapModule.class, ApplicationModule.class})
-public interface MapComponent {
+  public String getField() {
+    return mField;
+  }
 
-  void inject (MapActivity activity);
-  void inject (MapFragment fragment);
+  public String getValue() {
+    return mValue;
+  }
 }

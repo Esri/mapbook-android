@@ -31,7 +31,9 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.database.MatrixCursor;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
@@ -39,44 +41,38 @@ import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.Layout;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.esri.android.mapbook.R;
-import com.esri.android.mapbook.data.DataManagerCallbacks;
+import com.esri.android.mapbook.data.Entry;
+import com.esri.android.mapbook.data.FeatureContent;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
-import com.esri.arcgisruntime.arcgisservices.ArcGISFeatureLayerInfo;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.data.ArcGISFeatureTable;
-import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.FeatureTable;
-import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.LegendInfo;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.GeoElement;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.popup.Popup;
-import com.esri.arcgisruntime.mapping.popup.PopupField;
-import com.esri.arcgisruntime.mapping.popup.PopupFieldFormat;
-import com.esri.arcgisruntime.mapping.popup.PopupManager;
 import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
-import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class MapFragment extends Fragment implements MapContract.View {
@@ -97,10 +93,10 @@ public class MapFragment extends Fragment implements MapContract.View {
   private static final String COLUMN_NAME_X = "x";
   private static final String COLUMN_NAME_Y = "y";
   private MatrixCursor mSuggestionCursor;
-  private TextView mCalloutContent = null;
   private int mMapIndex = -1;
   private String mPath = null;
   private Callout mCallout = null;
+  private int currentLayoutId = 0;
 
   public MapFragment(){}
 
@@ -264,6 +260,7 @@ public class MapFragment extends Fragment implements MapContract.View {
    */
   private void toggleLayerList() {
 
+    //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
     LinearLayout transitionsContainer = mRoot;
     TransitionManager.beginDelayedTransition(transitionsContainer);
     if (mRecycleMapContentView.getVisibility() == android.view.View.GONE){
@@ -322,10 +319,9 @@ public class MapFragment extends Fragment implements MapContract.View {
 
   }
 
-  @Override public void displaySearchResult(Point resultPoint, String address, boolean zoomOut) {
-    if (mMapView.getCallout().isShowing()) {
-      mMapView.getCallout().dismiss();
-    }
+
+  @Override public void displaySearchResult(Point resultPoint, View calloutContent, boolean zoomOut) {
+
     //remove any previous graphics/search results
     mGraphicsOverlay.getGraphics().clear();
     // create graphic object for resulting location
@@ -337,9 +333,28 @@ public class MapFragment extends Fragment implements MapContract.View {
       // Zoom map to geocode result location
       mMapView.setViewpointAsync(new Viewpoint(resultPoint, 8000), 3);
     }
-
+    //Don't show a callout if we have no info
+    if (calloutContent == null){
+      return;
+    }
     mGraphicPoint = resultPoint;
-    mGraphicPointAddress = address;
+
+    mCallout = mMapView.getCallout();
+
+    Callout.Style style = new Callout.Style(getContext());
+    style.setMinWidth(350);
+    style.setMaxWidth(350);
+    style.setLeaderPosition(Callout.Style.LeaderPosition.UPPER_MIDDLE);
+    mCallout.setLocation(resultPoint);
+    mCallout.setContent(calloutContent);
+    mCallout.setShowOptions(new Callout.ShowOptions(true,false,false));
+    mCallout.setStyle(style);
+//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//      mCallout.getStyle().setBackgroundColor(getActivity().getColor(R.color.colorPrimary));
+//    }else{
+//      mCallout.getStyle().setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
+//    }
+    mCallout.show();
   }
 
 
@@ -364,10 +379,6 @@ public class MapFragment extends Fragment implements MapContract.View {
     mPinSourceSymbol.setWidth(20);
     mPinSourceSymbol.loadAsync();
 
-    mCalloutContent = new TextView(getActivity().getApplicationContext());
-    mCalloutContent.setTextColor(Color.BLACK);
-    mCalloutContent.setTextIsSelectable(true);
-
     mPresenter.loadMap(mPath, mMapIndex);
   }
 
@@ -387,8 +398,6 @@ public class MapFragment extends Fragment implements MapContract.View {
   @Override public void showMessage(String message) {
     Toast.makeText(getActivity().getApplicationContext(), message,Toast.LENGTH_LONG).show();
   }
-
-
 
   /**
    * Resume map view
@@ -413,6 +422,143 @@ public class MapFragment extends Fragment implements MapContract.View {
     }
   }
 
+  private View buildContentView(final List<FeatureContent> featureContents){
+    currentLayoutId = 0;
+    LayoutInflater inflater = (LayoutInflater)getActivity().getApplicationContext().getSystemService
+        (Context.LAYOUT_INFLATER_SERVICE);
+    View calloutView =  inflater.inflate(R.layout.callout_content,null);
+    final LinearLayout mainLayout = (LinearLayout) calloutView.findViewById(R.id.calloutLinearLayout);
+    Log.i(TAG, "Main layout width " + mainLayout.getWidth());
+
+    // Set popup count
+    final TextView txtPopupCount = (TextView) calloutView.findViewById(R.id.popupCount) ;
+    txtPopupCount.setText("1 of " + featureContents.size());
+    txtPopupCount.setTextColor(Color.BLACK);
+
+    int layoutCt = 0;
+    final List<LinearLayout> calloutLayouts = new ArrayList<>();
+    final TextView layerTitle = (TextView) calloutView.findViewById(R.id.layerName);
+    layerTitle.setText(featureContents.get(0).getLayerName());
+
+    layerTitle.setTextColor(Color.BLACK);
+    layerTitle.setTypeface(null, Typeface.BOLD);
+
+
+    for (FeatureContent content : featureContents){
+      LinearLayout linearLayout = new LinearLayout(getActivity());
+      linearLayout.setOrientation(LinearLayout.VERTICAL);
+      LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(600,
+          ViewGroup.LayoutParams.WRAP_CONTENT);
+     // layoutParams.setMargins(5, 3, 5, 3);
+      linearLayout.setLayoutParams(layoutParams);
+      linearLayout.setId(layoutCt);
+
+
+      List<Entry> entries = content.getEntries();
+      for (Entry entry : entries){
+        LinearLayout entryLayout = new LinearLayout(getActivity());
+        entryLayout.setOrientation(LinearLayout.HORIZONTAL);
+        entryLayout.setBackgroundColor(Color.WHITE);
+        entryLayout.setLayoutParams(layoutParams);
+        linearLayout.addView(entryLayout);
+        TextView label = new TextView(getActivity());
+
+        LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        labelParams.setMargins(0,0,10,0);
+        label.setLayoutParams(labelParams);
+        label.setTextColor(Color.BLACK);
+        label.setTypeface(null, Typeface.BOLD);
+        label.setText(entry.getField());
+
+        TextView value = new TextView(getActivity());
+
+        value.setTextColor(Color.BLACK);
+        value.setText(entry.getValue());
+        LinearLayout.LayoutParams valueParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,1);
+        value.setLayoutParams(valueParams);
+        entryLayout.addView(label);
+        entryLayout.addView(value);
+
+      }
+      calloutLayouts.add(linearLayout);
+      layoutCt = layoutCt +1;
+    }
+    mainLayout.addView(calloutLayouts.get(0));
+    mainLayout.requestLayout();
+
+    final Button btnPrev = (Button) calloutView.findViewById(R.id.btnPrev);
+    final Button btnNext = (Button) calloutView.findViewById(R.id.btnNext);
+    final Button btnClose = (Button) calloutView.findViewById(R.id.btnClose) ;
+
+    btnPrev.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        int currentIndex = getCurrentLayoutId();
+        View currentView = mainLayout.findViewById(currentIndex);
+        if (currentIndex > 0){
+          decrementCurrentLayoutId();
+          View newView = calloutLayouts.get(getCurrentLayoutId());
+          replaceView(mainLayout, currentView,newView);
+          // Reset the layer name in the callout
+          FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
+          String layerName = activeContent.getLayerName();
+          Log.i(TAG, "Current Layer " +layerName);
+          layerTitle.setText(layerName);
+          // Reset popup index
+          txtPopupCount.setText(getCurrentLayoutId() + 1 + " of " + featureContents.size() );
+
+        }
+
+      }
+    });
+
+
+    btnNext.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        int currentIndex = getCurrentLayoutId();
+        View currentView = mainLayout.findViewById(currentIndex);
+        if (currentIndex < featureContents.size() - 1){
+          incrementCurrentLayoutId();
+          View newView = calloutLayouts.get(getCurrentLayoutId());
+          replaceView(mainLayout, currentView,newView);
+
+          // Reset the layer name in the callout
+          FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
+          String layerName = activeContent.getLayerName();
+          Log.i(TAG, "Current Layer " +layerName);
+          layerTitle.setText(layerName);
+
+          // Reset popup index
+          txtPopupCount.setText(getCurrentLayoutId() + 1 + " of " + featureContents.size() );
+        }
+
+        Log.i(TAG, "Current layout id " + getCurrentLayoutId());
+      }
+    });
+
+    btnClose.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        if ( mCallout.isShowing()){
+          mCallout.dismiss();
+        }
+      }
+    });
+    return  calloutView;
+  }
+
+  private int getCurrentLayoutId(){
+    return currentLayoutId;
+  }
+  private void incrementCurrentLayoutId(){
+    currentLayoutId = currentLayoutId + 1;
+  }
+  private void decrementCurrentLayoutId(){
+    currentLayoutId = currentLayoutId - 1;
+  }
+  private void replaceView(LinearLayout mainView, View oldView, View newView){
+    mainView.removeView(oldView);
+    mainView.addView(newView);
+  }
+
   private class MapTouchListener extends DefaultMapViewOnTouchListener {
 
     public MapTouchListener(Context context, MapView mapView) {
@@ -420,37 +566,15 @@ public class MapFragment extends Fragment implements MapContract.View {
     }
 
     @Override
-    public void onLongPress(MotionEvent e) {
-      android.graphics.Point screenPoint = new android.graphics.Point(Math.round(e.getX()),
-          Math.round(e.getY()));
-
-      Point longPressPoint = mMapView.screenToLocation(screenPoint);
-
-//      ListenableFuture<List<GeocodeResult>> results = mLocatorTask.reverseGeocodeAsync(longPressPoint,
-//          mReverseGeocodeParameters);
-//      results.addDoneListener(new MapActivity.ResultsLoadedListener(results));
-
-    }
-
-
-    @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-
-
-      if (mMapView.getCallout().isShowing()) {
-        mMapView.getCallout().dismiss();
-      }
 
       if (mGraphicsOverlay.getGraphics().size() > 0) {
         if (mGraphicsOverlay.getGraphics().get(0).isSelected()) {
-          //isPinSelected = false;
           mGraphicsOverlay.getGraphics().get(0).setSelected(false);
         }
       }
       // get the screen point where user tapped
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
-
-      final Point geometry = mMapView.screenToLocation(screenPoint);
 
       final ListenableFuture<List<IdentifyLayerResult>> identifyLayers = mMapView.identifyLayersAsync(screenPoint,5d,true);
 
@@ -458,70 +582,17 @@ public class MapFragment extends Fragment implements MapContract.View {
         @Override
         public void run() {
           try {
+            Point clickedLocation = mMapView.screenToLocation(screenPoint);
 
             List<IdentifyLayerResult> results = identifyLayers.get();
-
-            for (IdentifyLayerResult result : results){
-
-              // a reference to the feature layer can be used, for example, to select identified features
-              FeatureLayer featureLayer = null;
-              String displayFieldName = null;
-              if (result.getLayerContent() instanceof FeatureLayer) {
-                featureLayer = (FeatureLayer) result.getLayerContent();
-                FeatureTable table = featureLayer.getFeatureTable();
-                if (table instanceof ArcGISFeatureTable){
-                  ArcGISFeatureTable arcGISFeatureTable = (ArcGISFeatureTable) table;
-                  ArcGISFeatureLayerInfo info  = arcGISFeatureTable.getLayerInfo();
-                  displayFieldName = info.getDisplayFieldName();
-                  Log.i(TAG, "Display field name "+ displayFieldName);
-                }
-              }
-
-              List<Popup> popups = result.getPopups();
-              Log.i(TAG,"Number of popups = " + popups.size());
-              SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-              for (Popup popup : popups){
-
-                PopupManager manager = new PopupManager(getActivity().getApplicationContext(), popup);
-
-                List<PopupField> popupFields = manager.getDisplayedFields();
-                for (PopupField field : popupFields){
-                  PopupFieldFormat dateFormat = new PopupFieldFormat();
-                  dateFormat.setDateFormat( PopupFieldFormat.DateFormat.SHORT_DATE_SHORT_TIME);
-                  field.setPopupFieldFormat(dateFormat);
-                  Object fieldValue = manager.getFieldValue(field);
-                  String value = "";
-                  Field.Type type = manager.getFieldType(field);
-                  if (type == Field.Type.DATE && fieldValue !=null){
-                    GregorianCalendar date = (GregorianCalendar) fieldValue;
-                    value = format.format(date.getTime());
-                    Log.i(TAG, "Field name = " +field.getLabel() + " value " + value);
-                  }else if (type == Field.Type.TEXT && fieldValue != null){
-                    value = fieldValue.toString();
-                    Log.i(TAG, "Field name = " +field.getLabel() + " value " + value);
-                  }
-
-                }
-
-                GeoElement element = popup.getGeoElement();
-                if (element instanceof Feature){
-                  Feature ft = (Feature) element;
-
-                  if (featureLayer != null){
-                    featureLayer.clearSelection();
-                    featureLayer.selectFeature(ft);
-                  }
-                  Map<String,Object> attributes = ft.getAttributes();
-                  if(displayFieldName !=null && attributes.containsKey(displayFieldName)){
-                    String placeInfo = attributes.get(displayFieldName).toString();
-                    Point center = ft.getGeometry().getExtent().getCenter();
-                    displaySearchResult(center, placeInfo,false);
-                    break;
-                  }
-                }
-              }
-              Log.i(TAG, "<--------------------------------------------------->");
+            List<FeatureContent> content = mPresenter.identifyFeatures(clickedLocation, results);
+            if (content.isEmpty()){
+              showMessage("No features found at that location");
+            }else{
+              View v = buildContentView(content);
+              displaySearchResult(clickedLocation,v, false);
             }
+
           } catch (InterruptedException | ExecutionException ie) {
             ie.printStackTrace();
           }

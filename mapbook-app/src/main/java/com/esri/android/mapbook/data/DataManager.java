@@ -26,12 +26,16 @@
 
 package com.esri.android.mapbook.data;
 
-import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.data.*;
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.data.FeatureQueryResult;
+import com.esri.arcgisruntime.data.FeatureTable;
+import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
@@ -39,12 +43,10 @@ import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.tasks.geocode.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RunnableFuture;
 
 public final class DataManager implements DataManagerContract {
 
@@ -59,9 +61,11 @@ public final class DataManager implements DataManagerContract {
     mGeocodeParameters = new GeocodeParameters();
     mGeocodeParameters.getResultAttributeNames().add("*");
     mGeocodeParameters.setMaxResults(1);
+
+    mReverseGeocodeParameters = new ReverseGeocodeParameters();
+    mReverseGeocodeParameters.getResultAttributeNames().add("*");
+    mReverseGeocodeParameters.setMaxResults(1);
   }
-
-
 
   @Override
   public void queryForFeatures(final Geometry geometry, final LayerList layers,
@@ -121,7 +125,7 @@ public final class DataManager implements DataManagerContract {
           }
           callback.onFeaturesFound(featureList, featureLayer);
 
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
           Log.e(TAG,e.getMessage());
           callback.onNoFeaturesFound();
         }
@@ -138,10 +142,15 @@ public final class DataManager implements DataManagerContract {
    */
   @Override
   public void geocodeAddress(final String address,
-      final DataManagerCallbacks.GeocodingCallback geocodingCallback){
+      final DataManagerCallbacks.GeoCodingCallback geocodingCallback){
     if (hasLocatorTask()){
       if (mLocatorTask == null){
         mLocatorTask = mMobileMapPackage.getLocatorTask();
+        // If locator task is still null, then the mobile map package doesn't have a locator
+        if (mLocatorTask == null){
+          geocodingCallback.onNoGeoCodingTask("No locator task found in mobile map package");
+          return;
+        }
       }
       mLocatorTask.addDoneLoadingListener(new Runnable() {
         @Override public void run() {
@@ -151,26 +160,61 @@ public final class DataManager implements DataManagerContract {
                 mGeocodeParameters);
             geocodeFuture.addDoneListener(new Runnable() {
               @Override public void run() {
+
                 try {
                   List<GeocodeResult> geocodeResults = geocodeFuture.get();
-                } catch (InterruptedException e) {
-                  Log.e(TAG, "InterruptedException " + e.getMessage());
-                  geocodingCallback.onGeocodingError(e.getCause());
-                } catch (ExecutionException e) {
-                  Log.e(TAG, "ExecutionException " + e.getMessage() );
-                  geocodingCallback.onGeocodingError(e.getCause());
+                  geocodingCallback.onGeoCodingTaskCompleted(geocodeResults);
+
+                } catch (InterruptedException | ExecutionException e) {
+
+                  Log.e(TAG, e.getMessage());
+                  geocodingCallback.onGeoCodingError(e.getCause());
                 }
               }
             });
           }else{
-            geocodingCallback.onGeocodingTaskNotLoaded(mLocatorTask.getLoadError());
+            geocodingCallback.onGeoCodingTaskNotLoaded(mLocatorTask.getLoadError());
           }
         }
       });
       mLocatorTask.loadAsync();
     }else{
-      geocodingCallback.onNoGeocodingTask("No locator task available");
+      geocodingCallback.onNoGeoCodingTask("No locator task available");
     }
+  }
+
+  @Override public void reverseGeocode(final Point point, final SpatialReference spatialReference, final DataManagerCallbacks.GeoCodingCallback callback) {
+    if (mLocatorTask == null){
+      mLocatorTask = mMobileMapPackage.getLocatorTask();
+
+      // If locator task is still null, then the mobile map package doesn't have a locator
+      if (mLocatorTask == null){
+        callback.onNoGeoCodingTask("No locator task found in mobile map package");
+        return;
+      }
+    }
+    mLocatorTask.addDoneLoadingListener(new Runnable() {
+      @Override public void run() {
+        if (mLocatorTask.getLoadStatus() == LoadStatus.LOADED){
+          mReverseGeocodeParameters.setOutputSpatialReference(spatialReference);
+          final ListenableFuture<List<GeocodeResult>> reverseGeocodeFuture = mLocatorTask.reverseGeocodeAsync(point, mReverseGeocodeParameters);
+          reverseGeocodeFuture.addDoneListener(new Runnable() {
+            @Override public void run() {
+              try {
+                List<GeocodeResult>  results = reverseGeocodeFuture.get();
+                callback.onGeoCodingTaskCompleted(results);
+              } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, e.getMessage());
+                callback.onGeoCodingError(e.getCause());
+              }
+            }
+          });
+        }else {
+          callback.onGeoCodingTaskNotLoaded(mLocatorTask.getLoadError());
+        }
+      }
+    });
+    mLocatorTask.loadAsync();
   }
 
   @Override
@@ -184,6 +228,11 @@ public final class DataManager implements DataManagerContract {
 
     if (mLocatorTask == null) {
       mLocatorTask = mMobileMapPackage.getLocatorTask();
+      // If locator task is still null, then the mobile map package doesn't have a locator
+      if (mLocatorTask == null){
+        callback.noSuggestionSupport();
+        return;
+      }
     }
     mLocatorTask.addDoneLoadingListener(new Runnable() {
       @Override public void run() {
@@ -200,12 +249,9 @@ public final class DataManager implements DataManagerContract {
                 try {
                   List<SuggestResult> results = suggestionsFuture.get();
                   callback.onSuggestionsComplete(results);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                   Log.e(TAG, "InterruptedException " + e.getMessage());
-                  callback.onSuggetionFailure(e.getCause());
-                } catch (ExecutionException e) {
-                  Log.e(TAG, "ExecutionException " + e.getMessage());
-                  callback.onSuggetionFailure(e.getCause());
+                  callback.onSuggestionFailure(e.getCause());
                 }
               }
             });
@@ -214,7 +260,6 @@ public final class DataManager implements DataManagerContract {
 
           }
         }
-
       }
 
     });
