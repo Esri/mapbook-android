@@ -103,7 +103,7 @@ public class MapPresenter implements MapContract.Presenter {
           GeocodeResult result = geocodeResults.get(0);
           Point displayLocation = result.getDisplayLocation();
 
-        //  mView.displaySearchResult(displayLocation, result.getLabel(), true);
+          mView.displaySearchResult(displayLocation, null, true);
 
         } else {
           mView.showMessage( "Location not found for " + address);
@@ -169,39 +169,33 @@ public class MapPresenter implements MapContract.Presenter {
 
     for (IdentifyLayerResult result : results){
 
-      // Create an object for each layer returned
-      FeatureContent featureContent = new FeatureContent(result.getLayerContent().getName());
-
       // a reference to the feature layer can be used, for example, to select identified features
       FeatureLayer featureLayer = null;
 
-      // Dig to find the display field for the layer
+      // We only care about FeatureLayer results
       if (result.getLayerContent() instanceof FeatureLayer) {
         featureLayer = (FeatureLayer) result.getLayerContent();
-      }
+        FeatureContent featureContent = new FeatureContent(featureLayer);
+        featureLayer.setSelectionWidth(3.0d);
 
+        List<Popup> popups = result.getPopups();
 
-      List<Popup> popups = result.getPopups();
-      Log.i(TAG, "Popups found = " + popups.size());
+        for (Popup popup : popups){
 
-      for (Popup popup : popups){
-
-        List<Entry> entries = popupInteractor.getPopupFields(popup);
-        featureContent.setEntries(entries);
-        // Select feature
-        GeoElement element = popup.getGeoElement();
-        if (element instanceof Feature){
-          Feature ft = (Feature) element;
-          if (featureLayer != null){
-            featureLayer.clearSelection();
-            featureLayer.selectFeature(ft);
+          List<Entry> entries = popupInteractor.getPopupFields(popup);
+          featureContent.setEntries(entries);
+          // Select feature
+          GeoElement element = popup.getGeoElement();
+          if (element instanceof Feature){
+            Feature ft = (Feature) element;
+            if (featureLayer != null){
+              featureContent.setFeature(ft); // Assuming 1 popup per IdentifyLayerResult!!!
+            }
           }
         }
+        content.add(featureContent);
       }
-
-      content.add(featureContent);
     }
-
     return content;
   }
 

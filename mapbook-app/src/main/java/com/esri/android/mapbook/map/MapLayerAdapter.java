@@ -26,7 +26,10 @@
 
 package com.esri.android.mapbook.map;
 
+import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,15 +37,23 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import com.esri.android.mapbook.R;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
+import com.esri.arcgisruntime.layers.LegendInfo;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLayerViewHolder> {
+
   private List<Layer> mLayers ;
+  private Context mContext;
+  private final String TAG = MapLayerAdapter.class.getSimpleName();
 
-
-  public MapLayerAdapter(){}
+  public MapLayerAdapter(Context context){
+    mContext = context;
+  }
 
   public void setLayerList(List layers){
 
@@ -73,6 +84,25 @@ public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLay
         }
       }
     });
+    final MapLegendAdapter legendAdapter = new MapLegendAdapter(mContext);
+    holder.legendItems.setLayoutManager(new LinearLayoutManager (mContext));
+    holder.legendItems.setAdapter(legendAdapter);
+    // Retrieve any legend info
+    if (layer instanceof FeatureLayer) {
+      final ListenableFuture<List<LegendInfo>> legendInfoFuture = layer.fetchLegendInfosAsync();
+      legendInfoFuture.addDoneListener(new Runnable() {
+        @Override public void run() {
+          try {
+            List<LegendInfo> legendList = legendInfoFuture.get();
+            legendAdapter.setLegendInfo(legendList);
+            legendAdapter.notifyDataSetChanged();
+          } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, e.getMessage());
+          }
+        }
+      });
+
+    }
   }
 
   @Override public int getItemCount() {
@@ -87,11 +117,13 @@ public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLay
 
     public final TextView mapContentName;
     public final CheckBox checkBox;
+    public final RecyclerView legendItems;
 
     public MapLayerViewHolder(final View view){
       super(view);
       checkBox = (CheckBox) view.findViewById(R.id.cbLayer) ;
       mapContentName = (TextView) view.findViewById(R.id.txtMapContentName);
+      legendItems = (RecyclerView) view.findViewById(R.id.legendRecylerView);
     }
   }
 }

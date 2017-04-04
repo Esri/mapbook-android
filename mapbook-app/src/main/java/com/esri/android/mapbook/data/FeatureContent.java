@@ -26,15 +26,21 @@
 
 package com.esri.android.mapbook.data;
 
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.layers.FeatureLayer;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class FeatureContent {
   private final String mLayerName;
-  private List<Entry> entries;
+  private final FeatureLayer mFeatureLayer;
+  private List<Entry> entries = null;
+  private Feature mFeature = null;
 
-  public FeatureContent(String layerName){
-    mLayerName = layerName;
+  public FeatureContent(FeatureLayer featureLayer){
+    mFeatureLayer = featureLayer;
+    mLayerName = mFeatureLayer.getName();
     setEntries(new ArrayList<Entry>());
   }
 
@@ -42,6 +48,15 @@ public class FeatureContent {
     return mLayerName;
   }
 
+  public void setFeature(Feature feature){
+    mFeature = feature;
+  }
+  public Feature getFeature(){
+    return mFeature;
+  }
+  public FeatureLayer getFeatureLayer(){
+    return mFeatureLayer;
+  }
   public List<Entry> getEntries() {
     return entries;
   }

@@ -40,16 +40,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.*;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import android.widget.Toolbar;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.Entry;
 import com.esri.android.mapbook.data.FeatureContent;
+import com.esri.android.mapbook.mapbook.MapbookAdapter;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Geometry;
@@ -59,6 +63,7 @@ import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.LegendInfo;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BookmarkList;
+import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
@@ -91,6 +96,7 @@ public class MapFragment extends Fragment implements MapContract.View {
   private String mPath = null;
   private Callout mCallout = null;
   private int currentLayoutId = 0;
+  private String mMapTitle = null;
 
   public MapFragment(){}
 
@@ -115,10 +121,10 @@ public class MapFragment extends Fragment implements MapContract.View {
     // View for map layers (visibility set to "gone" by default)
     mLayerRecyclerView = (RecyclerView) mRoot.findViewById(R.id.mapLayerRecyclerView);
     mLayerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-    mContentAdapter = new MapLayerAdapter();
+    mContentAdapter = new MapLayerAdapter(getContext());
     mLayerRecyclerView.setAdapter(mContentAdapter);
 
-    // View for map bookmars (visibility set to "gone" by default)
+    // View for map bookmarks (visibility set to "gone" by default)
     mBookmarkRecyclerView = (RecyclerView) mRoot.findViewById(R.id.mapBookmarkRecyclerView) ;
     mBookmarkRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mBookmarkAdapter = new MapBookmarkAdapter(new MapBookmarkAdapter.OnBookmarkClickListener() {
@@ -138,9 +144,10 @@ public class MapFragment extends Fragment implements MapContract.View {
 
     // Calling activity should pass the index and map title
     Bundle args = getArguments();
-    if (args.containsKey("INDEX")  && args.containsKey(MapbookFragment.FILE_PATH)){
+    if (args.containsKey("INDEX")  && args.containsKey(MapbookFragment.FILE_PATH) && args.containsKey("TITLE")){
       mPath = args.getString(MapbookFragment.FILE_PATH);
       mMapIndex = args.getInt("INDEX");
+      mMapTitle = args.getString("TITLE");
 
     }else{
       // Otherwise, finish the activity
@@ -148,6 +155,15 @@ public class MapFragment extends Fragment implements MapContract.View {
     }
 
     return null;
+  }
+
+  @Override
+  public void onActivityCreated (Bundle savedInstanceState){
+    super.onActivityCreated(savedInstanceState);
+    final ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+    if (actionBar != null && mMapTitle != null){
+      actionBar.setTitle(mMapTitle);
+    }
   }
 
   /**
@@ -323,34 +339,12 @@ public class MapFragment extends Fragment implements MapContract.View {
   @Override public void showMap(ArcGISMap map) {
     mMapView.setMap(map);
 
-    // Set the layer and bookmarks up
+
+    // Set up layers and bookmarks
     List<Layer> layerList = map.getOperationalLayers();
     mContentAdapter.setLayerList(layerList);
     BookmarkList bookmarks = map.getBookmarks();
     mBookmarkAdapter.setBoomarks(bookmarks);
-
-    Iterator<Layer> iter = layerList.iterator();
-    while (iter.hasNext()) {
-      Layer layer = iter.next();
-      if (layer instanceof FeatureLayer) {
-        ((FeatureLayer) layer).setSelectionWidth(3.0d);
-        final ListenableFuture<List<LegendInfo>> legendInfoFuture = layer.fetchLegendInfosAsync();
-        legendInfoFuture.addDoneListener(new Runnable() {
-          @Override public void run() {
-            try {
-              List<LegendInfo> legendList = legendInfoFuture.get();
-              Log.i("MapViewActivity", "Legend list size " + legendList.size());
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            } catch (ExecutionException e) {
-              e.printStackTrace();
-            }
-          }
-        });
-
-      }
-    }
-
   }
 
 
@@ -367,12 +361,14 @@ public class MapFragment extends Fragment implements MapContract.View {
       // Zoom map to geocode result location
       mMapView.setViewpointAsync(new Viewpoint(resultPoint, 8000), 3);
     }
-    //Don't show a callout if we have no info
-    if (calloutContent == null){
-      return;
-    }
 
     mCallout = mMapView.getCallout();
+
+    //Don't show a callout if we have no view info
+    if (calloutContent == null){
+      mCallout.dismiss();
+      return;
+    }
 
     Callout.Style style = new Callout.Style(getContext());
     style.setMinWidth(350);
@@ -382,14 +378,9 @@ public class MapFragment extends Fragment implements MapContract.View {
     mCallout.setContent(calloutContent);
     mCallout.setShowOptions(new Callout.ShowOptions(true,false,false));
     mCallout.setStyle(style);
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//      mCallout.getStyle().setBackgroundColor(getActivity().getColor(R.color.colorPrimary));
-//    }else{
-//      mCallout.getStyle().setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
-//    }
+
     mCallout.show();
   }
-
 
   @Override public void displayBookmarks() {
 
@@ -429,7 +420,7 @@ public class MapFragment extends Fragment implements MapContract.View {
   }
 
   @Override public void showMessage(String message) {
-    Toast.makeText(getActivity().getApplicationContext(), message,Toast.LENGTH_LONG).show();
+    Toast.makeText(getActivity().getApplicationContext(), message,Toast.LENGTH_SHORT).show();
   }
 
   /**
@@ -455,13 +446,26 @@ public class MapFragment extends Fragment implements MapContract.View {
     }
   }
 
+  private void clearSelections(){
+    LayerList layers = mMapView.getMap().getOperationalLayers();
+    for (Layer layer : layers){
+      if (layer instanceof  FeatureLayer){
+        ((FeatureLayer) layer).clearSelection();
+      }
+    }
+  }
+  /**
+   * Build the view for the callout
+   * @param featureContents
+   * @return The constructed view
+   */
   private View buildContentView(final List<FeatureContent> featureContents){
     currentLayoutId = 0;
     LayoutInflater inflater = (LayoutInflater)getActivity().getApplicationContext().getSystemService
         (Context.LAYOUT_INFLATER_SERVICE);
     View calloutView =  inflater.inflate(R.layout.callout_content,null);
     final LinearLayout mainLayout = (LinearLayout) calloutView.findViewById(R.id.calloutLinearLayout);
-    Log.i(TAG, "Main layout width " + mainLayout.getWidth());
+
 
     // Set popup count
     final TextView txtPopupCount = (TextView) calloutView.findViewById(R.id.popupCount) ;
@@ -471,7 +475,11 @@ public class MapFragment extends Fragment implements MapContract.View {
     int layoutCt = 0;
     final List<LinearLayout> calloutLayouts = new ArrayList<>();
     final TextView layerTitle = (TextView) calloutView.findViewById(R.id.layerName);
-    layerTitle.setText(featureContents.get(0).getLayerName());
+    FeatureContent featureContent = featureContents.get(0);
+    layerTitle.setText(featureContent.getLayerName());
+
+    // Highlight the first feature
+    featureContent.getFeatureLayer().selectFeature(featureContent.getFeature());
 
     layerTitle.setTextColor(Color.BLACK);
     layerTitle.setTypeface(null, Typeface.BOLD);
@@ -482,7 +490,6 @@ public class MapFragment extends Fragment implements MapContract.View {
       linearLayout.setOrientation(LinearLayout.VERTICAL);
       LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(600,
           ViewGroup.LayoutParams.WRAP_CONTENT);
-     // layoutParams.setMargins(5, 3, 5, 3);
       linearLayout.setLayoutParams(layoutParams);
       linearLayout.setId(layoutCt);
 
@@ -525,46 +532,14 @@ public class MapFragment extends Fragment implements MapContract.View {
 
     btnPrev.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        int currentIndex = getCurrentLayoutId();
-        View currentView = mainLayout.findViewById(currentIndex);
-        if (currentIndex > 0){
-          decrementCurrentLayoutId();
-          View newView = calloutLayouts.get(getCurrentLayoutId());
-          replaceView(mainLayout, currentView,newView);
-          // Reset the layer name in the callout
-          FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
-          String layerName = activeContent.getLayerName();
-          Log.i(TAG, "Current Layer " +layerName);
-          layerTitle.setText(layerName);
-          // Reset popup index
-          txtPopupCount.setText(getCurrentLayoutId() + 1 + " of " + featureContents.size() );
-
-        }
-
+        processButtonEvent(mainLayout, featureContents, calloutLayouts, layerTitle, txtPopupCount, btnNext, btnPrev, "prev");
       }
     });
 
 
     btnNext.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        int currentIndex = getCurrentLayoutId();
-        View currentView = mainLayout.findViewById(currentIndex);
-        if (currentIndex < featureContents.size() - 1){
-          incrementCurrentLayoutId();
-          View newView = calloutLayouts.get(getCurrentLayoutId());
-          replaceView(mainLayout, currentView,newView);
-
-          // Reset the layer name in the callout
-          FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
-          String layerName = activeContent.getLayerName();
-          Log.i(TAG, "Current Layer " +layerName);
-          layerTitle.setText(layerName);
-
-          // Reset popup index
-          txtPopupCount.setText(getCurrentLayoutId() + 1 + " of " + featureContents.size() );
-        }
-
-        Log.i(TAG, "Current layout id " + getCurrentLayoutId());
+        processButtonEvent(mainLayout, featureContents, calloutLayouts, layerTitle, txtPopupCount, btnNext, btnPrev, "next");
       }
     });
 
@@ -576,6 +551,60 @@ public class MapFragment extends Fragment implements MapContract.View {
       }
     });
     return  calloutView;
+  }
+
+  /**
+   * Toggle visibility of previous and next buttons based on currently viewed feature info
+   * @param mainLayout  LinearLayout
+   * @param featureContents List of FeatureContents
+   * @param calloutLayouts List of LinearLayouts
+   * @param layerTitle TextView representing title of layer where feature is located
+   * @param txtPopupCount TextView representing count of features identified
+   * @param btnNext Button for navigating to next feature
+   * @param btnPrev Button for navigating to previous feature
+   * @param btnName String representing flag for which button to process logic for
+   */
+  private void processButtonEvent(final LinearLayout mainLayout, final List<FeatureContent> featureContents,
+      final List<LinearLayout> calloutLayouts, final TextView layerTitle, final TextView txtPopupCount, final Button btnNext, final Button btnPrev, final String btnName ){
+
+    int currentIndex = getCurrentLayoutId();
+    View currentView = mainLayout.findViewById(currentIndex);
+    if (btnName.equalsIgnoreCase("next") && currentIndex < featureContents.size() - 1){
+      incrementCurrentLayoutId();
+
+    }else if (btnName.equalsIgnoreCase("prev") && currentIndex > 0){
+      decrementCurrentLayoutId();
+    }
+
+    View newView = calloutLayouts.get(getCurrentLayoutId());
+    replaceView(mainLayout, currentView,newView);
+
+    // Reset the layer name in the callout
+    FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
+    String layerName = activeContent.getLayerName();
+
+    // Clear any selections
+    clearSelections();
+
+    // Select the feature
+    activeContent.getFeatureLayer().selectFeature(activeContent.getFeature());
+
+    layerTitle.setText(layerName);
+
+    // Reset popup index
+    txtPopupCount.setText(getCurrentLayoutId() + 1 + " of " + featureContents.size() );
+    // Adjust visual cues for navigating features
+    currentIndex = getCurrentLayoutId();
+    if (currentIndex < featureContents.size() - 1){
+      btnNext.setAlpha(1.0f);
+    }else{
+      btnNext.setAlpha(0.3f);
+    }
+    if (currentIndex > 0){
+      btnPrev.setAlpha(1.0f);
+    }else{
+      btnPrev.setAlpha(0.3f);
+    }
   }
 
   private int getCurrentLayoutId(){
@@ -592,6 +621,7 @@ public class MapFragment extends Fragment implements MapContract.View {
     mainView.addView(newView);
   }
 
+
   private class MapTouchListener extends DefaultMapViewOnTouchListener {
 
     public MapTouchListener(Context context, MapView mapView) {
@@ -606,6 +636,9 @@ public class MapFragment extends Fragment implements MapContract.View {
           mGraphicsOverlay.getGraphics().get(0).setSelected(false);
         }
       }
+      // clear any previous selections
+      clearSelections();
+
       // get the screen point where user tapped
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
 
@@ -621,6 +654,7 @@ public class MapFragment extends Fragment implements MapContract.View {
             List<FeatureContent> content = mPresenter.identifyFeatures(clickedLocation, results);
             if (content.isEmpty()){
               showMessage("No features found at that location");
+              displaySearchResult(clickedLocation, null, false);
             }else{
               View v = buildContentView(content);
               displaySearchResult(clickedLocation,v, false);
