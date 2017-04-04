@@ -33,23 +33,23 @@
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:orientation="horizontal" >
+                  android:orientation="horizontal">
 
         <TextView android:layout_width="0dp"
                   android:layout_height="wrap_content"
                   android:id="@+id/layerName"
                   android:layout_marginBottom="16dp"
-                  android:layout_weight="5" />
+                  android:layout_weight="5"/>
 
         <Button android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:id="@+id/btnPrev"
+                android:id="@+id/btnPrev" android:alpha="0.3"
                 android:theme="@style/PrevButton"
                 style="@style/Widget.AppCompat.Button.Colored" android:paddingTop="3dp"/>
 
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:id="@+id/popupCount" android:text="1 of 4" />
+                  android:id="@+id/popupCount" android:text="1 of 4"/>
 
         <Button android:layout_width="36dp"
                 android:layout_height="36dp"
