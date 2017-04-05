@@ -15,6 +15,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".SplashActivity"
+                  android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -23,8 +24,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".mapbook.MapbookActivity"
+                  android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize"/>
         <activity android:name=".download.DownloadActivity"
+                  android:screenOrientation="landscape"
                   android:launchMode="standard"
                   android:uiOptions="splitActionBarWhenNarrow"
                   android:configChanges="orientation|screenSize"
@@ -36,9 +39,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".map.MapActivity"
+                  android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize"/>
         <activity
                 android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
+                android:screenOrientation="landscape"
                 android:label="OAuthIntentReceiver"
                 android:launchMode="singleTask">
             <intent-filter>
