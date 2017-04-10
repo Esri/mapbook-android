@@ -107,13 +107,16 @@ public final class DownloadFragment extends Fragment implements DownloadContract
 
   @Override final public void promptForInternetConnectivity() {
 
-    mProgressDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "ENABLE WI-FI", new DialogInterface.OnClickListener() {
+    final ProgressDialog networkDialog = new ProgressDialog(getContext());
+    networkDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "ENABLE WI-FI", new DialogInterface.OnClickListener() {
       @Override final public void onClick(final DialogInterface dialog, final int which) {
-        mProgressDialog.dismiss();
+        networkDialog.dismiss();
         startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
       }
     });
-    showProgressDialog(getString(R.string.wireless_problem),getString(R.string.internet_connectivity) );
+    networkDialog.setTitle(getString(R.string.wireless_problem));
+    networkDialog.setMessage(getString(R.string.internet_connectivity));
+    networkDialog.show();
   }
 
   @Override final public void executeDownload(final long itemSize, final InputStream inputStream) {
