@@ -23,4 +23,5 @@
     <string name="downloading_mapbook">Downloading Mapbook</string>
     <string name="index">INDEX</string>
     <string name="map_title">TITLE</string>
+    <string name="map_thumbnail">map thumbnail</string>
 </resources>
