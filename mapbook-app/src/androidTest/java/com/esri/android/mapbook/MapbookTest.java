@@ -57,7 +57,7 @@ public class MapbookTest {
    */
   @Test
   public void checkIfMapbookActivityIsDisplayed() throws Exception {
-    solo.waitForActivity("MapbookActivity", 2000);
+    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
     solo.assertCurrentActivity(TAG + " not displayed", MapbookActivity.class);
 
   }
@@ -68,7 +68,7 @@ public class MapbookTest {
    */
   @Test
   public void checkIfTitleIsDisplayed() throws Exception{
-    solo.waitForActivity("MapbookActivity", 2000);
+    Assert.assertNotNull(solo.waitForActivity("MapbookActivity", 2000));
     ActionBar actionBar = mActivityRule.getActivity().getSupportActionBar();
     Assert.assertNotNull(actionBar);
     Assert.assertTrue(actionBar.getTitle() == solo.getString(R.string.title));
@@ -81,8 +81,8 @@ public class MapbookTest {
    */
   @Test
   public void checkForMapbookContent() throws Exception{
-    solo.waitForActivity("MapbookActivity", 2000);
-    solo.waitForFragmentById(R.id.mapbookViewFragment);
+    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
 
     TextView title = (TextView) solo.getView(R.id.txtTitle);
     Assert.assertTrue(title.isShown());
@@ -154,17 +154,8 @@ public class MapbookTest {
    */
   @Test
   public void checkMapMenuItemsVisible(){
-    solo.waitForActivity("MapbookActivity", 2000);
-    solo.waitForFragmentById(R.id.mapbookViewFragment);
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
-    Assert.assertNotNull(mapRecyclerView);
-    // Click on first item in recycler view
-    solo.clickOnView(mapRecyclerView);
-
-    // This should trigger the map activity to be shown
-    solo.waitForActivity(MapActivity.class, 2000);
-    solo.waitForFragmentById(R.id.mapLinearLayout);
+    navigateToMap();
 
     SearchView search = (SearchView) solo.getView(R.id.action_search);
     Assert.assertTrue(search.isShown());
@@ -181,17 +172,8 @@ public class MapbookTest {
    */
   @Test
   public void checkShowLayers() throws Exception{
-    solo.waitForActivity("MapbookActivity", 2000);
-    solo.waitForFragmentById(R.id.mapbookViewFragment);
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
-    Assert.assertNotNull(mapRecyclerView);
-    // Click on first item in recycler view
-    solo.clickOnView(mapRecyclerView);
-
-    // This should trigger the map activity to be shown
-    solo.waitForActivity(MapActivity.class, 2000);
-    solo.waitForFragmentById(R.id.mapLinearLayout);
+    navigateToMap();
 
     ActionMenuItemView layers = (ActionMenuItemView) solo.getView(R.id.action_layers);
     solo.clickOnView(layers);
@@ -213,17 +195,8 @@ public class MapbookTest {
    */
   @Test
   public void checkShowSearchSuggestions() throws Exception {
-    solo.waitForActivity("MapbookActivity", 2000);
-    solo.waitForFragmentById(R.id.mapbookViewFragment);
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
-    Assert.assertNotNull(mapRecyclerView);
-    // Click on first item in recycler view
-    solo.clickOnView(mapRecyclerView);
-
-    // This should trigger the map activity to be shown
-    solo.waitForActivity(MapActivity.class, 2000);
-    solo.waitForFragmentById(R.id.mapLinearLayout);
+    navigateToMap();
 
     SearchView search = (SearchView) solo.getView(R.id.action_search);
     solo.clickOnView(search);
@@ -250,17 +223,8 @@ public class MapbookTest {
 
   @Test
   public void checkSearchForAddress() throws Exception{
-    solo.waitForActivity("MapbookActivity", 2000);
-    solo.waitForFragmentById(R.id.mapbookViewFragment);
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
-    Assert.assertNotNull(mapRecyclerView);
-    // Click on first item in recycler view
-    solo.clickOnView(mapRecyclerView);
-
-    // This should trigger the map activity to be shown
-    solo.waitForActivity(MapActivity.class, 2000);
-    solo.waitForFragmentById(R.id.mapLinearLayout);
+    navigateToMap();
 
     SearchView search = (SearchView) solo.getView(R.id.action_search);
     solo.clickOnView(search);
@@ -314,17 +278,8 @@ public class MapbookTest {
    */
   @Test
   public void checkBookmarksShown() throws Exception {
-    solo.waitForActivity("MapbookActivity", 2000);
-    solo.waitForFragmentById(R.id.mapbookViewFragment);
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
-    Assert.assertNotNull(mapRecyclerView);
-    // Click on first item in recycler view
-    solo.clickOnView(mapRecyclerView);
-
-    // This should trigger the map activity to be shown
-    solo.waitForActivity(MapActivity.class, 2000);
-    solo.waitForFragmentById(R.id.mapLinearLayout);
+    navigateToMap();
 
     final ActionMenuItemView bookmarks = (ActionMenuItemView) solo.getView(R.id.bookmarks);
     solo.clickOnView(bookmarks);
@@ -357,5 +312,39 @@ public class MapbookTest {
       }
     }
     Assert.assertTrue(bookmarkExtentsDiffer);
+  }
+
+  /**
+   * Clicking on the back button while in a map view
+   * should take the user back to the main screen.
+   * @throws Exception
+   */
+  @Test
+  public void checkNavigationBackToMainScreen() throws Exception{
+
+    navigateToMap();
+
+    // Go back to main screen
+    solo.goBack();
+
+    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
+  }
+
+  /**
+   * Navigate to the first map in the mabook
+   */
+  private void navigateToMap(){
+    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
+
+    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
+    Assert.assertNotNull(mapRecyclerView);
+    // Click on first item in recycler view
+    solo.clickOnView(mapRecyclerView);
+
+    // This should trigger the map activity to be shown
+    Assert.assertTrue(solo.waitForActivity(MapActivity.class, 2000));
+    Assert.assertTrue(solo.waitForFragmentById(R.id.mapLinearLayout));
   }
 }

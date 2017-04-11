@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:2.3.1'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -40,7 +40,7 @@ ext {
     supportLibraryVersion = '25.3.0'
     junitVersion = '4.12'
     runnerVersion = '0.4.1'
-    runtimeVersion = '100.1.0-1663'
+    runtimeVersion = '100.1.0-1669'
     espressoCoreVersion = '2.2.2'
     daggerVerison = '2.8'
     guavaVersion = '18.0'
