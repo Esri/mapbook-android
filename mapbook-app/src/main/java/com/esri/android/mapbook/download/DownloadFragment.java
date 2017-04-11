@@ -108,10 +108,16 @@ public final class DownloadFragment extends Fragment implements DownloadContract
   @Override final public void promptForInternetConnectivity() {
 
     final ProgressDialog networkDialog = new ProgressDialog(getContext());
-    networkDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "ENABLE WI-FI", new DialogInterface.OnClickListener() {
+    networkDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ENABLE WI-FI", new DialogInterface.OnClickListener() {
       @Override final public void onClick(final DialogInterface dialog, final int which) {
         networkDialog.dismiss();
         startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+      }
+    });
+    networkDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
+      @Override final public void onClick(final DialogInterface dialog, final int which) {
+        networkDialog.dismiss();
+        sendResult(RESULT_CANCELED, ERROR_STRING, "A Network Connection is Required to Download the Mobile Map Package");
       }
     });
     networkDialog.setTitle(getString(R.string.wireless_problem));
@@ -195,7 +201,8 @@ public final class DownloadFragment extends Fragment implements DownloadContract
       mTaskProgressDialog.setIndeterminate(false);
       mTaskProgressDialog.setMax(100);
       mTaskProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-      mTaskProgressDialog.setCancelable(true);
+      mTaskProgressDialog.setCancelable(false);
+      mTaskProgressDialog.setCanceledOnTouchOutside(false);
       mTaskProgressDialog.setMessage(getString(R.string.wait));
       mTaskProgressDialog.setTitle(getString(R.string.downloading_mapbook));
       mTaskProgressDialog.show();
