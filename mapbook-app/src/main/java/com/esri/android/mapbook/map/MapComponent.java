@@ -31,8 +31,6 @@ import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Component;
 
-import javax.inject.Singleton;
-
 /**
  * This is a Dagger component. Refer to {@link com.esri.android.mapbook.MapBookApplication} for the list of Dagger components
  * used in this application.

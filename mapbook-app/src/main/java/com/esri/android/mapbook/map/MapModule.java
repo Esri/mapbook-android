@@ -28,13 +28,9 @@ package com.esri.android.mapbook.map;
 
 import android.content.Context;
 import com.esri.android.mapbook.data.DataManager;
-import com.esri.android.mapbook.download.DownloadActivity;
 import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Module;
 import dagger.Provides;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 /**
  * This is a Dagger module. We use this to pass in the {@link com.esri.android.mapbook.data.DataManager}

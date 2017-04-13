@@ -27,39 +27,25 @@
 package com.esri.android.mapbook.map;
 
 import android.util.Log;
-import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.DataManager;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
 import com.esri.android.mapbook.data.Entry;
 import com.esri.android.mapbook.data.FeatureContent;
-import com.esri.arcgisruntime.arcgisservices.ArcGISFeatureLayerInfo;
-import com.esri.arcgisruntime.data.ArcGISFeatureTable;
 import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.FeatureTable;
-import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
-import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.GeoElement;
-import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.mapping.popup.Popup;
-import com.esri.arcgisruntime.mapping.popup.PopupField;
-import com.esri.arcgisruntime.mapping.popup.PopupFieldFormat;
-import com.esri.arcgisruntime.mapping.popup.PopupManager;
-import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import javax.inject.Inject;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 
 public class MapPresenter implements MapContract.Presenter {
 

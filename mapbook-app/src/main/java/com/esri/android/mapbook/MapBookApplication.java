@@ -25,7 +25,6 @@
 package com.esri.android.mapbook;
 
 import android.app.Application;
-import android.content.Context;
 
 /**
  *
