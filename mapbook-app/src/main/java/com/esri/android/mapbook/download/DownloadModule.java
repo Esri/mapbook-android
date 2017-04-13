@@ -29,6 +29,7 @@ package com.esri.android.mapbook.download;
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.util.Log;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.util.MapbookApplicationScope;
 import com.esri.arcgisruntime.portal.Portal;
@@ -51,7 +52,7 @@ public  class DownloadModule {
   private final Activity mActivity;
   private final DownloadContract.View mView;
 
-  public DownloadModule(DownloadContract.View view, Activity activity ){
+  public DownloadModule(final DownloadContract.View view, final Activity activity ){
     mView = view;
     mActivity = activity;
   }
@@ -69,42 +70,42 @@ public  class DownloadModule {
   @Provides
   @Named("mPortalItemId")
   @MapbookApplicationScope
-  public String providesPortalItemId(Context context) {
+  public String providesPortalItemId(final Context context) {
     return context.getString(R.string.portalId);
   }
 
   @Provides
   @Named("clientId")
   @MapbookApplicationScope
-  public String providesClientId(Context context){return context.getString(R.string.client_id);}
+  public String providesClientId(final Context context){return context.getString(R.string.client_id);}
 
   @Provides
   @Named("redirectUri")
   @MapbookApplicationScope
-  public String providesRedirectUri(Context context){ return context.getString(R.string.redirect_uri);}
+  public String providesRedirectUri(final Context context){ return context.getString(R.string.redirect_uri);}
 
   @Provides
   @Named("portalUrl")
   @MapbookApplicationScope
-  public String providesPortalUrl(Context context){return context.getString(R.string.portal);}
+  public String providesPortalUrl(final Context context){return context.getString(R.string.portal);}
 
   @Provides
   @MapbookApplicationScope
-  public OAuthConfiguration providesOAuthConfiguration(@Named("clientId") String clientId,
-      @Named("redirectUri") String redirectUri,
-      @Named("portalUrl") String portalUrl){
+  public OAuthConfiguration providesOAuthConfiguration(@Named("clientId") final String clientId,
+      @Named("redirectUri") final String redirectUri,
+      @Named("portalUrl") final String portalUrl){
     OAuthConfiguration oAuthConfiguration = null;
     try {
       oAuthConfiguration = new OAuthConfiguration(portalUrl, clientId, redirectUri);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
+    } catch (final MalformedURLException e) {
+      Log.e("DownloadModule", e.getMessage());
     }
     return oAuthConfiguration;
   }
 
   @Provides
   @MapbookApplicationScope
-  public Portal providesPortal(@Named("portalUrl") String portalUrl){
+  public Portal providesPortal(@Named("portalUrl") final String portalUrl){
     return new Portal(portalUrl,true);
   }
 
@@ -112,8 +113,7 @@ public  class DownloadModule {
   @Provides
   @MapbookApplicationScope
   public ConnectivityManager providesNetworkInfo(){
-    final ConnectivityManager connManager = (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
-    return connManager;
+    return (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
   }
 
 }

@@ -31,19 +31,67 @@ import com.esri.android.mapbook.BaseView;
 
 import java.io.InputStream;
 
+/**
+ * This is the contract between the Presenter and View components of the MVP pattern.
+ * It defines methods and logic used when downloading a mapbook.
+ */
 public interface DownloadContract {
 
   interface Presenter extends BasePresenter {
+    /**
+     * Fetches mapbook from Portal
+     */
     void downloadMapbook();
+
+    /**
+     * Initiates the authentication process against the Portal
+     */
     void signIn();
+
+    /**
+     * Checks if the device has any network connectivity
+     * @return true for connected, false for no connection
+     */
     boolean checkForInternetConnectivity();
   }
   interface View extends BaseView<DownloadContract.Presenter> {
+    /**
+     * Show a Toast with given message string
+     * @param message - String
+     */
     void showMessage(String message);
+
+    /**
+     * Notifies calling activity given an int representing a result code,
+     * a key represented by a string, and a message.
+     * @param resultCode - int
+     * @param key - String
+     * @param message - String
+     */
     void sendResult( int resultCode, String key, String message);
+
+    /**
+     * Shows a progress dialog with given title and message
+     * @param title - String representing message title
+     * @param message - String representing message
+     */
     void showProgressDialog(String title, String message);
+
+    /**
+     * Dismiss the progress dialog
+     */
     void dismissProgressDialog();
+
+    /**
+     * Prompts user to enable WIFI connectivity
+     */
     void promptForInternetConnectivity();
+
+    /**
+     * Starts an async task to download the file
+     * @param itemSize - long representing size of item to download
+     * @param inputStream - InputStream representing file
+     */
     void executeDownload(long itemSize, InputStream inputStream);
   }
 }
