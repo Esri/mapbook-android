@@ -29,22 +29,11 @@ package com.esri.android.mapbook.data;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.FeatureQueryResult;
-import com.esri.arcgisruntime.data.FeatureTable;
-import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.geometry.Geometry;
-import com.esri.arcgisruntime.geometry.Point;
-import com.esri.arcgisruntime.geometry.SpatialReference;
-import com.esri.arcgisruntime.layers.FeatureLayer;
-import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
-import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.tasks.geocode.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -52,8 +41,8 @@ public class DataManager implements DataManagerContract {
 
   private MobileMapPackage mMobileMapPackage = null;
   private GeocodeParameters mGeocodeParameters = null;
-  private ReverseGeocodeParameters mReverseGeocodeParameters = null;
-  private LocatorTask mLocatorTask;
+
+  private LocatorTask mLocatorTask = null;
 
   final private static String TAG = DataManager.class.getSimpleName();
 
@@ -62,30 +51,11 @@ public class DataManager implements DataManagerContract {
     mGeocodeParameters.getResultAttributeNames().add("*");
     mGeocodeParameters.setMaxResults(1);
 
-    mReverseGeocodeParameters = new ReverseGeocodeParameters();
+    ReverseGeocodeParameters mReverseGeocodeParameters = new ReverseGeocodeParameters();
     mReverseGeocodeParameters.getResultAttributeNames().add("*");
     mReverseGeocodeParameters.setMaxResults(1);
   }
 
-  @Override
-  public void queryForFeatures(final Geometry geometry, final LayerList layers,
-      final DataManagerCallbacks.FeatureCallback callback){
-
-    final Iterator<Layer> iterator = layers.iterator();
-    while (iterator.hasNext()){
-      final Layer layer = iterator.next();
-      if (layer instanceof FeatureLayer){
-        final FeatureTable featureTable = ((FeatureLayer) layer).getFeatureTable();
-        if (featureTable != null){
-          final QueryParameters queryParameters = new QueryParameters();
-          queryParameters.setGeometry(geometry);
-          final FeatureLayer featureLayer = (FeatureLayer) layer;
-          final ListenableFuture<FeatureQueryResult> futureResult = featureTable.queryFeaturesAsync(queryParameters);
-          processQueryForFeatures(futureResult,featureLayer,  callback);
-        }
-      }
-    }
-  }
 
   @Override public void loadMobileMapPackage(@NonNull final String mobileMapPackagePath,
       final DataManagerCallbacks.MapbookCallback callback) {
@@ -100,37 +70,6 @@ public class DataManager implements DataManagerContract {
       }
     });
     mMobileMapPackage.loadAsync();
-  }
-
-  /**
-   *
-   * @param futureResult
-   * @param featureLayer
-   * @param callback
-   */
-  final private static void processQueryForFeatures(final ListenableFuture<FeatureQueryResult> futureResult,
-      final FeatureLayer featureLayer, final DataManagerCallbacks.FeatureCallback callback ){
-
-    futureResult.addDoneListener(new Runnable() {
-      @Override public void run() {
-        // call get on the future to get the result
-        try {
-          final FeatureQueryResult result = futureResult.get();
-
-          final Iterator<Feature> iterator = result.iterator();
-          final List<Feature> featureList = new ArrayList<>();
-          while (iterator.hasNext()){
-            final Feature feature = iterator.next();
-            featureList.add(feature);
-          }
-          callback.onFeaturesFound(featureList, featureLayer);
-
-        } catch (InterruptedException | ExecutionException e) {
-          Log.e(TAG,e.getMessage());
-          callback.onNoFeaturesFound();
-        }
-      }
-    });
   }
 
   /**
@@ -162,7 +101,7 @@ public class DataManager implements DataManagerContract {
               @Override public void run() {
 
                 try {
-                  List<GeocodeResult> geocodeResults = geocodeFuture.get();
+                  final List<GeocodeResult> geocodeResults = geocodeFuture.get();
                   geocodingCallback.onGeoCodingTaskCompleted(geocodeResults);
 
                 } catch (InterruptedException | ExecutionException e) {
@@ -205,7 +144,7 @@ public class DataManager implements DataManagerContract {
       @Override public void run() {
         if (mLocatorTask.getLoadStatus() == LoadStatus.LOADED) {
           if (mLocatorTask.getLocatorInfo().isSupportsSuggestions()) {
-            SuggestParameters suggestParameters = new SuggestParameters();
+            final SuggestParameters suggestParameters = new SuggestParameters();
             suggestParameters.setMaxResults(5);
             suggestParameters.setSearchArea(searchArea);
 
@@ -214,7 +153,7 @@ public class DataManager implements DataManagerContract {
             suggestionsFuture.addDoneListener(new Runnable() {
               @Override public void run() {
                 try {
-                  List<SuggestResult> results = suggestionsFuture.get();
+                  final List<SuggestResult> results = suggestionsFuture.get();
                   callback.onSuggestionsComplete(results);
                 } catch (InterruptedException | ExecutionException e) {
                   Log.e(TAG, "InterruptedException " + e.getMessage());

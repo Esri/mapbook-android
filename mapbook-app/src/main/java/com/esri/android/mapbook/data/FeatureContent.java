@@ -32,13 +32,16 @@ import com.esri.arcgisruntime.layers.FeatureLayer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A POJO defining data in a Feature
+ */
 public class FeatureContent {
   private final String mLayerName;
   private final FeatureLayer mFeatureLayer;
   private List<Entry> entries = null;
   private Feature mFeature = null;
 
-  public FeatureContent(FeatureLayer featureLayer){
+  public FeatureContent(final FeatureLayer featureLayer){
     mFeatureLayer = featureLayer;
     mLayerName = mFeatureLayer.getName();
     setEntries(new ArrayList<Entry>());
@@ -48,7 +51,7 @@ public class FeatureContent {
     return mLayerName;
   }
 
-  public void setFeature(Feature feature){
+  public void setFeature(final Feature feature){
     mFeature = feature;
   }
   public Feature getFeature(){
@@ -62,7 +65,7 @@ public class FeatureContent {
   }
 
 
-  public void setEntries(List<Entry> entries) {
+  public void setEntries(final List<Entry> entries) {
     this.entries = entries;
   }
 }

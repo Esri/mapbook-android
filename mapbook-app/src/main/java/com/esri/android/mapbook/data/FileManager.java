@@ -45,12 +45,19 @@ public class FileManager implements FileManagerContract {
     file = new File(createMobileMapPackageFilePath());
   }
   /**
-   * Create the mobile map package file location and name structure
+   /**
+   * Generate the path for the location of the mobile map package.
+   *
+   * @return String
    */
   final public String createMobileMapPackageFilePath(){
     return extStorDir.getAbsolutePath() + File.separator + extSDCardDirName + File.separator + fileName + extension;
   }
 
+  /**
+   * Return the modified date of the file
+   * @return long representing milliseconds
+   */
   final public long getModifiedDate(){
     long modifiedDate = 0;
     if (file!= null){
@@ -59,6 +66,10 @@ public class FileManager implements FileManagerContract {
     return modifiedDate;
   }
 
+  /**
+   * Return the file size
+   * @return - long representing file size
+   */
   final public long getSize(){
     long size = 0;
     if (file != null){
@@ -66,6 +77,12 @@ public class FileManager implements FileManagerContract {
     }
     return size;
   }
+
+  /**
+   * Returns a string representing file path of mapbook.
+   * Returns a null string if file doesn't exist.
+   * @return - String
+   */
   final public String fileExists(){
     String path = null;
     file = new File(createMobileMapPackageFilePath());

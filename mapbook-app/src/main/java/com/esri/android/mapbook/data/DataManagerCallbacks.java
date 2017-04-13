@@ -34,6 +34,10 @@ import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
 
+/**
+ * Represents the different types of callback functions executed
+ * upon asynchronous completion of tasks.
+ */
 public interface DataManagerCallbacks {
   /**
    * Handles async calls for loading Features

@@ -26,11 +26,16 @@
 
 package com.esri.android.mapbook.data;
 
-public class Entry{
-  private String mField;
-  private String mValue;
+/**
+ * A POJO representing a simple key and string value pair that
+ * define a feature attribute.
+ */
 
-  public Entry(String field, String value){
+public class Entry{
+  private final String mField;
+  private final String mValue;
+
+  public Entry(final String field, final String value){
     mField = field;
     mValue = value;
   }

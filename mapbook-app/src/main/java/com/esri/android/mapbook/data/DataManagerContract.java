@@ -27,17 +27,40 @@
 package com.esri.android.mapbook.data;
 
 import com.esri.arcgisruntime.geometry.Geometry;
-import com.esri.arcgisruntime.mapping.LayerList;
 
-
+/**
+ * Methods implemented by objects responsible for interacting with
+ * mobile map packages and their locators.
+ */
 
 public interface DataManagerContract {
-
-  void queryForFeatures(Geometry geometry, LayerList layers,
-      DataManagerCallbacks.FeatureCallback callback);
+  /**
+   * Load mobile map given path and callback
+   * @param mobileMapPackagePath - String for  absolute path to file
+   * @param callback - MapbookCallback that executes on mobile map package load (or error)
+   */
   void loadMobileMapPackage(String mobileMapPackagePath, DataManagerCallbacks.MapbookCallback callback);
+
+  /**
+   * Geocode given address and execute callback upon completion
+   * @param address - String representing address
+   * @param geocodingCallback - GeoCodingCallback execute on completion of geocoding.
+   */
   void geocodeAddress(String address, DataManagerCallbacks.GeoCodingCallback geocodingCallback);
+
+  /**
+   * Return a boolean indicating whether the mapbook has a locator task
+   * @return -boolean, true if mapbook has locator task. False otherwise.
+   */
   boolean hasLocatorTask();
+
+  /**
+   * Retrieve suggestions from locator given search area and query.  Result are processed
+   * using the provided SuggestionCallback.
+   * @param searchArea - Geometry representing area to search
+   * @param query - String representing query string
+   * @param callback - The SuggestionCallback executed upon completion of locator suggestion lookup.
+   */
   void getSuggestions(Geometry searchArea, String query, DataManagerCallbacks.SuggestionCallback callback);
 
 }

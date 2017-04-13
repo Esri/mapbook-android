@@ -37,6 +37,10 @@ import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
 
+/**
+ * This is the contract between the Presenter and View components of the MVP pattern.
+ * It defines methods and logic used when showing a map in the mapbook.
+ */
 public interface MapContract {
 
   interface Presenter extends BasePresenter {
