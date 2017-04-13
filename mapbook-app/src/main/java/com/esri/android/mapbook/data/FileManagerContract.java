@@ -26,10 +26,35 @@
 
 package com.esri.android.mapbook.data;
 
+/**
+ * This is an interface defining methods for managing mapbook files on the device.
+ */
 public interface FileManagerContract {
+
+  /**
+   * Generate the path for the location of the mobile map package.
+   *
+   * @return String
+   */
   String createMobileMapPackageFilePath();
+
+  /**
+   * Return the modified date of the file
+   * @return long representing milliseconds
+   */
   long getModifiedDate();
+
+  /**
+   * Return the file size
+   * @return - long representing file size
+   */
   long getSize();
+
+  /**
+   * Returns a string representing file path of mapbook.
+   * Returns a null string if file doesn't exist.
+   * @return - String
+   */
   String fileExists();
 
 }
