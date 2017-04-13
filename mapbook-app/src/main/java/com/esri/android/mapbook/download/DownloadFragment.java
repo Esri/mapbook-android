@@ -45,7 +45,7 @@ import static android.app.Activity.RESULT_OK;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 import static com.esri.android.mapbook.mapbook.MapbookFragment.FILE_PATH;
 
-public final class DownloadFragment extends Fragment implements DownloadContract.View {
+public class DownloadFragment extends Fragment implements DownloadContract.View {
 
   DownloadContract.Presenter mPresenter;
   private static final String TAG = DownloadFragment.class.getSimpleName();

@@ -30,7 +30,7 @@ import android.util.Log;
 
 import java.io.File;
 
-public final class FileManager implements FileManagerContract {
+public class FileManager implements FileManagerContract {
   private static File extStorDir;
   private static String  extSDCardDirName;
   private static String fileName;

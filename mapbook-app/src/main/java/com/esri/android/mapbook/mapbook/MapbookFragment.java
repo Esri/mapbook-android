@@ -56,7 +56,7 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 
-public final class MapbookFragment extends Fragment implements MapbookContract.View {
+public class MapbookFragment extends Fragment implements MapbookContract.View {
 
   MapbookContract.Presenter mPresenter;
   private RecyclerView mRecyclerView;

@@ -48,7 +48,7 @@ import java.util.List;
  * The adapter used by the recycler view to display maps in the mapbook
  */
 
-public final class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleViewHolder>{
+public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleViewHolder>{
 
   private final static String TAG = MapbookAdapter.class.getSimpleName();
 

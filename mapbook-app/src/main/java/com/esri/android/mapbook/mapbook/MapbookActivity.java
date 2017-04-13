@@ -46,7 +46,7 @@ import com.esri.android.mapbook.util.ActivityUtils;
 
 import javax.inject.Inject;
 
-public final class MapbookActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class MapbookActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
   private static final int PERMISSION_TO_READ_EXTERNAL_STORAGE = 5;
   private View mLayout = null;

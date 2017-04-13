@@ -40,7 +40,7 @@ import java.io.File;
  * This is a Dagger module.
  */
 @Module
-public final class ApplicationModule {
+public class ApplicationModule {
 
   private Context mContext;
 
