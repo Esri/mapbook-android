@@ -55,8 +55,14 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
   @Inject  FileManager mFilemanager;
   @Inject MapbookPresenter mMapbookPresenter;
 
+  /**
+   * On creation of the activity, set up the action bar title
+   * and check that the user has granted permissions for reading
+   * external storage.
+   * @param savedInstanceState - Bundle
+   */
   @Override
-  final protected void onCreate(Bundle savedInstanceState) {
+  final protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_main);
@@ -74,6 +80,10 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     checkForReadStoragePermissions();
 
   }
+
+  /**
+   * Create the mapbook fragment and load the presenter
+   */
   final private void initialize(){
     MapbookFragment mapbookFragment = (MapbookFragment) getSupportFragmentManager().findFragmentById(R.id.mapbookViewFragment);
     if (mapbookFragment == null){
@@ -85,6 +95,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     DaggerMapbookComponent.builder().applicationComponent(((MapBookApplication) getApplication())
         .getComponent()).applicationModule(new ApplicationModule(getApplicationContext())).mapbookModule(new MapbookModule(mapbookFragment)).build().inject(this);
   }
+
   /**
    * Once the app has prompted for permission to read external storage, the response
    * from the user is handled here.
@@ -98,7 +109,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
    *            either PERMISSION_GRANTED or PERMISSION_DENIED
    */
   @Override
-  final public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+  final public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
     if (requestCode == PERMISSION_TO_READ_EXTERNAL_STORAGE) {
 
       // Request for reading external storage

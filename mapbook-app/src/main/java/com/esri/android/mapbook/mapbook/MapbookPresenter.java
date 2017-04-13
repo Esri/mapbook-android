@@ -38,6 +38,11 @@ import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import javax.inject.Inject;
 import java.util.List;
 
+/**
+ * This is the concrete implementation of the Presenter defined in the MapbookContract.
+ * It encapsulates business logic and drives the behavior of the View.
+ */
+
 public class MapbookPresenter implements MapbookContract.Presenter {
 
   private final FileManager mFileManager;
@@ -104,7 +109,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
                 try {
                   final byte[] itemThumbnailData = futureThumbnail.get();
                   mView.setThumbnailBitmap(itemThumbnailData);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                   Log.e(TAG,e.getMessage());
                   mView.showMessage("There were problems obtaining thumbnail images for maps in mapbook.");
                 }
@@ -142,7 +147,6 @@ public class MapbookPresenter implements MapbookContract.Presenter {
     mmp.addDoneLoadingListener(new Runnable() {
       @Override final public void run() {
         if (mmp.getLoadStatus() == LoadStatus.LOADED) {
-          final List<ArcGISMap> maps = mmp.getMaps();
           callback.onMapbookLoaded(mmp);
 
         }else{

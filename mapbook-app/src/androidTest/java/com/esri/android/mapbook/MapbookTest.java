@@ -16,7 +16,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.esri.android.mapbook.map.MapActivity;
 import com.esri.android.mapbook.mapbook.MapbookActivity;
-import com.esri.arcgisruntime.geometry.*;
+import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.robotium.solo.Solo;
@@ -243,6 +246,8 @@ public class MapbookTest {
     Assert.assertNotNull(graphic);
     Assert.assertTrue(mapView.getGraphicsOverlays().get(0).getGraphics().size()==1);
     solo.takeScreenshot("SEARCH_RESULT");
+
+    solo.sleep(3000);
 
     // Simulate the same location being tapped
     Geometry point = graphic.getGeometry();

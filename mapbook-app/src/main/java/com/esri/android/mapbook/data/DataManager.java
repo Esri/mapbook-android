@@ -183,39 +183,6 @@ public class DataManager implements DataManagerContract {
     }
   }
 
-  @Override public void reverseGeocode(final Point point, final SpatialReference spatialReference, final DataManagerCallbacks.GeoCodingCallback callback) {
-    if (mLocatorTask == null){
-      mLocatorTask = mMobileMapPackage.getLocatorTask();
-
-      // If locator task is still null, then the mobile map package doesn't have a locator
-      if (mLocatorTask == null){
-        callback.onNoGeoCodingTask("No locator task found in mobile map package");
-        return;
-      }
-    }
-    mLocatorTask.addDoneLoadingListener(new Runnable() {
-      @Override public void run() {
-        if (mLocatorTask.getLoadStatus() == LoadStatus.LOADED){
-          mReverseGeocodeParameters.setOutputSpatialReference(spatialReference);
-          final ListenableFuture<List<GeocodeResult>> reverseGeocodeFuture = mLocatorTask.reverseGeocodeAsync(point, mReverseGeocodeParameters);
-          reverseGeocodeFuture.addDoneListener(new Runnable() {
-            @Override public void run() {
-              try {
-                List<GeocodeResult>  results = reverseGeocodeFuture.get();
-                callback.onGeoCodingTaskCompleted(results);
-              } catch (InterruptedException | ExecutionException e) {
-                Log.e(TAG, e.getMessage());
-                callback.onGeoCodingError(e.getCause());
-              }
-            }
-          });
-        }else {
-          callback.onGeoCodingTaskNotLoaded(mLocatorTask.getLoadError());
-        }
-      }
-    });
-    mLocatorTask.loadAsync();
-  }
 
   @Override
   public boolean hasLocatorTask(){
