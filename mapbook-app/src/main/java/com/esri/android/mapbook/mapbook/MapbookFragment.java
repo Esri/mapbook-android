@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -59,38 +58,49 @@ import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 public class MapbookFragment extends Fragment implements MapbookContract.View {
 
   MapbookContract.Presenter mPresenter;
-  private RecyclerView mRecyclerView;
+
   private ConstraintLayout mRoot = null;
   private MapbookAdapter mapAdapter = null;
   private static final int REQUEST_DOWNLOAD = 1;
   public static final String FILE_PATH = "mmpk file path";
   private final String TAG = MapbookFragment.class.getSimpleName();
 
+  /**
+   * Default constructor
+   */
   public MapbookFragment(){}
 
+  /**
+   * Static method that returns a Mapbook Fragment with an
+   * empty Bundle that can be configured by caller.
+   * @return - MapbookFragment
+   */
   public static MapbookFragment newInstance() {
 
     final Bundle args = new Bundle();
 
-    MapbookFragment fragment = new MapbookFragment();
+    final MapbookFragment fragment = new MapbookFragment();
     fragment.setArguments(args);
     return fragment;
   }
 
+  /**
+   * Set up the view components and attach a listener
+   * to the map book adapter
+   * @param inflater - LayoutInflater
+   * @param container - ViewGroup
+   * @param savedInstanceState - Bundle
+   * @return the View (can be null)
+   */
   @Override
-  final public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-  }
-
-  @Override
-  final public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
+  final public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+      final Bundle savedInstanceState) {
     mRoot = (ConstraintLayout) container;
-    mRecyclerView = (RecyclerView) mRoot.findViewById(R.id.recyclerView) ;
+    RecyclerView mRecyclerView = (RecyclerView) mRoot.findViewById(R.id.recyclerView);
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager( layoutManager);
     mapAdapter = new MapbookAdapter(new MapbookAdapter.OnItemClickListener() {
-      @Override public void onItemClick(ImageView image, String title, int position) {
+      @Override public void onItemClick(final ImageView image, final String title, final int position) {
         final Intent intent = new Intent(getContext(), MapActivity.class);
         intent.putExtra(getString(R.string.index), position);
         intent.putExtra(getString(R.string.map_title), title);
@@ -104,22 +114,30 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     return null;
   }
 
+  /**
+   * Start the presenter every time the fragment resumes.
+   */
   @Override
   final public void onResume() {
     super.onResume();
     mPresenter.start();
   }
 
-  @Override final public void setPresenter(MapbookContract.Presenter presenter) {
+  /**
+   * Set the presenter for the view
+   * @param presenter - MapbookContract.Presenter
+   */
+  @Override final public void setPresenter(final MapbookContract.Presenter presenter) {
 
     mPresenter = presenter;
   }
 
   /**
-   * Populate the layout with item details
-   * @param item - Portal Item
+   * Show details associated with the mapbook
+   * given an Item
+   * @param item Item
    */
-  @Override final public void populateMapbookLayout(Item item) {
+  @Override final public void populateMapbookLayout(final Item item) {
     final String description = item.getDescription();
     final String name = item.getTitle();
 
@@ -133,17 +151,32 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     txtName.setText(name);
   }
 
-  @Override final public void setThumbnailBitmap(byte[] bytes) {
+  /**
+   * Set the map thumbnail given an array of bytes
+   * @param bytes [] of bytes
+   */
+  @Override final public void setThumbnailBitmap(final byte[] bytes) {
     final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     final ImageView image = (ImageView) mRoot.findViewById(R.id.mapBookThumbnail);
     image.setImageBitmap(bitmap);
   }
 
-  @Override final public void showMessage(String message) {
+  /**
+   * Show a Toast message given the message string
+   * @param message - String
+   */
+  @Override final public void showMessage(final String message) {
     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
   }
 
-  @Override final public void setMapbookMetatdata(long size, long modifiedDate, int mapCount) {
+  /**
+   * Display mapbook size, modified date and map count
+   * for mapbook
+   * @param size - long representing file size
+   * @param modifiedDate - long representing modified file date
+   * @param mapCount - int representing count of maps in mapbook
+   */
+  @Override final public void setMapbookMetatdata(final long size, final long modifiedDate, final int mapCount) {
     final TextView txtCount = (TextView) mRoot.findViewById(R.id.txtMapCount);
     txtCount.setText(""+ mapCount+ " Maps");
 
@@ -162,7 +195,9 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
       txtDowndate.setText(downloadedDate);
     }
   }
-
+  /**
+   * Logic for notifying user that mapbook couldn't be found on device
+   */
   @Override final public void showMapbookNotFound() {
 
     final TextView txtDescription = (TextView) mRoot.findViewById(R.id.txtDescription);
@@ -172,33 +207,50 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     btnRefresh.setVisibility(View.INVISIBLE);
   }
 
-  @Override final public void setMaps(List<ArcGISMap> maps) {
+  /**
+   * Assign a list of ArcGIS Maps to the view
+   * @param maps - List of ArcGIS map items
+   */
+  @Override final public void setMaps(final List<ArcGISMap> maps) {
     mapAdapter.setMaps(maps);
     mapAdapter.notifyDataSetChanged();
   }
 
-  @Override final public void downloadMapbook(String mmpkFilePath) {
+  /**
+   * Logic for initiating an activity dedicated
+   * to downloading the mapbook to the
+   * given path on the device.
+   * @param mmpkFilePath - String representing where on the device the
+   *             download should be stored.
+   */
+  @Override final public void downloadMapbook(final String mmpkFilePath) {
     // Kick off the DownloadActivity
     final Intent intent = new Intent(getActivity(), DownloadActivity.class);
     intent.putExtra(FILE_PATH, mmpkFilePath);
     startActivityForResult(intent, REQUEST_DOWNLOAD);
   }
 
+  /**
+   * Logic for handling results from the returned activity.
+   * @param requestCode - int
+   * @param resultCode -int
+   * @param data - Intent
+   */
   @Override
-  final public void onActivityResult(int requestCode, int resultCode, Intent data) {
+  final public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
     if (requestCode == REQUEST_DOWNLOAD){
       if (resultCode == RESULT_OK){
+        // If the result comes back from download successfully, there's nothing
+        // the fragment does actively in response.  Logic is executed in the
+        // presenter which is started when this fragment resumes onActivityResult.
         Log.i(TAG, "Retrieved file = " + data.getStringExtra(FILE_PATH));
 
       }else if (resultCode == RESULT_CANCELED){
         if (data.hasExtra(ERROR_STRING)){
-          String error = data.getStringExtra(ERROR_STRING);
+          final String error = data.getStringExtra(ERROR_STRING);
           Toast.makeText(getActivity(),error, Toast.LENGTH_LONG).show();
           //TODO:  Better view needed here for displaying errors
 
-       //   final TextView errorText = (TextView) mRoot.findViewById(R.id.txtError);
-      //    errorText.setText("There was a problem downloading the mapbook");
-       //   errorText.setVisibility(View.VISIBLE);
         }
 
       }

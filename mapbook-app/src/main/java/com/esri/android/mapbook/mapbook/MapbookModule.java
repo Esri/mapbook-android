@@ -47,9 +47,8 @@ import java.io.File;
 public class MapbookModule {
 
   private final MapbookContract.View mView;
-  private  FileManager mFilemanager;
 
-  public MapbookModule(MapbookContract.View view) {
+  public MapbookModule(final MapbookContract.View view) {
     mView = view;
 
   }
@@ -70,19 +69,19 @@ public class MapbookModule {
   @Provides
   @MapbookApplicationScope
   @Named("dataDirectory")
-  public String providesDataDirectory(Context context) {
+  public String providesDataDirectory(final Context context) {
     return context.getString(R.string.offlineDirectory);
   }
 
   @Provides
   @MapbookApplicationScope
   @Named("mmpkName")
-  public String providesMobileMapPackageName(Context context) { return context.getString(R.string.mobileMapPackageName); }
+  public String providesMobileMapPackageName(final Context context) { return context.getString(R.string.mobileMapPackageName); }
 
   @Provides
   @MapbookApplicationScope
   @Named("mmpkExtension")
-  public String providesMobileMapExtension(Context context) { return context.getString(R.string.mmpk_extension); }
+  public String providesMobileMapExtension(final Context context) { return context.getString(R.string.mmpk_extension); }
 
   @Provides
   @MapbookApplicationScope

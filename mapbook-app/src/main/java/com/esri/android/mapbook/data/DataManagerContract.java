@@ -27,10 +27,14 @@
 package com.esri.android.mapbook.data;
 
 import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.mapping.LayerList;
+
+
 
 public interface DataManagerContract {
 
-
+  void queryForFeatures(Geometry geometry, LayerList layers,
+      DataManagerCallbacks.FeatureCallback callback);
   void loadMobileMapPackage(String mobileMapPackagePath, DataManagerCallbacks.MapbookCallback callback);
   void geocodeAddress(String address, DataManagerCallbacks.GeoCodingCallback geocodingCallback);
   boolean hasLocatorTask();

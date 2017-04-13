@@ -52,6 +52,9 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
 
   private final static String TAG = MapbookAdapter.class.getSimpleName();
 
+  /**
+   * An interface for defining what happens when a map thumbnail is tapped
+   */
   public interface OnItemClickListener{
     void onItemClick(ImageView image, String mapTitle, int position);
   }
@@ -59,22 +62,39 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
   private  List<ArcGISMap> maps = Collections.emptyList();
   private final OnItemClickListener mListener;
 
-  public MapbookAdapter( OnItemClickListener listener){
-
+  /**
+   * Constructor relies on a implementation of the OnItemClickListener
+   * for handling logic when map thumbnails are tapped.
+   * @param listener - OnItemClickListener
+   */
+  public MapbookAdapter( final OnItemClickListener listener){
     mListener = listener;
   }
 
-
+  /**
+   *This method calls onCreateViewHolder(ViewGroup, int) to create a new RecyclerView.ViewHolder
+   * and initializes some private fields to be used by RecyclerView.
+   * @param viewGroup - ViewGroup
+   * @param i - int
+   * @return RecylceViewHolder
+   */
   @Override final public RecycleViewHolder onCreateViewHolder(final ViewGroup viewGroup, final int i) {
-    View itemView = LayoutInflater.
+    final View itemView = LayoutInflater.
         from(viewGroup.getContext()).
         inflate(R.layout.card_view, viewGroup, false);
     return new RecycleViewHolder(itemView);
   }
 
+  /**
+   * Called by RecyclerView to display the data at the specified position.
+   * @param holder RecycleViewHolder
+   * @param position - int
+   */
   @Override final public void onBindViewHolder(final RecycleViewHolder holder, final int position) {
     holder.mapName.setText("Map "+ (position+1));
     final ArcGISMap map = maps.get(position);
+
+    // TODO : Dan, do we need to wait until the map is loaded before binding to view holder?
     map.addDoneLoadingListener(new Runnable() {
       @Override public void run() {
         final Item i = map.getItem();
@@ -87,12 +107,15 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
     map.loadAsync();
   }
 
-
+  /**
+   * Returns the total number of items in the data set held by the adapter
+   * @return int
+   */
   @Override public int getItemCount() {
     return maps.size();
   }
 
-  final public void setMaps(List<ArcGISMap> mapList){
+  final public void setMaps(final List<ArcGISMap> mapList){
     maps = mapList;
   }
   final public class RecycleViewHolder extends RecyclerView.ViewHolder{
@@ -109,37 +132,44 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
       snippet = (TextView) view.findViewById(R.id.txtMapSnippet);
       mapCreateDate = (TextView) view.findViewById(R.id.txtMapCreateDate);
     }
+
+    /**
+     *
+     * @param item
+     * @param listener
+     */
     public void bind (final Item item, final OnItemClickListener listener){
       final String title = item.getTitle();
       mapName.setText(title);
       snippet.setText(item.getSnippet());
-     // final String description = item.getDescription();
-    //  final String extractedDescription = description.replaceAll("<[^>]*>", "");
 
       final String dateCreated = ActivityUtils.getDateString(item.getCreated());
       mapCreateDate.setText(dateCreated);
-      if (item != null){
-        final ListenableFuture<byte[]> future = item.fetchThumbnailAsync();
-        future.addDoneListener(new Runnable() {
-          @Override public void run() {
-            try {
-              final byte[] t = future.get();
 
-              final Bitmap bitmap = BitmapFactory.decodeByteArray(t, 0, t.length);
-              mapThumbnail.setImageBitmap(bitmap);
+      // Load thumbnails asynchronously
+      final ListenableFuture<byte[]> future = item.fetchThumbnailAsync();
+      future.addDoneListener(new Runnable() {
+        @Override public void run() {
+          try {
+            final byte[] t = future.get();
 
-              mapThumbnail.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                  mListener.onItemClick(mapThumbnail, title, getAdapterPosition());
-                }
-              });
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(t, 0, t.length);
+            mapThumbnail.setImageBitmap(bitmap);
 
-            } catch (Exception e) {
-              Log.e(TAG, e.getMessage());
-            }
+            // Set the on click listener using the OnItemClickListener passed
+            // into adapter's constructor.
+            mapThumbnail.setOnClickListener(new View.OnClickListener() {
+              @Override public void onClick(final View v) {
+                mListener.onItemClick(mapThumbnail, title, getAdapterPosition());
+              }
+            });
+
+          } catch (final Exception e) {
+            Log.e(TAG, e.getMessage());
           }
-        });
-      }
+        }
+      });
+
     }
 
   }
