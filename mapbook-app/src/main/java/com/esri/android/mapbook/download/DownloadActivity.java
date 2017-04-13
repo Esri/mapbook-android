@@ -50,7 +50,7 @@ public class DownloadActivity extends AppCompatActivity {
   private final String TAG = DownloadActivity.class.getSimpleName();
 
   @Override
-  final protected void onCreate(Bundle savedInstanceState) {
+  final protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     initialize();
@@ -64,8 +64,8 @@ public class DownloadActivity extends AppCompatActivity {
     DownloadFragment fragment = (DownloadFragment) getSupportFragmentManager().findFragmentByTag("downloadFragment");
     if (fragment == null){
       fragment = DownloadFragment.newInstance();
-      String fileName =  getIntent().getStringExtra(MapbookFragment.FILE_PATH);
-      Bundle args = fragment.getArguments();
+      final String fileName =  getIntent().getStringExtra(MapbookFragment.FILE_PATH);
+      final Bundle args = fragment.getArguments();
       args.putString(MapbookFragment.FILE_PATH, fileName);
       ActivityUtils.addFragmentToActivity(getSupportFragmentManager(), fragment, "downloadFragment");
     }

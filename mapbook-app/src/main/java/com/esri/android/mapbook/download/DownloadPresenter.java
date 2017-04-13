@@ -38,6 +38,7 @@ import com.esri.arcgisruntime.portal.PortalItem;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
@@ -65,10 +66,13 @@ public class DownloadPresenter implements DownloadContract.Presenter {
     mView.setPresenter(this);
   }
 
-
+  /**
+   * The entry point for this class begins by checking
+   * if the device has any network connectivity.
+   */
   @Override final public void start() {
     Log.i(TAG, "Starting presenter and checking for internet connectivity");
-    boolean isConnected = checkForInternetConnectivity();
+    final boolean isConnected = checkForInternetConnectivity();
     if (isConnected ){
       // If we've returned to the fragment after signing in, don't sign in again
       if (!mSignInStarted){
@@ -82,6 +86,9 @@ public class DownloadPresenter implements DownloadContract.Presenter {
 
   }
 
+  /**
+   * Fetches mapbook from Portal
+   */
   @Override final public void downloadMapbook() {
 
     Log.i(TAG, "Downloading mapbook");
@@ -100,7 +107,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
               mView.executeDownload(portalItemSize, inputStream);
 
 
-            } catch (Exception e) {
+            } catch (final InterruptedException | ExecutionException e) {
               mView.showMessage("There was a problem downloading the file");
               Log.e(TAG, "Problem downloading file " + e.getMessage());
               mView.sendResult(RESULT_CANCELED, ERROR_STRING,  e.getMessage());
@@ -111,6 +118,9 @@ public class DownloadPresenter implements DownloadContract.Presenter {
     });
   }
 
+  /**
+   * Initiates the authentication process against the Portal
+   */
   @Override final public void signIn() {
     mSignInStarted = true;
     Log.i(TAG, "Signing In");

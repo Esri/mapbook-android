@@ -45,6 +45,10 @@ import static android.app.Activity.RESULT_OK;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 import static com.esri.android.mapbook.mapbook.MapbookFragment.FILE_PATH;
 
+/**
+ * This fragment is responsible for showing progress dialogs and executing the
+ * AsyncTask for downloading the mapbook from the Portal. It's the View in the MVP pattern.
+ */
 public class DownloadFragment extends Fragment implements DownloadContract.View {
 
   DownloadContract.Presenter mPresenter;
@@ -52,8 +56,16 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
   private ProgressDialog mProgressDialog = null;
   private String mFileName = null;
 
+  /**
+   * Default constructor
+   */
   public DownloadFragment(){}
 
+  /**
+   * Static method that returns a Mapbook Fragment with an
+   * empty Bundle that can be configured by caller.
+   * @return - DownloadFragment
+   */
   public static DownloadFragment newInstance(){
     final Bundle args = new Bundle();
 
@@ -62,13 +74,19 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     return fragment;
 
   }
+
+  /**
+   * On creation of fragment, check for the path of the
+   * mobile map package.
+   * @param savedInstanceState - Bundle
+   */
   @Override
-  final public void onCreate(@Nullable Bundle savedInstanceState) {
+  final public void onCreate(@Nullable final Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
     mProgressDialog = new ProgressDialog(getActivity());
     // Calling activity should pass the file path
-    Bundle args = getArguments();
+    final Bundle args = getArguments();
     if (args.containsKey(FILE_PATH)){
       mFileName = args.getString(FILE_PATH);
     }else{
@@ -76,15 +94,29 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     }
   }
 
+  /**
+   * Set the presenter for this view
+   * @param presenter - DownloadPresenter
+   */
   @Override final public void setPresenter(final DownloadContract.Presenter presenter) {
     mPresenter = presenter;
   }
 
-
+  /**
+   * Show a Toast with given message string
+   * @param message - String
+   */
   @Override final public void showMessage(final String message) {
     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
   }
 
+  /**
+   * Notifies calling activity given an int representing a result code,
+   * a key represented by a string, and a message.
+   * @param resultCode - int
+   * @param key - String
+   * @param message - String
+   */
   @Override final public void sendResult( final int resultCode, final String key, final String message) {
     final Intent intent = new Intent();
     getActivity().setResult(resultCode, intent);
@@ -94,6 +126,11 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     getActivity().finish();
   }
 
+  /**
+   * Shows a progress dialog with given title and message
+   * @param title - String representing message title
+   * @param message - String representing message
+   */
   @Override final public void showProgressDialog(final String title, final String message) {
     mProgressDialog.dismiss();
     mProgressDialog.setMessage(message);
@@ -101,10 +138,16 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     mProgressDialog.show();
   }
 
+  /**
+   * Dismiss the progress dialog
+   */
   @Override final public void dismissProgressDialog() {
     mProgressDialog.dismiss();
   }
 
+  /**
+   * Prompts user to enable WIFI connectivity
+   */
   @Override final public void promptForInternetConnectivity() {
 
     final ProgressDialog networkDialog = new ProgressDialog(getContext());
@@ -129,6 +172,9 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     new DownloadMobileMapPackage().execute(inputStream, mFileName, itemSize);
   }
 
+  /**
+   * Start the presenter every time the fragment resumes.
+   */
   @Override
   public final void onResume() {
     super.onResume();
@@ -136,11 +182,14 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     mPresenter.start();
   }
 
+  /**
+   * AsyncTask used for downloading mobile map package and writing it to disk.
+   */
   private final class DownloadMobileMapPackage extends AsyncTask<Object, Integer, String> {
 
     private ProgressDialog mTaskProgressDialog = null;
 
-    @Override protected String doInBackground(Object... params) {
+    @Override protected String doInBackground(final Object... params) {
       Log.i(TAG, "Starting DownloadTask");
       String path = null;
       final InputStream inputStream = (InputStream) params[0];
@@ -179,7 +228,7 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
 
         path =  data.getPath();
 
-      } catch (Exception e) {
+      } catch (final Exception e) {
         Log.e(TAG, "Async Task Exception " + e.getMessage());
       } finally {
         try {
@@ -187,13 +236,17 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
             os.close();
           if (inputStream != null)
             inputStream.close();
-        } catch (IOException ioException) {
+        } catch (final IOException ioException) {
           Log.e(TAG, ioException.getMessage());
         }
 
       }
       return path;
     }
+
+    /**
+     * Show user a progress dialog as file is downloaded
+     */
     @Override
     final protected void onPreExecute() {
       super.onPreExecute();
@@ -207,13 +260,22 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
       mTaskProgressDialog.setTitle(getString(R.string.downloading_mapbook));
       mTaskProgressDialog.show();
     }
+
+    /**
+     * Update the progress of the download
+     * @param progress Integer
+     */
     @Override
     final protected void onProgressUpdate(final Integer... progress) {
       super.onProgressUpdate(progress);
-      Integer p = progress[0];
+      final Integer p = progress[0];
       mTaskProgressDialog.setProgress(p);
     }
 
+    /**
+     * Once the download is complete, return to the calling activity.
+     * @param result - String
+     */
     @Override
     final protected void onPostExecute(final String result) {
       mTaskProgressDialog.dismiss();
