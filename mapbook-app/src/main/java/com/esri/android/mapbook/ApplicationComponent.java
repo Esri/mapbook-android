@@ -23,11 +23,7 @@
  */
 package com.esri.android.mapbook;
 
-import com.esri.android.mapbook.map.MapActivity;
-import com.esri.android.mapbook.mapbook.MapbookActivity;
-import com.esri.android.mapbook.mapbook.MapbookPresenter;
 import dagger.Component;
-import javax.inject.Singleton;
 
 /**
  * An interface associating injections with targets.

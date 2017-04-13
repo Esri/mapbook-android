@@ -26,18 +26,13 @@
 
 package com.esri.android.mapbook.data;
 
-import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.Geometry;
-import com.esri.arcgisruntime.geometry.SpatialReference;
-import com.esri.arcgisruntime.mapping.LayerList;
 
 public interface DataManagerContract {
 
-  void queryForFeatures(Geometry geometry, LayerList layers,
-      DataManagerCallbacks.FeatureCallback callback);
+
   void loadMobileMapPackage(String mobileMapPackagePath, DataManagerCallbacks.MapbookCallback callback);
   void geocodeAddress(String address, DataManagerCallbacks.GeoCodingCallback geocodingCallback);
-  void reverseGeocode(Point point, SpatialReference spatialReference,  DataManagerCallbacks.GeoCodingCallback callback);
   boolean hasLocatorTask();
   void getSuggestions(Geometry searchArea, String query, DataManagerCallbacks.SuggestionCallback callback);
 

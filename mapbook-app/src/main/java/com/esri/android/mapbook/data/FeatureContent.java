@@ -61,9 +61,6 @@ public class FeatureContent {
     return entries;
   }
 
-  public void addEntry(Entry entry){
-    entries.add(entry);
-  }
 
   public void setEntries(List<Entry> entries) {
     this.entries = entries;

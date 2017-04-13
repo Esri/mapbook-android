@@ -27,7 +27,6 @@
 package com.esri.android.mapbook.map;
 
 import android.content.Context;
-import android.util.Log;
 import com.esri.android.mapbook.data.Entry;
 import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.mapping.popup.Popup;

@@ -26,15 +26,12 @@
 
 package com.esri.android.mapbook.map;
 
-import android.view.View;
 import com.esri.android.mapbook.BasePresenter;
 import com.esri.android.mapbook.BaseView;
 import com.esri.android.mapbook.data.FeatureContent;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
-import com.esri.arcgisruntime.mapping.LayerList;
-import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
