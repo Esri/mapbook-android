@@ -42,7 +42,7 @@ import java.io.InputStream;
 import static android.app.Activity.RESULT_CANCELED;
 import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 
-public final class DownloadPresenter implements DownloadContract.Presenter {
+public class DownloadPresenter implements DownloadContract.Presenter {
 
   private final String TAG = DownloadPresenter.class.getSimpleName();
   @Inject ConnectivityManager mConnectivityManager;

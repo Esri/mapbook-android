@@ -48,7 +48,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public final class DataManager implements DataManagerContract {
+public class DataManager implements DataManagerContract {
 
   private MobileMapPackage mMobileMapPackage = null;
   private GeocodeParameters mGeocodeParameters = null;

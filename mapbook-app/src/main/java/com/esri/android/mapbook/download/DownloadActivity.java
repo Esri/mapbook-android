@@ -39,7 +39,7 @@ import com.esri.arcgisruntime.security.OAuthConfiguration;
 
 import javax.inject.Inject;
 
-public final class DownloadActivity extends AppCompatActivity {
+public class DownloadActivity extends AppCompatActivity {
 
   @Inject DefaultAuthenticationChallengeHandler defaultAuthenticationChallengeHandler;
   @Inject OAuthConfiguration oAuthConfiguration;
