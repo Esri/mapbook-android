@@ -94,7 +94,7 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
     holder.mapName.setText("Map "+ (position+1));
     final ArcGISMap map = maps.get(position);
 
-    // TODO : Dan, do we need to wait until the map is loaded before binding to view holder?
+    //TODO Question for Dan, do we need to wait until the map is loaded before binding to view holder?
     map.addDoneLoadingListener(new Runnable() {
       @Override public void run() {
         final Item i = map.getItem();
