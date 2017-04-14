@@ -29,7 +29,10 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * This is a Dagger module.
+ * This is a Dagger module. This module passes in the Context dependency to the
+ * {@link com.esri.android.mapbook.mapbook.MapbookComponent},
+ * {@link com.esri.android.mapbook.download.DownloadComponent},
+ * and {@link com.esri.android.mapbook.map.MapComponent}
  */
 @Module
 public class ApplicationModule {

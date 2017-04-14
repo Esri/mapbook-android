@@ -34,7 +34,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.BaseColumns;
-import android.support.annotation.Nullable;
 import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -45,6 +44,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -96,8 +96,16 @@ public class MapFragment extends Fragment implements MapContract.View {
   private int currentLayoutId = 0;
   private String mMapTitle = null;
 
+  /**
+   * Default constructor
+   */
   public MapFragment(){}
 
+  /**
+   * Static method that returns a Mapbook Fragment with an
+   * empty Bundle that can be configured by caller.
+   * @return - MapFragment
+   */
   public static MapFragment newInstance(){
     final Bundle args = new Bundle();
     final MapFragment fragment = new MapFragment();
@@ -105,15 +113,17 @@ public class MapFragment extends Fragment implements MapContract.View {
     return fragment;
   }
 
+  /**
+   * When the view is created, unpack the arguments and check for
+   * the mobile map package path, map index, and map title.
+   * @param inflater -LayoutInflater
+   * @param container - ViewGroup
+   * @param savedInstanceState - Bundle
+   * @return the View
+   */
   @Override
-  public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-
-  }
-  @Override
-  final public android.view.View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
+  final public android.view.View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+      final Bundle savedInstanceState) {
     mRoot = (LinearLayout) container;
 
     // View for map layers (visibility set to "gone" by default)
@@ -126,7 +136,7 @@ public class MapFragment extends Fragment implements MapContract.View {
     mBookmarkRecyclerView = (RecyclerView) mRoot.findViewById(R.id.mapBookmarkRecyclerView) ;
     mBookmarkRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mBookmarkAdapter = new MapBookmarkAdapter(new MapBookmarkAdapter.OnBookmarkClickListener() {
-      @Override public void onItemClick(Viewpoint viewpoint) {
+      @Override public void onItemClick(final Viewpoint viewpoint) {
         mMapView.setViewpoint(viewpoint);
       }
     });
@@ -141,7 +151,7 @@ public class MapFragment extends Fragment implements MapContract.View {
 
 
     // Calling activity should pass the index and map title
-    Bundle args = getArguments();
+    final Bundle args = getArguments();
     if (args.containsKey("INDEX")  && args.containsKey(MapbookFragment.FILE_PATH) && args.containsKey("TITLE")){
       mPath = args.getString(MapbookFragment.FILE_PATH);
       mMapIndex = args.getInt("INDEX");
@@ -155,8 +165,12 @@ public class MapFragment extends Fragment implements MapContract.View {
     return null;
   }
 
+  /**
+   * Set the map title
+   * @param savedInstanceState - Bundle
+   */
   @Override
-  public void onActivityCreated (Bundle savedInstanceState){
+  public void onActivityCreated (final Bundle savedInstanceState){
     super.onActivityCreated(savedInstanceState);
     final ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
     if (actionBar != null && mMapTitle != null){
@@ -165,9 +179,9 @@ public class MapFragment extends Fragment implements MapContract.View {
   }
 
   /**
-   *
-   * @param menu
-   * @param inflater
+   * Set up search view in the menu
+   * @param menu - Menu
+   * @param inflater - MenuInflater
    */
   @Override
   public final void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
@@ -201,15 +215,15 @@ public class MapFragment extends Fragment implements MapContract.View {
     applySuggestionCursor();
 
     mSearchview.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
-      @Override public boolean onSuggestionSelect(int position) {
+      @Override public boolean onSuggestionSelect(final int position) {
         return false;
       }
 
-      @Override public boolean onSuggestionClick(int position) {
+      @Override public boolean onSuggestionClick(final int position) {
         // Obtain the content of the selected suggesting place via
         // cursor
-        MatrixCursor cursor = (MatrixCursor) mSearchview.getSuggestionsAdapter().getItem(position);
-        int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
+        final MatrixCursor cursor = (MatrixCursor) mSearchview.getSuggestionsAdapter().getItem(position);
+        final int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
         final String address = cursor.getString(indexColumnSuggestion);
 
         // Find the Location of the suggestion
@@ -223,8 +237,13 @@ public class MapFragment extends Fragment implements MapContract.View {
     });
   }
 
+  /**
+   * Logic for menu options
+   * @param menuItem - MenuItem
+   * @return boolean
+   */
   @Override
-  public boolean onOptionsItemSelected(MenuItem menuItem){
+  public boolean onOptionsItemSelected(final MenuItem menuItem){
     super.onOptionsItemSelected(menuItem);
 
     if (menuItem.getItemId() == R.id.action_layers){
@@ -246,8 +265,8 @@ public class MapFragment extends Fragment implements MapContract.View {
    *            String typed so far by the user to fetch the suggestions
    *
    */
-  @Override public void getSuggestions(Geometry geometry, String query) {
-    if (query == null || query.trim().length() ==0){
+  @Override public void getSuggestions(final Geometry geometry, final String query) {
+    if (query == null || query.trim().isEmpty()){
       return;
     }
     mPresenter.getSuggestions(geometry, query);
@@ -257,7 +276,7 @@ public class MapFragment extends Fragment implements MapContract.View {
    * Initialize Suggestion Cursor
    */
   private void initSuggestionCursor() {
-    String[] cols = { BaseColumns._ID, COLUMN_NAME_ADDRESS, COLUMN_NAME_X, COLUMN_NAME_Y};
+    final String[] cols = { BaseColumns._ID, COLUMN_NAME_ADDRESS, COLUMN_NAME_X, COLUMN_NAME_Y};
     mSuggestionCursor = new MatrixCursor(cols);
   }
 
@@ -265,9 +284,9 @@ public class MapFragment extends Fragment implements MapContract.View {
    * Set the suggestion cursor to an Adapter then set it to the search view
    */
   private void applySuggestionCursor() {
-    String[] cols = { COLUMN_NAME_ADDRESS};
-    int[] to = {R.id.suggestion_item_address};
-    SimpleCursorAdapter mSuggestionAdapter = new SimpleCursorAdapter(getActivity().getApplicationContext(),
+    final String[] cols = { COLUMN_NAME_ADDRESS};
+    final int[] to = {R.id.suggestion_item_address};
+    final SimpleCursorAdapter mSuggestionAdapter = new SimpleCursorAdapter(getActivity().getApplicationContext(),
         R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
     mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
     mSuggestionAdapter.notifyDataSetChanged();
@@ -280,11 +299,11 @@ public class MapFragment extends Fragment implements MapContract.View {
   private void toggleLayerList() {
 
     //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
-    LinearLayout transitionsContainer = mRoot;
+    final LinearLayout transitionsContainer = mRoot;
     TransitionManager.beginDelayedTransition(transitionsContainer);
     mBookmarkRecyclerView.setVisibility(View.GONE);
     if (mLayerRecyclerView.getVisibility() == android.view.View.GONE){
-      ViewGroup.LayoutParams params = mLayerRecyclerView.getLayoutParams();
+      //final ViewGroup.LayoutParams params = mLayerRecyclerView.getLayoutParams();
       mLayerRecyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
           ViewGroup.LayoutParams.MATCH_PARENT, 4));
       mLayerRecyclerView.requestLayout();
@@ -304,11 +323,11 @@ public class MapFragment extends Fragment implements MapContract.View {
   private void toggleBookmarkList() {
 
     //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
-    LinearLayout transitionsContainer = mRoot;
+    final LinearLayout transitionsContainer = mRoot;
     TransitionManager.beginDelayedTransition(transitionsContainer);
     mLayerRecyclerView.setVisibility(View.GONE);
     if (mBookmarkRecyclerView.getVisibility() == android.view.View.GONE){
-      ViewGroup.LayoutParams params = mBookmarkRecyclerView.getLayoutParams();
+   //   final ViewGroup.LayoutParams params = mBookmarkRecyclerView.getLayoutParams();
       mBookmarkRecyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
           ViewGroup.LayoutParams.MATCH_PARENT, 4));
       mBookmarkRecyclerView.requestLayout();
@@ -325,33 +344,47 @@ public class MapFragment extends Fragment implements MapContract.View {
    */
   private void hideKeyboard() {
     mSearchview.clearFocus();
-    InputMethodManager inputManager = (InputMethodManager) getActivity().getApplicationContext()
+    final InputMethodManager inputManager = (InputMethodManager) getActivity().getApplicationContext()
         .getSystemService(Context.INPUT_METHOD_SERVICE);
     inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
   }
 
-  @Override public void setPresenter(MapContract.Presenter presenter) {
+  /**
+   * Set the presenter for the view
+   * @param presenter - MapContract.Presenter
+   */
+  @Override public void setPresenter(final MapContract.Presenter presenter) {
     mPresenter = presenter;
   }
 
-  @Override public void showMap(ArcGISMap map) {
+  /**
+   * Display given map in the map view
+   * @param map - ArcGIS map
+   */
+  @Override public void showMap(final ArcGISMap map) {
     mMapView.setMap(map);
 
 
     // Set up layers and bookmarks
-    List<Layer> layerList = map.getOperationalLayers();
+    final List<Layer> layerList = map.getOperationalLayers();
     mContentAdapter.setLayerList(layerList);
-    BookmarkList bookmarks = map.getBookmarks();
+    final BookmarkList bookmarks = map.getBookmarks();
     mBookmarkAdapter.setBoomarks(bookmarks);
   }
 
-
-  @Override public void displaySearchResult(Point resultPoint, View calloutContent, boolean zoomOut) {
+  /**
+   * Display content for given location.
+   * @param resultPoint - Point
+   * @param calloutContent - View
+   * @param zoomOut - boolean, true to zoom out
+   */
+  @Override public void displaySearchResult(final Point resultPoint, final View calloutContent, final boolean zoomOut) {
 
     //remove any previous graphics/search results
     mGraphicsOverlay.getGraphics().clear();
+
     // create graphic object for resulting location
-    Graphic resultLocGraphic = new Graphic(resultPoint, mPinSourceSymbol);
+    final Graphic resultLocGraphic = new Graphic(resultPoint, mPinSourceSymbol);
     // add graphic to location layer
     mGraphicsOverlay.getGraphics().add(resultLocGraphic);
 
@@ -368,7 +401,7 @@ public class MapFragment extends Fragment implements MapContract.View {
       return;
     }
 
-    Callout.Style style = new Callout.Style(getContext());
+    final Callout.Style style = new Callout.Style(getContext());
     style.setMinWidth(350);
     style.setMaxWidth(350);
     style.setLeaderPosition(Callout.Style.LeaderPosition.UPPER_MIDDLE);
@@ -380,12 +413,11 @@ public class MapFragment extends Fragment implements MapContract.View {
     mCallout.show();
   }
 
-  @Override public void displayBookmarks() {
-
-  }
-
-  @Override public void setUpMap() {
-    //TODO Can this initialization be moved to the MapModule?
+  /**
+   * Initialize map-related objects
+   */
+  @Override public void initializeMapItems() {
+    //TODO Dan, should this initialization be moved to the MapModule?
     if (mGraphicsOverlay ==  null){
       mGraphicsOverlay = new GraphicsOverlay();
       mGraphicsOverlay.setSelectionColor(0xFF00FFFF);
@@ -395,7 +427,7 @@ public class MapFragment extends Fragment implements MapContract.View {
       mGraphicsOverlay.getGraphics().clear();
     }
 
-    BitmapDrawable startDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.pin);
+    final BitmapDrawable startDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.pin);
     mPinSourceSymbol = new PictureMarkerSymbol(startDrawable);
     mPinSourceSymbol.setHeight(90);
     mPinSourceSymbol.setWidth(20);
@@ -404,25 +436,32 @@ public class MapFragment extends Fragment implements MapContract.View {
     mPresenter.loadMap(mPath, mMapIndex);
   }
 
-  @Override public void showSuggestedPlaceNames(List<SuggestResult> suggestions) {
+  /**
+   * Show suggestions
+   * @param suggestions List<SuggestResults></SuggestResults>
+   */
+  @Override public void showSuggestedPlaceNames(final List<SuggestResult> suggestions) {
     if (suggestions == null || suggestions.isEmpty()){
       return;
     }
     initSuggestionCursor();
     int key = 0;
-    for (SuggestResult result : suggestions) {
+    for (final SuggestResult result : suggestions) {
       // Add the suggestion results to the cursor
       mSuggestionCursor.addRow(new Object[]{key++, result.getLabel(), "0", "0"});
     }
     applySuggestionCursor();
   }
-
-  @Override public void showMessage(String message) {
+  /**
+   * Show a message
+   * @param message - String
+   */
+  @Override public void showMessage(final String message) {
     Toast.makeText(getActivity().getApplicationContext(), message,Toast.LENGTH_SHORT).show();
   }
 
   /**
-   * Resume map view
+   * Resume map view and start presenter
    */
   @Override
   public final void onResume(){
@@ -444,9 +483,12 @@ public class MapFragment extends Fragment implements MapContract.View {
     }
   }
 
+  /**
+   * Clear selected features in all layers
+   */
   private void clearSelections(){
-    LayerList layers = mMapView.getMap().getOperationalLayers();
-    for (Layer layer : layers){
+    final LayerList layers = mMapView.getMap().getOperationalLayers();
+    for (final Layer layer : layers){
       if (layer instanceof  FeatureLayer){
         ((FeatureLayer) layer).clearSelection();
       }
@@ -454,14 +496,14 @@ public class MapFragment extends Fragment implements MapContract.View {
   }
   /**
    * Build the view for the callout
-   * @param featureContents
-   * @return The constructed view
+   * @param featureContents - List of FeatureContent
+   * @return The constructed View
    */
   private View buildContentView(final List<FeatureContent> featureContents){
     currentLayoutId = 0;
-    LayoutInflater inflater = (LayoutInflater)getActivity().getApplicationContext().getSystemService
+    final LayoutInflater inflater = (LayoutInflater)getActivity().getApplicationContext().getSystemService
         (Context.LAYOUT_INFLATER_SERVICE);
-    View calloutView =  inflater.inflate(R.layout.callout_content,null);
+    final View calloutView =  inflater.inflate(R.layout.callout_content,null);
     final LinearLayout mainLayout = (LinearLayout) calloutView.findViewById(R.id.calloutLinearLayout);
 
 
@@ -473,46 +515,51 @@ public class MapFragment extends Fragment implements MapContract.View {
     int layoutCt = 0;
     final List<LinearLayout> calloutLayouts = new ArrayList<>();
     final TextView layerTitle = (TextView) calloutView.findViewById(R.id.layerName);
-    FeatureContent featureContent = featureContents.get(0);
+
+    final FeatureContent featureContent = featureContents.get(0);
+
+    //Use the first feature content item to set the title
     layerTitle.setText(featureContent.getLayerName());
-
-    // Highlight the first feature
-    featureContent.getFeatureLayer().selectFeature(featureContent.getFeature());
-
     layerTitle.setTextColor(Color.BLACK);
     layerTitle.setTypeface(null, Typeface.BOLD);
 
+    // Select the first feature
+    featureContent.getFeatureLayer().selectFeature(featureContent.getFeature());
 
-    for (FeatureContent content : featureContents){
-      LinearLayout linearLayout = new LinearLayout(getActivity());
+    // Iterate through the feature content and build out
+    // a layout for each  featured content object.
+
+    for (final FeatureContent content : featureContents){
+
+      final LinearLayout linearLayout = new LinearLayout(getActivity());
       linearLayout.setOrientation(LinearLayout.VERTICAL);
-      LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(600,
+      final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(600,
           ViewGroup.LayoutParams.WRAP_CONTENT);
       linearLayout.setLayoutParams(layoutParams);
       linearLayout.setId(layoutCt);
 
-
-      List<Entry> entries = content.getEntries();
-      for (Entry entry : entries){
-        LinearLayout entryLayout = new LinearLayout(getActivity());
+      // Populate each Linear Layout with the column name and value of the feature
+      final List<Entry> entries = content.getEntries();
+      for (final Entry entry : entries){
+        final LinearLayout entryLayout = new LinearLayout(getActivity());
         entryLayout.setOrientation(LinearLayout.HORIZONTAL);
         entryLayout.setBackgroundColor(Color.WHITE);
         entryLayout.setLayoutParams(layoutParams);
         linearLayout.addView(entryLayout);
-        TextView label = new TextView(getActivity());
+        final TextView label = new TextView(getActivity());
 
-        LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        final LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
         labelParams.setMargins(0,0,10,0);
         label.setLayoutParams(labelParams);
         label.setTextColor(Color.BLACK);
         label.setTypeface(null, Typeface.BOLD);
         label.setText(entry.getField());
 
-        TextView value = new TextView(getActivity());
+        final TextView value = new TextView(getActivity());
 
         value.setTextColor(Color.BLACK);
         value.setText(entry.getValue());
-        LinearLayout.LayoutParams valueParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,1);
+        final LinearLayout.LayoutParams valueParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,1);
         value.setLayoutParams(valueParams);
         entryLayout.addView(label);
         entryLayout.addView(value);
@@ -524,25 +571,27 @@ public class MapFragment extends Fragment implements MapContract.View {
     mainLayout.addView(calloutLayouts.get(0));
     mainLayout.requestLayout();
 
+    // Set up buttons in the callout that navigate across
+    // all the feature content for the location
     final Button btnPrev = (Button) calloutView.findViewById(R.id.btnPrev);
     final Button btnNext = (Button) calloutView.findViewById(R.id.btnNext);
     final Button btnClose = (Button) calloutView.findViewById(R.id.btnClose) ;
 
     btnPrev.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
+      @Override public void onClick(final View v) {
         processButtonEvent(mainLayout, featureContents, calloutLayouts, layerTitle, txtPopupCount, btnNext, btnPrev, "prev");
       }
     });
 
 
     btnNext.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
+      @Override public void onClick(final View v) {
         processButtonEvent(mainLayout, featureContents, calloutLayouts, layerTitle, txtPopupCount, btnNext, btnPrev, "next");
       }
     });
 
     btnClose.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
+      @Override public void onClick(final View v) {
         if ( mCallout.isShowing()){
           mCallout.dismiss();
         }
@@ -566,7 +615,7 @@ public class MapFragment extends Fragment implements MapContract.View {
       final List<LinearLayout> calloutLayouts, final TextView layerTitle, final TextView txtPopupCount, final Button btnNext, final Button btnPrev, final String btnName ){
 
     int currentIndex = getCurrentLayoutId();
-    View currentView = mainLayout.findViewById(currentIndex);
+    final View currentView = mainLayout.findViewById(currentIndex);
     if (btnName.equalsIgnoreCase("next") && currentIndex < featureContents.size() - 1){
       incrementCurrentLayoutId();
 
@@ -574,12 +623,12 @@ public class MapFragment extends Fragment implements MapContract.View {
       decrementCurrentLayoutId();
     }
 
-    View newView = calloutLayouts.get(getCurrentLayoutId());
+    final View newView = calloutLayouts.get(getCurrentLayoutId());
     replaceView(mainLayout, currentView,newView);
 
     // Reset the layer name in the callout
-    FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
-    String layerName = activeContent.getLayerName();
+    final FeatureContent activeContent = featureContents.get(getCurrentLayoutId());
+    final String layerName = activeContent.getLayerName();
 
     // Clear any selections
     clearSelections();
@@ -591,8 +640,10 @@ public class MapFragment extends Fragment implements MapContract.View {
 
     // Reset popup index
     txtPopupCount.setText(getCurrentLayoutId() + 1 + " of " + featureContents.size() );
-    // Adjust visual cues for navigating features
+
     currentIndex = getCurrentLayoutId();
+
+    // Adjust visual cues for navigating features
     if (currentIndex < featureContents.size() - 1){
       btnNext.setAlpha(1.0f);
     }else{
@@ -604,7 +655,7 @@ public class MapFragment extends Fragment implements MapContract.View {
       btnPrev.setAlpha(0.3f);
     }
   }
-
+  // Methods for keeping track of the current layout index
   private int getCurrentLayoutId(){
     return currentLayoutId;
   }
@@ -614,7 +665,7 @@ public class MapFragment extends Fragment implements MapContract.View {
   private void decrementCurrentLayoutId(){
     currentLayoutId = currentLayoutId - 1;
   }
-  private void replaceView(LinearLayout mainView, View oldView, View newView){
+  private void replaceView(final LinearLayout mainView, final View oldView, final View newView){
     mainView.removeView(oldView);
     mainView.addView(newView);
   }
@@ -622,14 +673,20 @@ public class MapFragment extends Fragment implements MapContract.View {
 
   private class MapTouchListener extends DefaultMapViewOnTouchListener {
 
-    public MapTouchListener(Context context, MapView mapView) {
+    public MapTouchListener(final Context context, final MapView mapView) {
       super(context, mapView);
     }
 
+    /**
+     * When a user taps on the map, an identify action is initiated and
+     * any features found are displayed in a callout view.
+     * @param e - MotionEvent
+     * @return boolean
+     */
     @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
+    public boolean onSingleTapConfirmed(final MotionEvent e) {
 
-      if (mGraphicsOverlay.getGraphics().size() > 0) {
+      if (!mGraphicsOverlay.getGraphics().isEmpty()) {
         if (mGraphicsOverlay.getGraphics().get(0).isSelected()) {
           mGraphicsOverlay.getGraphics().get(0).setSelected(false);
         }
@@ -646,20 +703,20 @@ public class MapFragment extends Fragment implements MapContract.View {
         @Override
         public void run() {
           try {
-            Point clickedLocation = mMapView.screenToLocation(screenPoint);
+            final Point clickedLocation = mMapView.screenToLocation(screenPoint);
 
-            List<IdentifyLayerResult> results = identifyLayers.get();
-            List<FeatureContent> content = mPresenter.identifyFeatures(clickedLocation, results);
+            final List<IdentifyLayerResult> results = identifyLayers.get();
+            final List<FeatureContent> content = mPresenter.identifyFeatures(results);
             if (content.isEmpty()){
-              showMessage("No features found at that location");
+              showMessage(getString(R.string.no_features_found));
               displaySearchResult(clickedLocation, null, false);
             }else{
-              View v = buildContentView(content);
+              final View v = buildContentView(content);
               displaySearchResult(clickedLocation,v, false);
             }
 
           } catch (InterruptedException | ExecutionException ie) {
-            ie.printStackTrace();
+            Log.e(TAG,ie.getMessage());
           }
 
         }

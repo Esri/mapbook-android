@@ -46,8 +46,14 @@ public class MapActivity extends AppCompatActivity {
   @Inject DataManager mDataManager;
   @Inject MapPresenter mMapPresenter;
 
+  /**
+   * On creation of the activity, get the data
+   * passed in the Intent to the activity and
+   * set up the map fragment and inject map module dependencies.
+   * @param savedInstanceState - Bundle
+   */
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.map_view);
@@ -59,13 +65,13 @@ public class MapActivity extends AppCompatActivity {
 
     final Intent intent = getIntent();
     final String mmpkPath = intent.getStringExtra(MapbookFragment.FILE_PATH);
-    int index = intent.getIntExtra("INDEX",0);
-    String title = intent.getStringExtra("TITLE");
+    final int index = intent.getIntExtra("INDEX",0);
+    final String title = intent.getStringExtra("TITLE");
 
     MapFragment fragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.mapLinearLayout);
     if (fragment == null){
       fragment = MapFragment.newInstance();
-      Bundle args = fragment.getArguments();
+      final Bundle args = fragment.getArguments();
       args.putString(MapbookFragment.FILE_PATH, mmpkPath);
       args.putInt("INDEX", index);
       args.putString("TITLE", title);

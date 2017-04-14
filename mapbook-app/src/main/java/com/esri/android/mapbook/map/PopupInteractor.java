@@ -40,39 +40,41 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+/**
+ * This class extract a list of Entry items from a given popup
+ */
 public class PopupInteractor implements PopupInteractorContract {
 
-  private PopupManager mPopupManager;
-  private Context mContext;
+  private final Context mContext;
   private static final String DATE_FORMAT = "MM-dd-yyyy";
 
   @Inject
-  public PopupInteractor(Context context){
+  public PopupInteractor(final Context context){
     mContext = context;
   }
-  @Override public List<Entry> getPopupFields(Popup popup) {
+  @Override public List<Entry> getPopupFields(final Popup popup) {
 
-    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-    PopupFieldFormat dateFormat = new PopupFieldFormat();
+    final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+    final PopupFieldFormat dateFormat = new PopupFieldFormat();
     dateFormat.setDateFormat(PopupFieldFormat.DateFormat.SHORT_DATE_SHORT_TIME);
 
-    mPopupManager = new PopupManager(mContext, popup);
-    List<Entry> entries = new ArrayList<>();
-    List<PopupField> fields = mPopupManager.getDisplayedFields();
-    for (PopupField field : fields) {
-      Field.Type fieldType = mPopupManager.getFieldType(field);
-      Object fieldValue = mPopupManager.getFieldValue(field);
-      String fieldLabel = field.getLabel();
+    PopupManager mPopupManager = new PopupManager(mContext, popup);
+    final List<Entry> entries = new ArrayList<>();
+    final List<PopupField> fields = mPopupManager.getDisplayedFields();
+    for (final PopupField field : fields) {
+      final Field.Type fieldType = mPopupManager.getFieldType(field);
+      final Object fieldValue = mPopupManager.getFieldValue(field);
+      final String fieldLabel = field.getLabel();
       String value = "";
       if (fieldType == Field.Type.DATE && fieldValue !=null ){
-        GregorianCalendar date = (GregorianCalendar) fieldValue;
+        final GregorianCalendar date = (GregorianCalendar) fieldValue;
         value = formatter.format(date.getTime());
-        Entry entry = new Entry(field.getLabel(), value);
+        final Entry entry = new Entry(fieldLabel, value);
         entries.add(entry);
 
       }else if (fieldType == Field.Type.TEXT && fieldValue != null) {
         value = fieldValue.toString();
-        Entry entry = new Entry(field.getLabel(), value);
+        final Entry entry = new Entry(fieldLabel, value);
         entries.add(entry);
       }
 

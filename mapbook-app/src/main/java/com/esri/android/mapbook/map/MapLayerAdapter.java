@@ -45,38 +45,57 @@ import com.esri.arcgisruntime.layers.LegendInfo;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Adapter used in the TOC (Table of Contents that display layers in map)
+ */
+
 public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLayerViewHolder> {
 
   private List<Layer> mLayers ;
-  private Context mContext;
+  private final Context mContext;
   private final String TAG = MapLayerAdapter.class.getSimpleName();
 
-  public MapLayerAdapter(Context context){
+  public MapLayerAdapter(final Context context){
     mContext = context;
   }
 
-  public void setLayerList(List layers){
+  /**
+   * Set the data for this adapter
+   * @param layers - List
+   */
+  public void setLayerList(final List layers){
 
     mLayers = layers;
 
   }
-
-  @Override public MapLayerViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-    View itemView = LayoutInflater.
+  /**
+   *This method calls onCreateViewHolder(ViewGroup, int) to create a new RecyclerView.ViewHolder
+   * and initializes some private fields to be used by RecyclerView.
+   * @param viewGroup - ViewGroup
+   * @param i - int
+   * @return MapLayerViewHolder
+   */
+  @Override public MapLayerViewHolder onCreateViewHolder(final ViewGroup viewGroup, final int i) {
+    final View itemView = LayoutInflater.
         from(viewGroup.getContext()).
         inflate(R.layout.map_layer_view, viewGroup, false);
 
     return new MapLayerViewHolder(itemView);
   }
 
+  /**
+   * Called by RecyclerView to display the data at the specified position.
+   * @param holder RecycleViewHolder
+   * @param position - int
+   */
   @Override public void onBindViewHolder(final MapLayerViewHolder holder, final int position) {
     final Layer layer = mLayers.get(position);
     holder.mapContentName.setText(layer.getName());
 
-    boolean layerVisible = (layer.isVisible());
+    final boolean layerVisible = (layer.isVisible());
     holder.checkBox.setChecked(layerVisible);
     holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+      @Override public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
         if (layer.isVisible()){
           layer.setVisible(false);
         }else{
@@ -93,7 +112,7 @@ public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLay
       legendInfoFuture.addDoneListener(new Runnable() {
         @Override public void run() {
           try {
-            List<LegendInfo> legendList = legendInfoFuture.get();
+            final List<LegendInfo> legendList = legendInfoFuture.get();
             legendAdapter.setLegendInfo(legendList);
             legendAdapter.notifyDataSetChanged();
           } catch (InterruptedException | ExecutionException e) {
@@ -104,13 +123,12 @@ public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLay
 
     }
   }
-
+  /**
+   * Returns the total number of items in the data set held by the adapter.
+   * @return int
+   */
   @Override public int getItemCount() {
-    if (mLayers == null){
-      return 0;
-    }else{
-      return mLayers.size();
-    }
+    return mLayers == null ? 0 : mLayers.size();
   }
 
   public class MapLayerViewHolder extends RecyclerView.ViewHolder{
