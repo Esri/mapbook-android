@@ -417,7 +417,7 @@ public class MapFragment extends Fragment implements MapContract.View {
    * Initialize map-related objects
    */
   @Override public void initializeMapItems() {
-    //TODO Dan, should this initialization be moved to the MapModule?
+    //TODO Question for Dan, should this initialization be moved to the MapModule?
     if (mGraphicsOverlay ==  null){
       mGraphicsOverlay = new GraphicsOverlay();
       mGraphicsOverlay.setSelectionColor(0xFF00FFFF);
@@ -698,6 +698,10 @@ public class MapFragment extends Fragment implements MapContract.View {
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
 
       final ListenableFuture<List<IdentifyLayerResult>> identifyLayers = mMapView.identifyLayersAsync(screenPoint,5d,true);
+
+      /*
+      TODO Question for Dan, is there a better way to move this logic into the presenter?  Or is the separation between business logic and view good enough here?
+       */
 
       identifyLayers.addDoneListener(new Runnable() {
         @Override

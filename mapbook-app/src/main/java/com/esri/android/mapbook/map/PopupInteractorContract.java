@@ -37,6 +37,7 @@ import java.util.List;
  * should have no knowledge of Android specific objects (like Context), so this interface
  * is used to interact with the PopupManager.
  *
+ * TODO Question for Dan, thoughts on this design?
  * See this link for more:
  * http://stackoverflow.com/questions/34303510/does-the-presenter-having-knowledge-of-the-activity-context-a-bad-idea-in-the/34664466#34664466
  */
