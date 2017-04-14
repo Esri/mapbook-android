@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- TODO: add your customized values here-->
+    <!-- TODO: add your own client id here-->
     <string name="client_id">dwiufZvIY08RV4hd</string>
 
     <!-- This redirect URI is the default value for https://www.arcgis.com -->
