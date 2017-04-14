@@ -86,6 +86,15 @@ If there are changes made in the Original repository, you can sync the fork to k
 5. You should now have the following directory on your target device, ```/sdcard/Data```. Note:  Directory may be slightly different on your device.  When the mapbook app first starts up, it will download the mapbook to this directory.
 6. Exit the shell with the, ```exit``` command.
 
+## Testing With Robotium
+The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the mapbook-app will run best on an attached device, rather than in the emulator.  You will need to adjust the values in the app_settings.xml file to reflect your specific auth credentials and any local addresses the tests use.  Use the following steps to configure your environment for running the tests.
+
+1.  Attach a non-emulated Android device to your computer.
+2.  Ensure location services are enabled on the Android device.
+3.  Ensure you have internet connectivity on the Android device.
+4.  Adjust the entries in your values/app_settings.xml.
+5.  Right-click on the MapbookTest.java file in Android Studio and select Run 'MapbookTest'.
+
 ## Requirements
 * [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Android Studio](http://developer.android.com/sdk/index.html)
