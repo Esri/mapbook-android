@@ -28,7 +28,6 @@ import dagger.Component;
 /**
  * An interface associating injections with targets.
  * It provides a call and scope to where we want to inject.
- * Associate module with targets.
  */
 
 @Component (modules = {ApplicationModule.class})

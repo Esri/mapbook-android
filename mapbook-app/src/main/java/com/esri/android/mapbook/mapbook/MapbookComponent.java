@@ -32,8 +32,8 @@ import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Component;
 
 /**
- * This is a Dagger component. Refer to {@link com.esri.android.mapbook.MapBookApplication} for the list of Dagger components
- * used in this application.
+ * This is a Dagger component. Refer to {@link com.esri.android.mapbook.MapBookApplication}
+ * for the list of Dagger components used in this application.
  * <P>
  * Because this component depends on the {@link ApplicationComponent}, which is a singleton, a
  * scope must be specified. All fragment components use a custom scope for this purpose.

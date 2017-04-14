@@ -36,7 +36,14 @@ import com.esri.arcgisruntime.mapping.Bookmark;
 import com.esri.arcgisruntime.mapping.BookmarkList;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 
+/**
+ * The adapter used by the recycler view to display bookmarks in the map
+ */
 public class MapBookmarkAdapter extends RecyclerView.Adapter<MapBookmarkAdapter.MapBookmarkViewHolder> {
+
+  /**
+   * An interface for defining what happens when a bookmark is tapped
+   */
 
   public interface OnBookmarkClickListener {
     void onItemClick(Viewpoint viewpoint);
@@ -45,40 +52,61 @@ public class MapBookmarkAdapter extends RecyclerView.Adapter<MapBookmarkAdapter.
   private BookmarkList mBookmarkList;
   private final OnBookmarkClickListener mListener;
 
-  public MapBookmarkAdapter(OnBookmarkClickListener listener){
+  /**
+   * Constructor relies on a implementation of the OnBookmarkClickListener
+   * for handling logic when map bookmarks are tapped.
+   * @param listener - OnBookmarkClickListener
+   */
+  public MapBookmarkAdapter(final OnBookmarkClickListener listener){
     mListener = listener;
   }
 
-  public void setBoomarks(BookmarkList bookmarks){
+  /**
+   * Set the data items for this adapter
+   * @param bookmarks - BookmarkList
+   */
+  public void setBoomarks(final BookmarkList bookmarks){
     mBookmarkList = bookmarks;
   }
 
-  @Override public MapBookmarkViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    View itemView = LayoutInflater.
+  /**
+   *This method calls onCreateViewHolder(ViewGroup, int) to create a new RecyclerView.ViewHolder
+   * and initializes some private fields to be used by RecyclerView.
+   * @param parent - ViewGroup
+   * @param viewType - int
+   * @return MapBookmarkViewHolder
+   */
+  @Override public MapBookmarkViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+    final View itemView = LayoutInflater.
         from(parent.getContext()).
         inflate(R.layout.map_bookmark_view, parent, false);
 
     return new MapBookmarkViewHolder(itemView);
   }
 
-  @Override public void onBindViewHolder(MapBookmarkViewHolder holder, int position) {
+  /**
+   * Called by RecyclerView to display the data at the specified position.
+   * @param holder RecycleViewHolder
+   * @param position - int
+   */
+  @Override public void onBindViewHolder(final MapBookmarkViewHolder holder, final int position) {
       final Bookmark bookmark= mBookmarkList.get(position);
-      String bookmarkName = bookmark.getName();
+      final String bookmarkName = bookmark.getName();
       holder.mBookmarkTxt.setText(bookmarkName);
       holder.mViewpoint = bookmark.getViewpoint();
       holder.mBookmarkTxt.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
+        @Override public void onClick(final View v) {
           mListener.onItemClick(bookmark.getViewpoint());
         }
       });
   }
 
+  /**
+   * Returns the total number of items in the data set held by the adapter.
+   * @return int
+   */
   @Override public int getItemCount() {
-    if (mBookmarkList == null){
-      return 0;
-    }else{
-      return mBookmarkList.size();
-    }
+    return mBookmarkList == null ? 0 : mBookmarkList.size();
   }
 
   public class MapBookmarkViewHolder extends RecyclerView.ViewHolder{
@@ -86,7 +114,7 @@ public class MapBookmarkAdapter extends RecyclerView.Adapter<MapBookmarkAdapter.
     final TextView mBookmarkTxt;
     public Viewpoint mViewpoint;
 
-    public MapBookmarkViewHolder(View itemView) {
+    public MapBookmarkViewHolder(final View itemView) {
       super(itemView);
       mBookmarkTxt = (TextView) itemView.findViewById(R.id.txtBookmarkName);
     }

@@ -44,20 +44,80 @@ import java.util.List;
 public interface MapContract {
 
   interface Presenter extends BasePresenter {
+    /**
+     * Geocode given string address
+     * @param address - String representing address
+     */
     void geoCodeAddress(String address);
+
+    /**
+     * Get suggestions for area defined by geometry and given query
+     * @param geometry - Geometry
+     * @param query - String
+     */
     void getSuggestions(Geometry geometry, String query);
+
+    /**
+     * Returns true if mobile map package has task, false if does not.
+     * @return boolean
+     */
     boolean hasLocatorTask();
+
+    /**
+     * Load a specific map from a mobile map package stored
+     * at the given path.
+     * @param path - String representing location on device where mobile map package exists.
+     * @param mapIndex - int representing index of the map to be loaded.
+     */
     void loadMap(String path, int mapIndex);
-    List<FeatureContent> identifyFeatures(Point point, List<IdentifyLayerResult> results);
+
+    /**
+     * Returns list of featured content given the results of an identify operation.
+
+     * @param results - List of IdentifyLayerResults
+     * @return List of FeatureContent
+     */
+    List<FeatureContent> identifyFeatures(List<IdentifyLayerResult> results);
 
   }
   interface View extends BaseView<Presenter>{
+
+    /**
+     * Display given map in the map view
+     * @param map - ArcGIS map
+     */
     void showMap(ArcGISMap map);
+
+    /**
+     * Display content for given location.
+     * @param resultpoint - Point
+     * @param calloutContent - View
+     * @param zoomOut - boolean, true to zoom out
+     */
     void displaySearchResult(Point resultpoint, android.view.View calloutContent, boolean zoomOut);
-    void displayBookmarks();
-    void setUpMap();
+
+    /**
+     * Initialize map-related objects
+     */
+    void initializeMapItems();
+
+    /**
+     * Show suggestions
+     * @param suggestResultList List<SuggestResults></SuggestResults>
+     */
     void showSuggestedPlaceNames(List<SuggestResult> suggestResultList);
+
+    /**
+     * Show a message
+     * @param message - String
+     */
     void showMessage(String message);
+
+    /**
+     * Get suggestions for the given area and query
+     * @param geometry - Geometry
+     * @param query - String
+     */
     void getSuggestions(Geometry geometry, String query);
   }
 }

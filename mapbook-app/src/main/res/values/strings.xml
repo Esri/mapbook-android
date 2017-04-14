@@ -24,4 +24,5 @@
     <string name="index">INDEX</string>
     <string name="map_title">TITLE</string>
     <string name="map_thumbnail">map thumbnail</string>
+    <string name="no_features_found">No features found at that location</string>
 </resources>

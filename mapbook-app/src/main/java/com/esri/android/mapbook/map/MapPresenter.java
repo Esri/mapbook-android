@@ -53,8 +53,6 @@ public class MapPresenter implements MapContract.Presenter {
 
   private final MapContract.View mView;
 
-
-
   @Inject
   PopupInteractor popupInteractor;
 
@@ -75,19 +73,25 @@ public class MapPresenter implements MapContract.Presenter {
     mView.setPresenter(this);
   }
 
-
+  /**
+   * Entry point for this class starts by initializng map related items.
+   */
   @Override public void start() {
-    mView.setUpMap();
+    mView.initializeMapItems();
   }
 
+  /**
+   * Geocode given string address
+   * @param address - String representing address
+   */
   @Override public void geoCodeAddress(final String address) {
     mDataManager.geocodeAddress(address, new DataManagerCallbacks.GeoCodingCallback() {
-      @Override public void onGeoCodingTaskCompleted(List<GeocodeResult> geocodeResults) {
-        if (geocodeResults.size() > 0) {
+      @Override public void onGeoCodingTaskCompleted(final List<GeocodeResult> geocodeResults) {
+        if (!geocodeResults.isEmpty()) {
           // Use the first result - for example
           // display on the map
-          GeocodeResult result = geocodeResults.get(0);
-          Point displayLocation = result.getDisplayLocation();
+          final GeocodeResult result = geocodeResults.get(0);
+          final Point displayLocation = result.getDisplayLocation();
 
           mView.displaySearchResult(displayLocation, null, true);
 
@@ -97,32 +101,36 @@ public class MapPresenter implements MapContract.Presenter {
         }
       }
 
-      @Override public void onGeoCodingTaskNotLoaded(Throwable error) {
+      @Override public void onGeoCodingTaskNotLoaded(final Throwable error) {
         mView.showMessage("An error was encountered when trying to search for the address " + error.getMessage());
       }
 
-      @Override public void onNoGeoCodingTask(String message) {
+      @Override public void onNoGeoCodingTask(final String message) {
         mView.showMessage(message);
       }
 
-      @Override public void onGeoCodingError(Throwable error) {
+      @Override public void onGeoCodingError(final Throwable error) {
 
       }
     });
   }
 
-
-  @Override public void getSuggestions(Geometry geometry, String query) {
+  /**
+   * Get suggestions for area defined by geometry and given query
+   * @param geometry - Geometry
+   * @param query - String
+   */
+  @Override public void getSuggestions(final Geometry geometry, final String query) {
       mDataManager.getSuggestions(geometry, query, new DataManagerCallbacks.SuggestionCallback() {
-        @Override public void onSuggestionsComplete(List<SuggestResult> suggestResults) {
-          if (suggestResults.size() > 0){
+        @Override public void onSuggestionsComplete(final List<SuggestResult> suggestResults) {
+          if (!suggestResults.isEmpty()){
             mView.showSuggestedPlaceNames(suggestResults);
           }else{
             Log.i(TAG, "No suggestions returned");
           }
         }
 
-        @Override public void onSuggestionFailure(Throwable error) {
+        @Override public void onSuggestionFailure(final Throwable error) {
           Log.i(TAG, "Suggestion error " +  error.getMessage());
         }
 
@@ -132,28 +140,44 @@ public class MapPresenter implements MapContract.Presenter {
       });
   }
 
+  /**
+   * Returns true if mobile map package has task, false if does not.
+   * @return boolean
+   */
   @Override public boolean hasLocatorTask() {
     return mDataManager.hasLocatorTask();
   }
 
-  @Override public void loadMap(String path, final int mapIndex) {
+  /**
+   * Load a specific map from a mobile map package stored
+   * at the given path.
+   * @param path - String representing location on device where mobile map package exists.
+   * @param mapIndex - int representing index of the map to be loaded.
+   */
+  @Override public void loadMap(final String path, final int mapIndex) {
     mDataManager.loadMobileMapPackage(path, new DataManagerCallbacks.MapbookCallback() {
-      @Override public void onMapbookLoaded(MobileMapPackage mobileMapPackage) {
-        List<ArcGISMap> maps = mobileMapPackage.getMaps();
-        ArcGISMap map = maps.get(mapIndex);
+      @Override public void onMapbookLoaded(final MobileMapPackage mobileMapPackage) {
+        final List<ArcGISMap> maps = mobileMapPackage.getMaps();
+        final ArcGISMap map = maps.get(mapIndex);
         mView.showMap(map);
       }
 
-      @Override public void onMapbookNotLoaded(Throwable error) {
+      @Override public void onMapbookNotLoaded(final Throwable error) {
         mView.showMessage("There was a problem loading the map");
       }
     });
   }
 
-  @Override public List<FeatureContent> identifyFeatures(Point point, List<IdentifyLayerResult> results) {
-    List<FeatureContent> content = new ArrayList<>();
+  /**
+   * Returns list of featured content given the results of an identify operation.
 
-    for (IdentifyLayerResult result : results){
+   * @param results - List of IdentifyLayerResults
+   * @return List of FeatureContent
+   */
+  @Override public List<FeatureContent> identifyFeatures( final List<IdentifyLayerResult> results) {
+    final List<FeatureContent> content = new ArrayList<>();
+
+    for (final IdentifyLayerResult result : results){
 
       // a reference to the feature layer can be used, for example, to select identified features
       FeatureLayer featureLayer = null;
@@ -161,19 +185,19 @@ public class MapPresenter implements MapContract.Presenter {
       // We only care about FeatureLayer results
       if (result.getLayerContent() instanceof FeatureLayer) {
         featureLayer = (FeatureLayer) result.getLayerContent();
-        FeatureContent featureContent = new FeatureContent(featureLayer);
+        final FeatureContent featureContent = new FeatureContent(featureLayer);
         featureLayer.setSelectionWidth(3.0d);
 
-        List<Popup> popups = result.getPopups();
+        final List<Popup> popups = result.getPopups();
 
-        for (Popup popup : popups){
+        for (final Popup popup : popups){
 
-          List<Entry> entries = popupInteractor.getPopupFields(popup);
+          final List<Entry> entries = popupInteractor.getPopupFields(popup);
           featureContent.setEntries(entries);
           // Select feature
-          GeoElement element = popup.getGeoElement();
+          final GeoElement element = popup.getGeoElement();
           if (element instanceof Feature){
-            Feature ft = (Feature) element;
+            final Feature ft = (Feature) element;
             if (featureLayer != null){
               featureContent.setFeature(ft); // Assuming 1 popup per IdentifyLayerResult!!!
             }
