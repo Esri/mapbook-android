@@ -129,6 +129,9 @@ public class MapbookPresenter implements MapbookContract.Presenter {
         }
       });
 
+      // Kick off an intent service to check for any mobile map package updates
+      mView.checkForUpdatedPortalItem();
+
     }else{
       // Mapbook file isn't found, try downloading it...
       mView.downloadMapbook(mFileManager.createMobileMapPackageFilePath());

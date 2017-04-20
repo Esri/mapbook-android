@@ -26,12 +26,16 @@
 
 package com.esri.android.mapbook.mapbook;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -41,9 +45,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.esri.android.mapbook.Constants;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.download.DownloadActivity;
 import com.esri.android.mapbook.map.MapActivity;
+import com.esri.android.mapbook.download.PortalItemUpdateService;
 import com.esri.android.mapbook.util.ActivityUtils;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Item;
@@ -82,6 +88,23 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     final MapbookFragment fragment = new MapbookFragment();
     fragment.setArguments(args);
     return fragment;
+  }
+
+  @Override
+  final public void onCreate (Bundle savedInstanceState){
+    super.onCreate(savedInstanceState);
+
+    // The filter's action is BROADCAST_ACTION
+    IntentFilter latestVersionIntentFilter = new IntentFilter(
+        Constants.BROADCAST_ACTION);
+
+    // Instantiates a new DownloadStateReceiver
+    PortalItemBroadcastReceiver mDownloadStateReceiver =
+        new PortalItemBroadcastReceiver();
+    // Registers the DownloadStateReceiver and its intent filters
+    LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+        mDownloadStateReceiver,
+        latestVersionIntentFilter);
   }
 
   /**
@@ -145,7 +168,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     txtDescription.setText(description);
 
     final TextView txtCrdate = (TextView) mRoot.findViewById(R.id.txtCrDate);
-    txtCrdate.setText(ActivityUtils.getDateString(item.getCreated()));
+    txtCrdate.setText("Created " + ActivityUtils.getDateString(item.getCreated()));
 
     final TextView txtName = (TextView) mRoot.findViewById(R.id.txtTitle);
     txtName.setText(name);
@@ -185,14 +208,14 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
       final long fileSizeInKB = size / 1024;
       // Convert the KB to MegaBytes (1 MB = 1024 KBytes)
       final long fileSizeInMB = fileSizeInKB / 1024;
-      txtSize.setText(fileSizeInMB + " MB");
+      txtSize.setText("Size " + fileSizeInMB + " MB");
     }
     if (modifiedDate > 0) {
       final Calendar c = Calendar.getInstance();
       c.setTimeInMillis(modifiedDate);
       final String downloadedDate = ActivityUtils.getDateString(c);
       final TextView txtDowndate = (TextView) mRoot.findViewById(R.id.txtDownloadDate);
-      txtDowndate.setText(downloadedDate);
+      txtDowndate.setText("Last downloaded " + downloadedDate);
     }
   }
   /**
@@ -231,6 +254,15 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   }
 
   /**
+   * Start an IntentService to check for any
+   * updated versions of the mobile map package
+   */
+  @Override public void checkForUpdatedPortalItem() {
+    Intent portalItemUpdateServiceIntent = new Intent(getActivity(), PortalItemUpdateService.class);
+    getActivity().startService(portalItemUpdateServiceIntent);
+  }
+
+  /**
    * Logic for handling results from the returned activity.
    * @param requestCode - int
    * @param resultCode -int
@@ -254,6 +286,22 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         }
 
       }
+    }
+  }
+
+  private class PortalItemBroadcastReceiver extends BroadcastReceiver {
+
+    // Prevents instantiation
+    private PortalItemBroadcastReceiver(){}
+
+    @Override public void onReceive(Context context, Intent intent) {
+
+    /*
+     * Handle Intents here.
+     */
+     long timeUpdated = intent.getLongExtra(Constants.LATEST_DATE,0);
+     Log.i(TAG, "Time updated in milliseconds " + timeUpdated);
+
     }
   }
 

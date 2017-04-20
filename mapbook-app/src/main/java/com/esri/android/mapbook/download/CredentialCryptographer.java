@@ -30,6 +30,7 @@ import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
+import com.esri.android.mapbook.Constants;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
@@ -53,7 +54,6 @@ public class CredentialCryptographer {
   private static final String ALIAS = "CRED_KEY";
   KeyStore keyStore;
   @Inject Context mContext;
-  GCMParameterSpec spec;
 
   public CredentialCryptographer(Context context){
     mContext   = context;
@@ -95,6 +95,10 @@ public class CredentialCryptographer {
     }
   }
 
+  private String getFilePath(String fileName){
+    String filesDirectory = mContext.getFilesDir().getAbsolutePath();
+    return filesDirectory + File.separator + fileName;
+  }
   /**
    * Encrypt given bytes and persist contents to File with given filename.
    * @param input - byte[] to encrypt
@@ -117,10 +121,12 @@ public class CredentialCryptographer {
       Cipher c = Cipher.getInstance(CIPHER_TYPE);
       c.init(Cipher.ENCRYPT_MODE, key);
 
-      // The GCMParameter spec is needed later to decrypt the file
-      spec = new GCMParameterSpec(128,c.getIV());
-      String filesDirectory = mContext.getFilesDir().getAbsolutePath();
-      encryptedDataFilePath = filesDirectory + File.separator + fileName;
+      // Persist the GCMParamterSpec src bytes to file for later use
+      FileOutputStream fos = mContext.openFileOutput(Constants.IV_FILE, Context.MODE_PRIVATE);
+      fos.write(c.getIV());
+      fos.close();
+
+      encryptedDataFilePath = getFilePath(fileName);
 
       CipherOutputStream cipherOutputStream =
           new CipherOutputStream(
@@ -149,10 +155,10 @@ public class CredentialCryptographer {
   /**
    * Decrypt contents of File given path and
    * return a string representation
-   * @param encryptedDataFilePath String representing absolute file path
+   * @param encryptedDataFileName String representing file name
    * @return Decrypted string or null if decryption fails
    */
-  public String decryptData (String encryptedDataFilePath){
+  public String decryptData (String encryptedDataFileName){
     String decryptedString = null;
     try {
 
@@ -162,15 +168,21 @@ public class CredentialCryptographer {
 
       Cipher c = Cipher.getInstance(CIPHER_TYPE);
 
-      // Need to provide the GCMSpec used by the
-      // encryption method when decrypting
-      c.init(Cipher.DECRYPT_MODE, key, spec);
-
-      File file = new File(encryptedDataFilePath);
+      File file = new File(getFilePath(encryptedDataFileName));
       int fileSize = (int)file.length();
 
+      // Need to provide the GCMSpec used by the
+      // encryption method when decrypting
+      File ivFile = new File(getFilePath(Constants.IV_FILE));
+      int ivFileSize =  (int) ivFile.length();
+      FileInputStream fis = mContext.openFileInput(Constants.IV_FILE);
+      byte [] GMspec = new byte[ivFileSize];
+      fis.read(GMspec, 0, ivFileSize);
+      fis.close();
+      c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, GMspec));
+
       CipherInputStream cipherInputStream =
-          new CipherInputStream(new FileInputStream(encryptedDataFilePath),
+          new CipherInputStream(new FileInputStream(getFilePath(encryptedDataFileName)),
               c);
       byte[] fileContentBytes = new byte[fileSize];
 

@@ -89,6 +89,13 @@ public interface MapbookContract {
      *             download should be stored.
      */
     void downloadMapbook(String path);
+
+
+    /**
+     * Start an IntentService to check for any
+     * updated versions of the mobile map package
+     */
+    void checkForUpdatedPortalItem();
   }
 
   interface Presenter extends BasePresenter {

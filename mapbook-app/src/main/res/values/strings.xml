@@ -25,4 +25,7 @@
     <string name="map_title">TITLE</string>
     <string name="map_thumbnail">map thumbnail</string>
     <string name="no_features_found">No features found at that location</string>
+    <string name="enable_wifi">ENABLE WI-FI</string>
+    <string name="cancel">CANCEL</string>
+    <string name="path_not_found">File path not found in fragment arguments</string>
 </resources>
