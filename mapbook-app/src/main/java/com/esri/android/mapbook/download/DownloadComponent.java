@@ -45,5 +45,5 @@ public interface DownloadComponent {
 
   void inject (DownloadActivity activity);
   void inject (DownloadPresenter presenter);
-
+  void inject (CredentialCryptographer manager);
 }
