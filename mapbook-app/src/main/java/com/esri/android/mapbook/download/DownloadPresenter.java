@@ -34,6 +34,7 @@ import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.security.AuthenticationManager;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,6 +50,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
   @Inject ConnectivityManager mConnectivityManager;
   @Inject Portal mPortal;
   @Inject @Named("mPortalItemId") String mPortalItemId;
+  @Inject CredentialCryptographer mCredentialManager;
 
   private final DownloadContract.View mView;
   private boolean mSignInStarted = false;
@@ -131,6 +133,13 @@ public class DownloadPresenter implements DownloadContract.Presenter {
       public void run() {
 
         mView.dismissProgressDialog();
+
+        String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
+        Log.i(TAG, "JSON credential cache = " + jsonCredentials);
+        String filePath = mCredentialManager.encryptData(jsonCredentials.getBytes(),"secret_data");
+        Log.i(TAG, "Data encrypted to file path = " + filePath);
+        String reconstitutedData = mCredentialManager.decryptData(filePath);
+        Log.i(TAG, "Reconstituted JSON data = " + reconstitutedData);
 
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
 
