@@ -54,6 +54,9 @@
                 <data android:scheme="my-ags-app"/>
             </intent-filter>
         </activity>
+        <service
+                android:name=".download.PortalItemUpdateService"
+                android:exported="false"/>
     </application>
 
 </manifest>

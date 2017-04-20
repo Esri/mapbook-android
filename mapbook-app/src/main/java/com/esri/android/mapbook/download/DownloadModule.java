@@ -49,13 +49,14 @@ import java.net.MalformedURLException;
 @Module
 public  class DownloadModule {
 
-  private final Activity mActivity;
-  private final DownloadContract.View mView;
+  private  Activity mActivity;
+  private  DownloadContract.View mView;
 
   public DownloadModule(final DownloadContract.View view, final Activity activity ){
     mView = view;
     mActivity = activity;
   }
+  public DownloadModule(){};
 
   @Provides
   @MapbookApplicationScope

@@ -30,6 +30,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.util.Log;
+import com.esri.android.mapbook.Constants;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
@@ -134,15 +135,15 @@ public class DownloadPresenter implements DownloadContract.Presenter {
 
         mView.dismissProgressDialog();
 
-        String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
-        Log.i(TAG, "JSON credential cache = " + jsonCredentials);
-        String filePath = mCredentialManager.encryptData(jsonCredentials.getBytes(),"secret_data");
-        Log.i(TAG, "Data encrypted to file path = " + filePath);
-        String reconstitutedData = mCredentialManager.decryptData(filePath);
-        Log.i(TAG, "Reconstituted JSON data = " + reconstitutedData);
-
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
+          String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
+          Log.i(TAG, "JSON credential cache = " + jsonCredentials);
+          String filePath = mCredentialManager.encryptData(jsonCredentials.getBytes(), Constants.CRED_FILE);
+          Log.i(TAG, "Data encrypted to file path = " + filePath);
+          String reconstitutedData = mCredentialManager.decryptData(Constants.CRED_FILE);
+          Log.i(TAG, "Reconstituted JSON data = " + reconstitutedData);
 
+          Log.i(TAG, "User " + mPortal.getCredential().getUsername());
           final Handler handler = new Handler() ;
           handler.post(new Runnable() {
             @Override public void run() {
@@ -162,8 +163,6 @@ public class DownloadPresenter implements DownloadContract.Presenter {
     });
     mPortal.loadAsync();
   }
-
-
 
   /**
    * Get the state of the network info

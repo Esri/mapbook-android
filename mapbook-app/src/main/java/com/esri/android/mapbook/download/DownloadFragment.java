@@ -90,7 +90,7 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
     if (args.containsKey(FILE_PATH)){
       mFileName = args.getString(FILE_PATH);
     }else{
-      sendResult(RESULT_CANCELED, ERROR_STRING, "File path not found in fragment arguments");
+      sendResult(RESULT_CANCELED, ERROR_STRING, getString(R.string.path_not_found));
     }
   }
 
@@ -151,13 +151,13 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
   @Override final public void promptForInternetConnectivity() {
 
     final ProgressDialog networkDialog = new ProgressDialog(getContext());
-    networkDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ENABLE WI-FI", new DialogInterface.OnClickListener() {
+    networkDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.enable_wifi), new DialogInterface.OnClickListener() {
       @Override final public void onClick(final DialogInterface dialog, final int which) {
         networkDialog.dismiss();
         startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
       }
     });
-    networkDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
+    networkDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
       @Override final public void onClick(final DialogInterface dialog, final int which) {
         networkDialog.dismiss();
         sendResult(RESULT_CANCELED, ERROR_STRING, "A Network Connection is Required to Download the Mobile Map Package");

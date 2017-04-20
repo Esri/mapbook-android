@@ -65,16 +65,16 @@ public class MapActivity extends AppCompatActivity {
 
     final Intent intent = getIntent();
     final String mmpkPath = intent.getStringExtra(MapbookFragment.FILE_PATH);
-    final int index = intent.getIntExtra("INDEX",0);
-    final String title = intent.getStringExtra("TITLE");
+    final int index = intent.getIntExtra(getString(R.string.index),0);
+    final String title = intent.getStringExtra(getString(R.string.title));
 
     MapFragment fragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.mapLinearLayout);
     if (fragment == null){
       fragment = MapFragment.newInstance();
       final Bundle args = fragment.getArguments();
       args.putString(MapbookFragment.FILE_PATH, mmpkPath);
-      args.putInt("INDEX", index);
-      args.putString("TITLE", title);
+      args.putInt(getString(R.string.index), index);
+      args.putString(getString(R.string.title), title);
       ActivityUtils.addFragmentToActivity(getSupportFragmentManager(), fragment, R.id.mapLinearLayout);
     }
     // Ask the component to inject this activity
