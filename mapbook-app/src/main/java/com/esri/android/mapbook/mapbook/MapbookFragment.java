@@ -296,12 +296,15 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
 
     @Override public void onReceive(Context context, Intent intent) {
 
-    /*
-     * Handle Intents here.
-     */
-     long timeUpdated = intent.getLongExtra(Constants.LATEST_DATE,0);
-     Log.i(TAG, "Time updated in milliseconds " + timeUpdated);
-
+      /*
+       * Handle Intents here.
+       */
+      if (intent.getExtras() !=  null){
+        long timeUpdated = intent.getLongExtra(Constants.LATEST_DATE,0);
+        Log.i(TAG, "Time updated in milliseconds " + timeUpdated);
+      }else{
+        Log.i(TAG, "No update time found");
+      }
     }
   }
 

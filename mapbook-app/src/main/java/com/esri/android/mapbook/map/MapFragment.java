@@ -152,10 +152,10 @@ public class MapFragment extends Fragment implements MapContract.View {
 
     // Calling activity should pass the index and map title
     final Bundle args = getArguments();
-    if (args.containsKey("INDEX")  && args.containsKey(MapbookFragment.FILE_PATH) && args.containsKey("TITLE")){
+    if (args.containsKey(getString(R.string.index))  && args.containsKey(MapbookFragment.FILE_PATH) && args.containsKey(getString(R.string.map_title))){
       mPath = args.getString(MapbookFragment.FILE_PATH);
-      mMapIndex = args.getInt("INDEX");
-      mMapTitle = args.getString("TITLE");
+      mMapIndex = args.getInt(getString(R.string.index));
+      mMapTitle = args.getString(getString(R.string.map_title));
 
     }else{
       // Otherwise, finish the activity
