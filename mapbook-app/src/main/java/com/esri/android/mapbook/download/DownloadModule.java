@@ -56,7 +56,7 @@ public  class DownloadModule {
     mView = view;
     mActivity = activity;
   }
-  public DownloadModule(){};
+  public DownloadModule(){}
 
   @Provides
   @MapbookApplicationScope

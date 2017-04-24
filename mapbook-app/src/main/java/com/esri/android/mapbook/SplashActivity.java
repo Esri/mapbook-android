@@ -29,6 +29,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import com.esri.android.mapbook.mapbook.MapbookActivity;
 
+/**
+ * This activity simply displays a splash screen as the app starts up.
+ */
 public  class SplashActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {

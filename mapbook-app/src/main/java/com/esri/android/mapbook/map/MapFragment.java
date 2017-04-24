@@ -64,7 +64,12 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BookmarkList;
 import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.*;
+import com.esri.arcgisruntime.mapping.view.Callout;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
@@ -72,6 +77,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * This fragment is responsible for manipulating the map view and
+ * displaying map related data. It's the View in the MVP pattern.
+ */
 public class MapFragment extends Fragment implements MapContract.View {
 
   private RecyclerView mLayerRecyclerView = null;
@@ -203,10 +212,10 @@ public class MapFragment extends Fragment implements MapContract.View {
 
       @Override public boolean onQueryTextChange(final String newText) {
 
-        if (!mPresenter.hasLocatorTask()){
-          return false;
-        }else{
+        if (mPresenter.hasLocatorTask()){
           getSuggestions(mMapView.getVisibleArea(), newText);
+        }else{
+          return false;
         }
         return true;
       }

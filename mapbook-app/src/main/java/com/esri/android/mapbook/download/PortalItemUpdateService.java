@@ -34,6 +34,7 @@ import android.util.Log;
 import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.Constants;
 import com.esri.android.mapbook.MapBookApplication;
+import com.esri.android.mapbook.R;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
@@ -68,7 +69,7 @@ public class PortalItemUpdateService extends IntentService {
   }
   /**
    * Broadcast the modified date for a given portal item
-   * @param intent
+   * @param intent - Intent
    */
   @Override protected void onHandleIntent(@Nullable Intent intent) {
     Log.i(TAG, "onHandleIntent");
@@ -79,7 +80,7 @@ public class PortalItemUpdateService extends IntentService {
     if (credentialString == null){
       // Send a broadcast out with latest time stamp from portal item
       Intent errorIntent =
-          new Intent(Constants.BROADCAST_ACTION);
+          new Intent(getString(R.string.BROADCAST_ACTION));
       broadcastIntent(errorIntent);
     }else{
       Log.i(TAG, credentialString);
@@ -96,9 +97,9 @@ public class PortalItemUpdateService extends IntentService {
 
           // Send a broadcast out with latest time stamp from portal item
           Intent localIntent =
-              new Intent(Constants.BROADCAST_ACTION)
+              new Intent(getString(R.string.BROADCAST_ACTION))
                   // Puts the status into the Intent
-                  .putExtra(Constants.LATEST_DATE, timeInMillis);
+                  .putExtra(getString(R.string.LATEST_DATE), timeInMillis);
           broadcastIntent(localIntent);
         }
       });

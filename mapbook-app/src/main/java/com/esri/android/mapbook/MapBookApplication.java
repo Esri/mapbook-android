@@ -32,7 +32,7 @@ import android.app.Application;
  * must ensure only one instance of the class is created. Therefore, we create a custom
  * {@link MapBookApplication} class to store a singleton reference to the {@link ApplicationComponent}.
  *
- *  * <P>
+ * <P>
  * The application is made of 3 other Dagger components, as follows:<BR />
  * {@link com.esri.android.mapbook.mapbook.MapbookComponent}: shows the mapbook metadata<BR />
  * {@link com.esri.android.mapbook.download.DownloadComponent}: manages downloading mapbook from the Portal<BR />

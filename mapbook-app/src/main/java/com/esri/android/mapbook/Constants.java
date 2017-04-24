@@ -26,15 +26,13 @@
 
 package com.esri.android.mapbook;
 
+/**
+ * These are constants used by classes that don't have an
+ * Android context (thus the getString(R.string.id) methods
+ * can't be used).  These constants define the names of two files used
+ * for persisting credentials on the device.
+ */
 public class Constants {
-
-  // Defines a custom Intent action
-  public static final String BROADCAST_ACTION =
-      "com.esri.android.mapbook.BROADCAST";
-
-  // Defines the key for the long "extra" in an Intent
-  public static final String LATEST_DATE =
-      "com.esri.android.mapbook.STATUS";
 
   // Name of the file for storing encrypted credentials
   public static final String CRED_FILE = "cred_file";

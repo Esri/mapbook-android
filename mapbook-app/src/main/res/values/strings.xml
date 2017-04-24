@@ -5,19 +5,6 @@
     <string name="portalId">1fe928ff591544fb814b8a2fbc944cae</string>
     <string name="mobileMapPackageName">OfflineMapbook_v4</string>
     <string name="offlineDirectory">Data</string>
-    <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
-    <string name="wireless_problem">Wireless Connectivity Problem</string>
-    <string name="query_hint">Search by address or name</string>
-    <string name="main_menu">Main Menu</string>
-    <string name="layers">Layers</string>
-    <string name="search">Search</string>
-    <string name="bookmarks">Bookmarks</string>
-    <string name="geo_locate_error">Geocode failed on address</string>
-    <string name="location_not_foud">We are sorry, we couldn\'t find a location with the name - </string>
-    <string name="reverse_geocode_message">Drag the pin to reverse-geocode</string>
-    <string name="feature_not_found">No feature found</string>
-    <string name="layer_action">Layers</string>
-    <string name="data_directory">MobileMaps</string>
     <string name="mmpk_extension">.mmpk</string>
     <string name="wait">Please wait</string>
     <string name="downloading_mapbook">Downloading Mapbook</string>
@@ -28,4 +15,12 @@
     <string name="enable_wifi">ENABLE WI-FI</string>
     <string name="cancel">CANCEL</string>
     <string name="path_not_found">File path not found in fragment arguments</string>
+    <string name="layers">Layers</string>
+    <string name="search">Search</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
+    <string name="wireless_problem">Wireless Connectivity Problem</string>
+    <string name="query_hint">Search by address or name</string>
+    <string name="BROADCAST_ACTION">com.esri.android.mapbook.BROADCAST</string>
+    <string name="LATEST_DATE">com.esri.android.mapbook.LATEST_DATE</string>
 </resources>

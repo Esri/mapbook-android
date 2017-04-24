@@ -39,6 +39,10 @@ import com.esri.arcgisruntime.security.OAuthConfiguration;
 
 import javax.inject.Inject;
 
+/**
+ * The DownloadActivity processes the fragment arguments, starts the DownloadFragment, injects dependencies,
+ * and finishes setup for the AuthenticationManager.
+ */
 public class DownloadActivity extends AppCompatActivity {
 
   @Inject DefaultAuthenticationChallengeHandler defaultAuthenticationChallengeHandler;

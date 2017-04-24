@@ -24,6 +24,10 @@
 
 package com.esri.android.mapbook;
 
+/**
+ * In order for MVP to be wired up correctly, all view interfaces in this application extend this interface,
+ * allowing for a presenter to be associated with a view.
+ */
 public interface BaseView<T> {
 
   void setPresenter(T presenter);

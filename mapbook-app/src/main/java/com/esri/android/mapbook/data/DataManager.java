@@ -76,8 +76,8 @@ public class DataManager implements DataManagerContract {
    *
    * Geocode an address typed in by user
    *
-   * @param address
-   * @param geocodingCallback
+   * @param address - String
+   * @param geocodingCallback GeoCodingCallback
    */
   @Override
   public void geocodeAddress(final String address,
