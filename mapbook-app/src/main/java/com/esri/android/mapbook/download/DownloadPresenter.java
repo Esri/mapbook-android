@@ -138,9 +138,9 @@ public class DownloadPresenter implements DownloadContract.Presenter {
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
           String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
           Log.i(TAG, "JSON credential cache = " + jsonCredentials);
-          String filePath = mCredentialManager.encryptData(jsonCredentials.getBytes(), Constants.CRED_FILE);
+          String filePath = mCredentialManager.rsaEncryptData(jsonCredentials.getBytes(), Constants.CRED_FILE);
           Log.i(TAG, "Data encrypted to file path = " + filePath);
-          String reconstitutedData = mCredentialManager.decryptData(Constants.CRED_FILE);
+          String reconstitutedData = mCredentialManager.rsaDecrpytData(Constants.CRED_FILE);
           Log.i(TAG, "Reconstituted JSON data = " + reconstitutedData);
 
           Log.i(TAG, "User " + mPortal.getCredential().getUsername());

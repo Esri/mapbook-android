@@ -73,30 +73,42 @@ public class PortalItemUpdateService extends IntentService {
   @Override protected void onHandleIntent(@Nullable Intent intent) {
     Log.i(TAG, "onHandleIntent");
 
-    String credentialString = mCredCryptographer.decryptData(Constants.CRED_FILE);
-    Log.i(TAG, credentialString);
+    //String credentialString = mCredCryptographer.decryptData(Constants.CRED_FILE);
+    String credentialString = mCredCryptographer.rsaDecrpytData(Constants.CRED_FILE);
 
-    // Reconstitute the AuthenticationManager from cached credentials
-    AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
+    if (credentialString == null){
+      // Send a broadcast out with latest time stamp from portal item
+      Intent errorIntent =
+          new Intent(Constants.BROADCAST_ACTION);
+      broadcastIntent(errorIntent);
+    }else{
+      Log.i(TAG, credentialString);
 
-    final IntentService service = this;
+      // Reconstitute the AuthenticationManager from cached credentials
+      AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
 
-    final PortalItem portalItem = new PortalItem(mPortal, mPortalItemId);
-    portalItem.loadAsync();
-    portalItem.addDoneLoadingListener(new Runnable() {
-      @Override public void run() {
-        Calendar dateModified = portalItem.getModified();
-        long timeInMillis = dateModified.getTimeInMillis();
+      final PortalItem portalItem = new PortalItem(mPortal, mPortalItemId);
+      portalItem.loadAsync();
+      portalItem.addDoneLoadingListener(new Runnable() {
+        @Override public void run() {
+          Calendar dateModified = portalItem.getModified();
+          long timeInMillis = dateModified.getTimeInMillis();
 
-        // Send a broadcast out with latest time stamp from portal item
-        Intent localIntent =
-            new Intent(Constants.BROADCAST_ACTION)
-                // Puts the status into the Intent
-                .putExtra(Constants.LATEST_DATE, timeInMillis);
-        // Broadcasts the Intent to receivers in this app.
-        LocalBroadcastManager.getInstance(service).sendBroadcast(localIntent);
-        Log.i(TAG, "Broadcast sent");
-      }
-    });
+          // Send a broadcast out with latest time stamp from portal item
+          Intent localIntent =
+              new Intent(Constants.BROADCAST_ACTION)
+                  // Puts the status into the Intent
+                  .putExtra(Constants.LATEST_DATE, timeInMillis);
+          broadcastIntent(localIntent);
+        }
+      });
+    }
+
+  }
+
+  private void broadcastIntent(Intent intent) {
+    // Broadcasts the Intent to receivers in this app.
+    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    Log.i(TAG, "Broadcast sent");
   }
 }

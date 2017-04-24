@@ -27,6 +27,7 @@
 package com.esri.android.mapbook.mapbook;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -42,15 +43,19 @@ import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.MapBookApplication;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.FileManager;
+import com.esri.android.mapbook.download.PortalItemUpdateService;
 import com.esri.android.mapbook.util.ActivityUtils;
 
 import javax.inject.Inject;
+import java.io.File;
 
 public class MapbookActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
   private static final int PERMISSION_TO_READ_EXTERNAL_STORAGE = 5;
   private View mLayout = null;
   private final String TAG = MapbookActivity.class.getSimpleName();
+  private boolean permissionsChecked = false;
+  private boolean permissionsGranted = false;
 
   @Inject  FileManager mFilemanager;
   @Inject MapbookPresenter mMapbookPresenter;
@@ -76,11 +81,21 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
       }
       toolbar.setNavigationIcon(null);
     }
-    // Can we read external storage?
-    checkForReadStoragePermissions();
 
   }
 
+  @Override
+  final public void onPostResume(){
+    super.onPostResume();
+    Log.i(TAG,"onPostResume");
+    if (!permissionsChecked){
+      // Can we read external storage?
+      checkForReadStoragePermissions();
+    }
+    if (permissionsGranted){
+      initialize();
+    }
+  }
   /**
    * Create the mapbook fragment and load the presenter
    */
@@ -94,6 +109,8 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     // Load presenter
     DaggerMapbookComponent.builder().applicationComponent(((MapBookApplication) getApplication())
         .getComponent()).applicationModule(new ApplicationModule(getApplicationContext())).mapbookModule(new MapbookModule(mapbookFragment)).build().inject(this);
+
+    checkForUpdatedPortalItem();
   }
 
   /**
@@ -115,7 +132,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
       // Request for reading external storage
       if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
         // Permission has been granted
-        initialize();
+        permissionsGranted = true;
 
       } else {
         // Permission request was denied.
@@ -132,9 +149,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     final int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
       Log.i(TAG, "This application has proper permissions for reading external storage...");
-
-      // Proceed with remaining logic
-      initialize();
+      permissionsGranted = true;
 
     } else {
       Log.i(TAG, "This application DOES NOT have appropriate permissions for reading external storage");
@@ -142,5 +157,15 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
           new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
           PERMISSION_TO_READ_EXTERNAL_STORAGE);
     }
+    // We've checked permissions and shouldn't re-check in the future
+    permissionsChecked = true;
+  }
+  /**
+   * Start an IntentService to check for any
+   * updated versions of the mobile map package
+   */
+  public void checkForUpdatedPortalItem() {
+    Intent portalItemUpdateServiceIntent = new Intent(this, PortalItemUpdateService.class);
+    this.startService(portalItemUpdateServiceIntent);
   }
 }
