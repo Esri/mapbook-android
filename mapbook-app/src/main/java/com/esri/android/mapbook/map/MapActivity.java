@@ -38,7 +38,9 @@ import com.esri.android.mapbook.util.ActivityUtils;
 
 import javax.inject.Inject;
 
-
+/**
+ *  The MapActivity processes the Intent, starts the MapFragment and injects dependencies.
+ */
 public class MapActivity extends AppCompatActivity {
 
   private final static String TAG = MapActivity.class.getSimpleName();

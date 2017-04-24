@@ -48,7 +48,7 @@ import java.util.List;
  * The adapter used by the recycler view to display maps in the mapbook
  */
 
-public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleViewHolder>{
+ class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleViewHolder>{
 
   private final static String TAG = MapbookAdapter.class.getSimpleName();
 
@@ -93,8 +93,7 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
   @Override final public void onBindViewHolder(final RecycleViewHolder holder, final int position) {
     holder.mapName.setText("Map "+ (position+1));
     final ArcGISMap map = maps.get(position);
-
-    //TODO Question for Dan, do we need to wait until the map is loaded before binding to view holder?
+    // Wait for the map to load before getting the Item
     map.addDoneLoadingListener(new Runnable() {
       @Override public void run() {
         final Item i = map.getItem();
@@ -115,10 +114,10 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
     return maps.size();
   }
 
-  final public void setMaps(final List<ArcGISMap> mapList){
+  final void setMaps(final List<ArcGISMap> mapList){
     maps = mapList;
   }
-  final public class RecycleViewHolder extends RecyclerView.ViewHolder{
+  final class RecycleViewHolder extends RecyclerView.ViewHolder{
 
     public final ImageView mapThumbnail;
     public final TextView mapName;
@@ -135,8 +134,8 @@ public class MapbookAdapter extends RecyclerView.Adapter<MapbookAdapter.RecycleV
 
     /**
      *
-     * @param item
-     * @param listener
+     * @param item - Item - Contains thumbnail data
+     * @param listener - OnItemClickListener called when the thumbnail image is tapped
      */
     public void bind (final Item item, final OnItemClickListener listener){
       final String title = item.getTitle();

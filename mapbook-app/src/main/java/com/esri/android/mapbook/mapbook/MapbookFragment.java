@@ -96,7 +96,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
 
     // The filter's action is BROADCAST_ACTION
     IntentFilter latestVersionIntentFilter = new IntentFilter(
-        Constants.BROADCAST_ACTION);
+        getString(R.string.BROADCAST_ACTION));
 
     // Instantiates a new DownloadStateReceiver
     PortalItemBroadcastReceiver mDownloadStateReceiver =
@@ -300,7 +300,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
        * Handle Intents here.
        */
       if (intent.getExtras() !=  null){
-        long timeUpdated = intent.getLongExtra(Constants.LATEST_DATE,0);
+        long timeUpdated = intent.getLongExtra(getString(R.string.LATEST_DATE),0);
         Log.i(TAG, "Time updated in milliseconds " + timeUpdated);
       }else{
         Log.i(TAG, "No update time found");

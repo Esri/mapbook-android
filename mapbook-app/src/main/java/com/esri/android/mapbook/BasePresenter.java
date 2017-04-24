@@ -23,6 +23,11 @@
  */
 package com.esri.android.mapbook;
 
+/**
+ * All presenter interfaces in this application extend this interface.
+ * The base interface defines the entry point for defining presentation logic.
+ * It's the Presenter in the MVP pattern.
+ */
 
 public interface BasePresenter {
   void start();

@@ -49,6 +49,11 @@ import com.esri.android.mapbook.util.ActivityUtils;
 import javax.inject.Inject;
 import java.io.File;
 
+/**
+ * The MapbookActivity checks for READ EXTERNAL storage permissions, starts the background service
+ * used to check if new versions of the mapbook exist, injects dependencies, and
+ * adds the MapbookFragment.
+ */
 public class MapbookActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
   private static final int PERMISSION_TO_READ_EXTERNAL_STORAGE = 5;
