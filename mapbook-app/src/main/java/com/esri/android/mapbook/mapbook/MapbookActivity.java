@@ -56,6 +56,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
   private final String TAG = MapbookActivity.class.getSimpleName();
   private boolean permissionsChecked = false;
   private boolean permissionsGranted = false;
+  private boolean initialized = false;
 
   @Inject  FileManager mFilemanager;
   @Inject MapbookPresenter mMapbookPresenter;
@@ -92,7 +93,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
       // Can we read external storage?
       checkForReadStoragePermissions();
     }
-    if (permissionsGranted){
+    if (permissionsGranted && !initialized){
       initialize();
     }
   }
@@ -111,6 +112,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
         .getComponent()).applicationModule(new ApplicationModule(getApplicationContext())).mapbookModule(new MapbookModule(mapbookFragment)).build().inject(this);
 
     checkForUpdatedPortalItem();
+    initialized = true;
   }
 
   /**
