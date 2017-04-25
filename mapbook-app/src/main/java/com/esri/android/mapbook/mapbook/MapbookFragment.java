@@ -45,11 +45,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.esri.android.mapbook.Constants;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.download.DownloadActivity;
 import com.esri.android.mapbook.map.MapActivity;
-import com.esri.android.mapbook.download.PortalItemUpdateService;
 import com.esri.android.mapbook.util.ActivityUtils;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Item;
@@ -98,12 +96,12 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     IntentFilter latestVersionIntentFilter = new IntentFilter(
         getString(R.string.BROADCAST_ACTION));
 
-    // Instantiates a new DownloadStateReceiver
-    PortalItemBroadcastReceiver mDownloadStateReceiver =
+    // Instantiates a new PortalItemBroadcastReceiver
+    PortalItemBroadcastReceiver portalItemBroadcastReceiver =
         new PortalItemBroadcastReceiver();
-    // Registers the DownloadStateReceiver and its intent filters
+    // Registers the PortalItemBroadcastReceiver and its intent filters
     LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-        mDownloadStateReceiver,
+        portalItemBroadcastReceiver,
         latestVersionIntentFilter);
   }
 
@@ -134,6 +132,14 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     mRecyclerView.setAdapter(mapAdapter);
     layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
+    // Set on click listener for download button
+    ImageView downloadBtn = (ImageView) getActivity().findViewById(R.id.imageDownloadBtn);
+    downloadBtn.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Log.i(TAG, "Download button clicked");
+        downloadMapbook(mPresenter.getMapbookPath());
+      }
+    });
     return null;
   }
 
@@ -226,7 +232,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     final TextView txtDescription = (TextView) mRoot.findViewById(R.id.txtDescription);
     txtDescription.setText("Unable to download the mobile map package");
 
-    final ImageView btnRefresh = (ImageView) mRoot.findViewById(R.id.imageView2);
+    final ImageView btnRefresh = (ImageView) mRoot.findViewById(R.id.imageDownloadBtn);
     btnRefresh.setVisibility(View.INVISIBLE);
   }
 
@@ -254,13 +260,21 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   }
 
   /**
-   * Start an IntentService to check for any
-   * updated versions of the mobile map package
+   * Toggle the visibility of the download button and text
+   * @param display - boolean, true for show, false for hide
    */
-  @Override public void checkForUpdatedPortalItem() {
-    Intent portalItemUpdateServiceIntent = new Intent(getActivity(), PortalItemUpdateService.class);
-    getActivity().startService(portalItemUpdateServiceIntent);
+  @Override public void toggleDownloadVisibility(boolean display) {
+    ImageView downloadBtn = (ImageView) getActivity().findViewById(R.id.imageDownloadBtn);
+    TextView txtUpdateFile = (TextView) getActivity().findViewById(R.id.txtUpdate);
+    if (display){
+      downloadBtn.setVisibility(View.VISIBLE);
+      txtUpdateFile.setVisibility(View.VISIBLE);
+    }else{
+      downloadBtn.setVisibility(View.INVISIBLE);
+      txtUpdateFile.setVisibility(View.INVISIBLE);
+    }
   }
+
 
   /**
    * Logic for handling results from the returned activity.
@@ -272,9 +286,11 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   final public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
     if (requestCode == REQUEST_DOWNLOAD){
       if (resultCode == RESULT_OK){
-        // If the result comes back from download successfully, there's nothing
-        // the fragment does actively in response.  Logic is executed in the
-        // presenter which is started when this fragment resumes onActivityResult.
+        // If the result comes back from download successfully, ensure the download image
+        // and text are set back to invisible.
+        toggleDownloadVisibility(false);
+        // Logic is executed in the presenter which is
+        // started when this fragment resumes onActivityResult.
         Log.i(TAG, "Retrieved file = " + data.getStringExtra(FILE_PATH));
 
       }else if (resultCode == RESULT_CANCELED){
@@ -282,16 +298,19 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
           final String error = data.getStringExtra(ERROR_STRING);
           Toast.makeText(getActivity(),error, Toast.LENGTH_LONG).show();
           //TODO:  Better view needed here for displaying errors
-
         }
-
       }
     }
   }
 
+  /**
+   * This class listens for broadcasts from the PortalItemUpdateService.
+   * If there's a newer version of the mobile map package available,
+   * show a download button in the UI.
+   */
   private class PortalItemBroadcastReceiver extends BroadcastReceiver {
 
-    // Prevents instantiation
+    // Prevents instantiation TODO: Does this comment make sense?
     private PortalItemBroadcastReceiver(){}
 
     @Override public void onReceive(Context context, Intent intent) {
@@ -301,9 +320,8 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
        */
       if (intent.getExtras() !=  null){
         long timeUpdated = intent.getLongExtra(getString(R.string.LATEST_DATE),0);
-        Log.i(TAG, "Time updated in milliseconds " + timeUpdated);
-      }else{
-        Log.i(TAG, "No update time found");
+        mPresenter.processBroadcast(timeUpdated);
+        Log.i(TAG, "Portal item's modified date in milliseconds " + timeUpdated);
       }
     }
   }

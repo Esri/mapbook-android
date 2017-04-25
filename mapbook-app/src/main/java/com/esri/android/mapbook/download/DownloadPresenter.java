@@ -51,7 +51,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
   @Inject ConnectivityManager mConnectivityManager;
   @Inject Portal mPortal;
   @Inject @Named("mPortalItemId") String mPortalItemId;
-  @Inject CredentialCryptographer mCredentialManager;
+  @Inject CredentialCryptographer mCredentialCryptographer;
 
   private final DownloadContract.View mView;
   private boolean mSignInStarted = false;
@@ -138,9 +138,9 @@ public class DownloadPresenter implements DownloadContract.Presenter {
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
           String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
           Log.i(TAG, "JSON credential cache = " + jsonCredentials);
-          String filePath = mCredentialManager.rsaEncryptData(jsonCredentials.getBytes(), Constants.CRED_FILE);
+          String filePath = mCredentialCryptographer.rsaEncryptData(jsonCredentials.getBytes(), Constants.CRED_FILE);
           Log.i(TAG, "Data encrypted to file path = " + filePath);
-          String reconstitutedData = mCredentialManager.rsaDecrpytData(Constants.CRED_FILE);
+          String reconstitutedData = mCredentialCryptographer.rsaDecrpytData(Constants.CRED_FILE);
           Log.i(TAG, "Reconstituted JSON data = " + reconstitutedData);
 
           Log.i(TAG, "User " + mPortal.getCredential().getUsername());
@@ -172,5 +172,27 @@ public class DownloadPresenter implements DownloadContract.Presenter {
   @Override final public boolean checkForInternetConnectivity() {
     final NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
     return  networkInfo != null && networkInfo.isConnected();
+  }
+  /**
+   * Update mobile map package with latest version
+   */
+  @Override public void update() {
+    //Check for valid credentials
+    String credentialString = mCredentialCryptographer.rsaDecrpytData(Constants.CRED_FILE);
+
+    if (credentialString == null){
+      Log.i(TAG,"Downloading with cached credentials");
+      AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
+      final Handler handler = new Handler() ;
+      handler.post(new Runnable() {
+        @Override public void run() {
+          // Download map book
+          downloadMapbook();
+        }
+      });
+    }else{
+      Log.i(TAG,"Credential cache cannot be reconstituted from null credentials");
+      signIn();
+    }
   }
 }
