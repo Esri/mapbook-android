@@ -31,15 +31,13 @@ import android.util.Log;
 import java.io.File;
 
 public class FileManager implements FileManagerContract {
-  private static File extStorDir;
-  private static String  extSDCardDirName;
+  private static File fileDir;
   private static String fileName;
   private static String extension;
   private static File file;
 
-  public FileManager(final File directory, final String subfolderName, final String fName, final String fileExtension){
-    extStorDir = directory;
-    extSDCardDirName = subfolderName;
+  public FileManager(final File directory,  final String fName, final String fileExtension){
+    fileDir = directory;
     fileName = fName;
     extension = fileExtension;
     file = new File(createMobileMapPackageFilePath());
@@ -51,7 +49,7 @@ public class FileManager implements FileManagerContract {
    * @return String
    */
   final public String createMobileMapPackageFilePath(){
-    return extStorDir.getAbsolutePath() + File.separator + extSDCardDirName + File.separator + fileName + extension;
+    return fileDir.getAbsolutePath() +  File.separator + fileName + extension;
   }
 
   /**

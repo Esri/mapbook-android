@@ -28,6 +28,7 @@ package com.esri.android.mapbook.mapbook;
 
 import android.content.Context;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.FileManager;
 import com.esri.android.mapbook.util.MapbookApplicationScope;
@@ -60,18 +61,11 @@ public class MapbookModule {
   @Provides
   @MapbookApplicationScope
   public FileManager providesFileManager(@Named("storageDirectory") final File storageDirectory,
-      @Named("dataDirectory") final String subfolderName,
       @Named("mmpkName") final String fileName,
       @Named("mmpkExtension") final String extension) {
-    return new FileManager(storageDirectory, subfolderName, fileName, extension);
+    return new FileManager(storageDirectory, fileName, extension);
   }
 
-  @Provides
-  @MapbookApplicationScope
-  @Named("dataDirectory")
-  public String providesDataDirectory(final Context context) {
-    return context.getString(R.string.offlineDirectory);
-  }
 
   @Provides
   @MapbookApplicationScope
@@ -86,5 +80,14 @@ public class MapbookModule {
   @Provides
   @MapbookApplicationScope
   @Named("storageDirectory")
-  public File providesStorageDirectory() { return Environment.getExternalStorageDirectory(); }
+  public File providesStorageDirectory(final Context context) {
+    File directory = null;
+    File [] files = ContextCompat.getExternalFilesDirs(context, null);
+    if (files.length > 0){
+      directory = files[0];
+    }else{
+      directory = Environment.getDataDirectory();
+    }
+    return directory;
+  }
 }
