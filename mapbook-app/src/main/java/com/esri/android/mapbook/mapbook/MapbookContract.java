@@ -96,6 +96,17 @@ public interface MapbookContract {
      * @param display - boolean, true for show, false for hide
      */
     void toggleDownloadVisibility(boolean display);
+
+    /**
+     * Set the user name field in the view
+     * @param userName - String
+     */
+    void setUserName(String userName);
+
+    /**
+     * Exit the application
+     */
+    void exit();
   }
 
   interface Presenter extends BasePresenter {
@@ -122,5 +133,10 @@ public interface MapbookContract {
      * @param modifiedMillis long - The milliseconds representing modified date of PortalItem
      */
     void processBroadcast(long modifiedMillis);
+
+    /**
+     * Logout current user
+     */
+    void logout();
   }
 }

@@ -24,6 +24,7 @@
 package com.esri.android.mapbook;
 
 import android.content.Context;
+import com.esri.android.mapbook.download.CredentialCryptographer;
 import com.esri.android.mapbook.util.MapbookApplicationScope;
 import dagger.Module;
 import dagger.Provides;
@@ -50,5 +51,10 @@ public class ApplicationModule {
     return mContext;
   }
 
+  @Provides
+  @MapbookApplicationScope
+  public CredentialCryptographer providesCredentialManager(final Context context){
+    return new CredentialCryptographer( context);
+  }
 
 }

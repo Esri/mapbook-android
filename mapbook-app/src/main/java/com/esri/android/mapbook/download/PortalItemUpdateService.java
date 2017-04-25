@@ -57,6 +57,9 @@ public class PortalItemUpdateService extends IntentService {
 
   public PortalItemUpdateService() {super("PortalItemUpdateService"); }
 
+  /**
+   * Inject dependencies
+   */
   @Override
   public void onCreate() {
     super.onCreate();
@@ -74,8 +77,7 @@ public class PortalItemUpdateService extends IntentService {
   @Override protected void onHandleIntent(@Nullable Intent intent) {
     Log.i(TAG, "onHandleIntent");
 
-    //String credentialString = mCredCryptographer.decryptData(Constants.CRED_FILE);
-    String credentialString = mCredCryptographer.rsaDecrpytData(Constants.CRED_FILE);
+    String credentialString = mCredCryptographer.decrypt();
 
     if (credentialString == null){
       // Send a broadcast out with latest time stamp from portal item
@@ -104,9 +106,12 @@ public class PortalItemUpdateService extends IntentService {
         }
       });
     }
-
   }
 
+  /**
+   * Send the broadcast
+   * @param intent - Intent
+   */
   private void broadcastIntent(Intent intent) {
     // Broadcasts the Intent to receivers in this app.
     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
