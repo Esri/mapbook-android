@@ -187,6 +187,7 @@ public class MapFragment extends Fragment implements MapContract.View {
     }
   }
 
+
   /**
    * Set up search view in the menu
    * @param menu - Menu

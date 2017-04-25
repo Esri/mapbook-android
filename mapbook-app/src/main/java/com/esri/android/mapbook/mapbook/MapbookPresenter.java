@@ -29,11 +29,13 @@ package com.esri.android.mapbook.mapbook;
 import android.util.Log;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
 import com.esri.android.mapbook.data.FileManager;
+import com.esri.android.mapbook.download.CredentialCryptographer;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Item;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
+import com.esri.arcgisruntime.security.AuthenticationManager;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -52,6 +54,8 @@ public class MapbookPresenter implements MapbookContract.Presenter {
   private String mPath = null;
 
   private final String TAG = MapbookPresenter.class.getSimpleName();
+
+  @Inject CredentialCryptographer mCredentialCryptopgrapher;
 
   @Inject
   MapbookPresenter (final FileManager manager, final MapbookContract.View view) {
@@ -179,5 +183,25 @@ public class MapbookPresenter implements MapbookContract.Presenter {
     }else{
       mView.toggleDownloadVisibility(false);
     }
+  }
+
+  /**
+   * Logout user by deleting cred_file and mobile map package
+   */
+  @Override public void logout() {
+    // Clear credential cache
+    AuthenticationManager.CredentialCache.clear();
+
+    // Delete cred file
+    boolean deletedCred =  mCredentialCryptopgrapher.deleteCredentialFile();
+    Log.i(TAG, "Credentials deleted "+ deletedCred);
+    // Delete mmpk
+    boolean deletedMmpk = mCredentialCryptopgrapher.deleteMobileMapPackage(mPath);
+    Log.i(TAG, "MMPK deleted "+ deletedMmpk);
+    // Unset user name in action bar
+    mView.setUserName("");
+
+    // Exit app
+    mView.exit();
   }
 }

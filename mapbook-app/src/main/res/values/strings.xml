@@ -23,4 +23,5 @@
     <string name="query_hint">Search by address or name</string>
     <string name="BROADCAST_ACTION">com.esri.android.mapbook.BROADCAST</string>
     <string name="LATEST_DATE">com.esri.android.mapbook.LATEST_DATE</string>
+    <string name="logout">LOGOUT</string>
 </resources>

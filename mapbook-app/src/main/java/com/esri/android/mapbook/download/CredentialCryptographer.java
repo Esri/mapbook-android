@@ -26,9 +26,11 @@
 
 package com.esri.android.mapbook.download;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Path;
+import android.os.Build;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -36,6 +38,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 import com.esri.android.mapbook.Constants;
+import com.esri.android.mapbook.mapbook.MapbookContract;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
@@ -51,12 +54,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -71,6 +69,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Class that handles AES encryption and decryption of a string and persisting
@@ -94,10 +93,51 @@ public class CredentialCryptographer {
   }
 
   /**
+   * Entry point for encrypting bytes. Encryption/decryption
+   * methods are dependent on underlying OS Version.
+   * @param bytes - array of bytes to encrypt
+   * @param filePath - the name of the file with encrypted bytes
+   * @return - File path representing location of encrypted data.
+   */
+  public String encrypt(final byte[] bytes, final String filePath){
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      return encryptData(bytes, filePath);
+    }else{
+      return rsaEncryptData(bytes, filePath);
+    }
+  }
+
+  /**
+   * Entry point for decrypting a file given
+   * @return String representing decrypted data
+   */
+  public String decrypt(){
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      return decryptData(Constants.CRED_FILE);
+    }else{
+      return rsaDecryptData();
+    }
+  }
+
+  /**
+   * Delete credential file
+   * @return boolean, true for successful delete, false for unsuccessful deletion
+   */
+  public boolean deleteCredentialFile(){
+    String filePath = getFilePath(Constants.CRED_FILE);
+    File f = new File(filePath);
+    return f.delete();
+  }
+
+  public boolean deleteMobileMapPackage(String mmpkPath){
+    File f = new File(mmpkPath);
+    return f.delete();
+  }
+  /**
    * Create a new key in the Keystore
    */
+  @TargetApi(23)
   private void createNewKey(){
-    SecretKey key = null;
     try {
       KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
       keyStore.load(null);
@@ -114,22 +154,19 @@ public class CredentialCryptographer {
       keyGenerator.generateKey();
       Log.i(TAG, "Key created in Keystore");
 
-    }catch (KeyStoreException kS){
+    }catch (KeyStoreException | InvalidAlgorithmParameterException | NoSuchProviderException | NoSuchAlgorithmException | CertificateException  kS){
       Log.e(TAG, kS.getMessage());
-    } catch (InvalidAlgorithmParameterException iape){
-      Log.e(TAG, iape.getMessage());
-    } catch (NoSuchProviderException prov){
-      Log.e(TAG, prov.getMessage());
-    } catch (NoSuchAlgorithmException algoE){
-      Log.e(TAG, algoE.getMessage());
-    } catch (CertificateException cert){
-      Log.e(TAG, cert.getMessage());
     } catch (IOException io){
       Log.e(TAG, io.getMessage());
     }
   }
 
-  private String getFilePath(String fileName){
+  /**
+   * Return the absolute file path for a file in the app directory
+   * @param fileName - String representing file name
+   * @return String representing the absolute path to the file
+   */
+  private final String getFilePath(String fileName){
     String filepath = null;
     File [] dirFiles = ContextCompat.getExternalFilesDirs(mContext, null);
     for (int x=0 ; x < dirFiles.length ; x++){
@@ -145,7 +182,7 @@ public class CredentialCryptographer {
     }
     // We don't encrypt files if we can't store them...
     if (dirFiles.length == 0){
-      Log.i(TAG, "Data cannot be encrypted because no external directories were found.");
+      Log.i(TAG, "Data cannot be encrypted because no app directories were found.");
       return filepath;
     }else{
       File f = dirFiles[0];
@@ -159,86 +196,79 @@ public class CredentialCryptographer {
    * @param fileName - String name of the encrypted file
    * @return String representing encrypted file or null if encryption fails.
    */
-  public String encryptData(byte [] input,  String fileName){
+  @TargetApi(23)
+  private String encryptData(byte [] input,  String fileName){
 
     String encryptedDataFilePath = null;
     try {
-      KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
       keyStore.load(null);
 
       // Does the key need to be created?
       if (!keyStore.containsAlias(ALIAS)){
         createNewKey();
       }
-      SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
+      final SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
 
-      Cipher c = Cipher.getInstance(CIPHER_TYPE);
+      final Cipher c = Cipher.getInstance(CIPHER_TYPE);
       c.init(Cipher.ENCRYPT_MODE, key);
 
       // Persist the GCMParamterSpec src bytes to file for later use
-      FileOutputStream fos = mContext.openFileOutput(Constants.IV_FILE, Context.MODE_PRIVATE);
+       final FileOutputStream fos = mContext.openFileOutput(Constants.IV_FILE, Context.MODE_PRIVATE);
       fos.write(c.getIV());
       fos.close();
 
       encryptedDataFilePath = getFilePath(fileName);
 
-      CipherOutputStream cipherOutputStream =
+      final CipherOutputStream cipherOutputStream =
           new CipherOutputStream(
               new FileOutputStream(encryptedDataFilePath), c);
       cipherOutputStream.write(input);
       cipherOutputStream.close();
 
-    }catch (KeyStoreException ke){
+    }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | NoSuchPaddingException
+        | UnrecoverableKeyException | InvalidKeyException ke){
       Log.e(TAG, ke.getMessage());
-    } catch (NoSuchAlgorithmException algoE){
-      Log.e(TAG, algoE.getMessage());
-    } catch (CertificateException cert){
-      Log.e(TAG, cert.getMessage());
-    } catch (IOException io){
+    }catch (IOException io){
       Log.e(TAG, io.getMessage());
-    } catch (NoSuchPaddingException pad){
-      Log.e(TAG, pad.getMessage());
-    } catch (UnrecoverableKeyException un){
-      Log.e(TAG, un.getMessage());
-    }catch (InvalidKeyException key){
-      Log.e(TAG, key.getMessage());
     }
     return encryptedDataFilePath;
   }
 
   /**
    * Decrypt contents of File given path and
-   * return a string representation
+   * return a string representation of the decrypted data
    * @param encryptedDataFileName String representing file name
    * @return Decrypted string or null if decryption fails
    */
-  public String decryptData (String encryptedDataFileName){
+  @TargetApi(23)
+  private String decryptData (String encryptedDataFileName){
     String decryptedString = null;
     try {
 
-      KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
       keyStore.load(null);
-      SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
+      final SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
 
-      Cipher c = Cipher.getInstance(CIPHER_TYPE);
+      final Cipher c = Cipher.getInstance(CIPHER_TYPE);
 
-      File file = new File(getFilePath(encryptedDataFileName));
-      int fileSize = (int)file.length();
+      final File file = new File(getFilePath(encryptedDataFileName));
+      final int fileSize = (int)file.length();
 
       // Need to provide the GCMSpec used by the
       // encryption method when decrypting
-      File ivFile = new File(getFilePath(Constants.IV_FILE));
-      int ivFileSize =  (int) ivFile.length();
-      FileInputStream fis = mContext.openFileInput(Constants.IV_FILE);
-      byte [] GMspec = new byte[ivFileSize];
+      final File ivFile = new File(getFilePath(Constants.IV_FILE));
+      final int ivFileSize =  (int) ivFile.length();
+      final FileInputStream fis = mContext.openFileInput(Constants.IV_FILE);
+      final byte [] GMspec = new byte[ivFileSize];
       fis.read(GMspec, 0, ivFileSize);
       fis.close();
       c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, GMspec));
 
-      CipherInputStream cipherInputStream =
+       final CipherInputStream cipherInputStream =
           new CipherInputStream(new FileInputStream(getFilePath(encryptedDataFileName)),
               c);
-      byte[] fileContentBytes = new byte[fileSize];
+      final byte[] fileContentBytes = new byte[fileSize];
 
       int index = 0;
       int nextByte;
@@ -249,30 +279,46 @@ public class CredentialCryptographer {
       decryptedString = new String(fileContentBytes, 0, index, "UTF-8");
       Log.v(TAG, "Decrypted string = " + decryptedString);
 
-    }catch (KeyStoreException ke){
+    }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException |
+        NoSuchPaddingException | UnrecoverableKeyException | InvalidKeyException |
+        InvalidAlgorithmParameterException |UnsupportedEncodingException ke){
       Log.e(TAG, ke.getMessage());
-    } catch (NoSuchAlgorithmException algoE){
-      Log.e(TAG, algoE.getMessage());
-    } catch (CertificateException cert){
-      Log.e(TAG, cert.getMessage());
-    } catch (IOException io){
+    } catch (IOException io) {
       Log.e(TAG, io.getMessage());
-    } catch (NoSuchPaddingException pad){
-      Log.e(TAG, pad.getMessage());
-    } catch (UnrecoverableKeyException un){
-      Log.e(TAG, un.getMessage());
-    } catch (InvalidKeyException key){
-      Log.e(TAG, key.getMessage());
-    } catch (InvalidAlgorithmParameterException iape){
-      Log.e(TAG, iape.getMessage());
     }
 
     return decryptedString;
   }
-  public String rsaEncryptData(byte[] data, String filename){
+  /**  Workflow for RSA based encryption for pre-M devices
+   *
+   Step One: Key Generation
+    1. Generate a pair of RSA keys;
+    2. Generate a random AES key;
+    3. Encrypt the AES key using the RSA public key;
+    4. Store the encrypted AES key in Preferences.
+
+   Step Two: Encrypting and Storing the data
+    1. Retrieve the encrypted AES key from Preferences;
+    2. Decrypt the above to obtain the AES key using the private RSA key;
+    3. Encrypt the data using the AES key;
+
+   Step Three: Retrieving and decrypting the data
+    1. Retrieve the encrypted AES key from Preferences;
+    2. Decrypt the above to obtain the AES key using the private RSA key;
+    3. Decrypt the data using the AES key
+   */
+
+  /**
+   * Encrypt data with RSA generated keys
+   * @param data - Array of bytes to encrypt
+   * @param filename - String name of file
+   * @return - String representing absolute path to encrypted file or
+   * null if an error occurs.
+   */
+  private String rsaEncryptData(final byte[] data, final String filename){
     String encryptedDataFilePath = null;
     try {
-      KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
       keyStore.load(null);
 
       // Do the keys need to be created?
@@ -281,58 +327,54 @@ public class CredentialCryptographer {
         generateAndStoreAESKey();
       }
 
-      // Do we have an AES key?
-      Key aesKey = getSecretKey(mContext);
-
-
-      byte [] encryptedBytes = encrypt(mContext, data);
+      final byte [] encryptedBytes = encrypt(mContext, data);
 
       // Write contents to file in app directory
-      String encodeFileName = getFilePath(Constants.CRED_FILE);
+      encryptedDataFilePath = getFilePath(Constants.CRED_FILE);
 
-   //   FileOutputStream fos = mContext.openFileOutput(encodeFileName, Context.MODE_PRIVATE);
-      FileOutputStream fos = new FileOutputStream(new File(encodeFileName));
+      final FileOutputStream fos = new FileOutputStream(new File(encryptedDataFilePath));
       fos.write(encryptedBytes);
       fos.close();
 
 
-    }catch (KeyStoreException ke){
+    }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ke){
       Log.e(TAG, ke.getMessage());
-    } catch (NoSuchAlgorithmException algoE){
-      Log.e(TAG, algoE.getMessage());
-    } catch (CertificateException cert){
-      Log.e(TAG, cert.getMessage());
-    } catch (IOException io){
-      Log.e(TAG, io.getMessage());
     } catch (Exception e){
       Log.e(TAG, e.getMessage());
     }
     return encryptedDataFilePath;
   }
 
-  public String rsaDecrpytData(String encryptedFileName ){
-    String decrpyptedData = null;
+  /**
+   * Decrypt the credentials file and return decrypted data as a string
+   * @return - String representing decrypted data or null if an exception occurs
+   */
+  private String rsaDecryptData( ){
+    String decryptedData = null;
     try {
-      File credFle = new File(getFilePath(Constants.CRED_FILE));
-      byte [] data = Files.toByteArray(credFle);
-      byte[] decryptedBytes = decrypt(mContext, data);
-      decrpyptedData = new String(decryptedBytes, Charsets.UTF_8);
+      final File credFle = new File(getFilePath(Constants.CRED_FILE));
+      final byte [] data = Files.toByteArray(credFle);
+      final byte[] decryptedBytes = decrypt(mContext, data);
+      decryptedData = new String(decryptedBytes, Charsets.UTF_8);
 
     }catch (IOException e){
       Log.e(TAG,e.getMessage());
     }
-    return decrpyptedData;
+    return decryptedData;
   }
 
+  /**
+   * Generate RSA keys in the keystore
+   */
   private void generateRsaKeys(){
     try {
-      KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
       keyStore.load(null);
       // Generate the RSA key pairs
       if (!keyStore.containsAlias(ALIAS)) {
         // Generate a key pair for encryption
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
+        final Calendar start = Calendar.getInstance();
+        final Calendar end = Calendar.getInstance();
         end.add(Calendar.YEAR, 30);
         KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(mContext)
             .setAlias(ALIAS)
@@ -341,60 +383,57 @@ public class CredentialCryptographer {
             .setStartDate(start.getTime())
             .setEndDate(end.getTime())
             .build();
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, AndroidKeyStore);
+        final KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, AndroidKeyStore);
         kpg.initialize(spec);
         kpg.generateKeyPair();
       }
-    }catch (KeyStoreException ke){
+    }catch (KeyStoreException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchProviderException | CertificateException ke){
         Log.e(TAG, ke.getMessage());
-    } catch (NoSuchAlgorithmException algoE){
-        Log.e(TAG, algoE.getMessage());
-    } catch (InvalidAlgorithmParameterException iape){
-        Log.e(TAG, iape.getMessage());
-    }catch(NoSuchProviderException prov) {
-      Log.e(TAG, prov.getMessage());
-    } catch (CertificateException c){
-      Log.e(TAG, c.getMessage());
-    } catch (IOException e){
+    }catch (IOException e){
       Log.e(TAG, e.getMessage());
     }
 
   }
   private byte[] rsaEncrypt(byte[] secret) throws Exception{
-    KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+    final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
     keyStore.load(null);
-    KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(ALIAS, null);
-    // Encrypt the text
-    Cipher inputCipher = Cipher.getInstance(RSA_MODE, "AndroidOpenSSL");
+    final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(ALIAS, null);
+
+    final Cipher inputCipher = Cipher.getInstance(RSA_MODE, "AndroidOpenSSL");
     inputCipher.init(Cipher.ENCRYPT_MODE, privateKeyEntry.getCertificate().getPublicKey());
 
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, inputCipher);
+    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    final CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, inputCipher);
     cipherOutputStream.write(secret);
     cipherOutputStream.close();
 
-    byte[] vals = outputStream.toByteArray();
-    return vals;
+    return outputStream.toByteArray();
   }
 
-  private  byte[]  rsaDecrypt(byte[] encrypted) throws Exception {
-    KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+  /**
+   * Use RSA keys to encrypt an array of bytes
+   * @param encrypted - array of bytes to be encrypted
+   * @return encrypted byte array
+   * @throws Exception - Exception
+   */
+  private byte[] rsaDecrypt(final byte[] encrypted) throws Exception {
+    final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
     keyStore.load(null);
 
-    KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry(ALIAS, null);
-    Cipher output = Cipher.getInstance(RSA_MODE, "AndroidOpenSSL");
+    final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry(ALIAS, null);
+    final Cipher output = Cipher.getInstance(RSA_MODE, "AndroidOpenSSL");
     output.init(Cipher.DECRYPT_MODE, privateKeyEntry.getPrivateKey());
-    CipherInputStream cipherInputStream = new CipherInputStream(
+     final CipherInputStream cipherInputStream = new CipherInputStream(
         new ByteArrayInputStream(encrypted), output);
-    ArrayList<Byte> values = new ArrayList<>();
+    final List<Byte> values = new ArrayList<>();
     int nextByte;
     while ((nextByte = cipherInputStream.read()) != -1) {
       values.add((byte)nextByte);
     }
 
-    byte[] bytes = new byte[values.size()];
+    final byte[] bytes = new byte[values.size()];
     for(int i = 0; i < bytes.length; i++) {
-      bytes[i] = values.get(i).byteValue();
+      bytes[i] = values.get(i);
     }
     return bytes;
   }
@@ -403,100 +442,89 @@ public class CredentialCryptographer {
    * This is done one time only, when data is first encrypted.
    */
   private void generateAndStoreAESKey(){
-    SharedPreferences pref = mContext.getSharedPreferences(SHARED_PREFENCE_NAME, Context.MODE_PRIVATE);
-    String enryptedKeyB64 = pref.getString(ENCRYPTED_KEY, null);
-    if (enryptedKeyB64 == null) {
-      byte[] key = new byte[16];
-      SecureRandom secureRandom = new SecureRandom();
+    final SharedPreferences pref = mContext.getSharedPreferences(SHARED_PREFENCE_NAME, Context.MODE_PRIVATE);
+    String encryptedKey64 = pref.getString(ENCRYPTED_KEY, null);
+    if (encryptedKey64 == null) {
+      final byte[] key = new byte[16];
+      final SecureRandom secureRandom = new SecureRandom();
       secureRandom.nextBytes(key);
       byte[] encryptedKey = new byte[0];
       try {
         encryptedKey = rsaEncrypt(key);
-      } catch (Exception e) {
-        e.printStackTrace();
+      } catch (final Exception e) {
+        Log.e(TAG, e.getMessage());
       }
-      enryptedKeyB64 = Base64.encodeToString(encryptedKey, Base64.DEFAULT);
+      encryptedKey64 = Base64.encodeToString(encryptedKey, Base64.DEFAULT);
       SharedPreferences.Editor edit = pref.edit();
-      edit.putString(ENCRYPTED_KEY, enryptedKeyB64);
+      edit.putString(ENCRYPTED_KEY, encryptedKey64);
       edit.commit();
 
+      // Log out the encrypted key
       if (pref.contains(ENCRYPTED_KEY)){
         Log.i(TAG,pref.getString(ENCRYPTED_KEY,"Not found"));
       }
     }
   }
-  public byte[] encrypt(Context context, byte[] input) {
+
+  /**
+   * Return bytes that have been encrypted
+   * with a key stored in the SharedPreferences.
+   * @param context - Context
+   * @param input - array of bytes
+   * @return Encrypted array of bytes or null if an exception is encountered
+   */
+  private byte[] encrypt(Context context, byte[] input) {
     Cipher c = null;
     byte[] encodedBytes = null;
     try {
       c = Cipher.getInstance(AES_MODE, "BC");
-
+      // Encrypt bytes with a key stored in SharedPreferences
       c.init(Cipher.ENCRYPT_MODE, getSecretKey(mContext));
       encodedBytes = new byte[0];
       encodedBytes = c.doFinal(input);
 
-    } catch (IllegalBlockSizeException e) {
-      e.printStackTrace();
-    } catch (BadPaddingException e) {
-      e.printStackTrace();
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
-    } catch (NoSuchProviderException e) {
-      e.printStackTrace();
-    } catch (NoSuchPaddingException e) {
-      e.printStackTrace();
+    } catch (IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException |
+        NoSuchProviderException | NoSuchPaddingException e) {
+      Log.e(TAG, e.getMessage());
     } catch (Exception e){
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage());
     }
     return encodedBytes;
   }
 
-
-  public byte[] decrypt(Context context, byte[] encrypted) {
+  /**
+   * Decrypt a given set of encrypted bytes
+   * @param context - Context
+   * @param encrypted - array of bytes
+   * @return Array of decoded bytes or null if exception encountered
+   */
+  private byte[] decrypt(Context context, byte[] encrypted) {
     byte [] decodedBytes = null;
     try{
-      Cipher c = Cipher.getInstance(AES_MODE, "BC");
+      final Cipher c = Cipher.getInstance(AES_MODE, "BC");
       c.init(Cipher.DECRYPT_MODE, getSecretKey(context));
       decodedBytes = c.doFinal(encrypted);
-    }catch (IllegalBlockSizeException e) {
-      e.printStackTrace();
-    } catch (BadPaddingException e) {
-      e.printStackTrace();
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
-    } catch (NoSuchProviderException e) {
-      e.printStackTrace();
-    } catch (NoSuchPaddingException e) {
-      e.printStackTrace();
-    } catch (Exception e) {
-      e.printStackTrace();
+    }catch ( final IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException |
+        NoSuchProviderException | NoSuchPaddingException | InvalidKeyException e) {
+      Log.e(TAG, e.getMessage());
+    } catch ( final Exception e){
+      Log.e(TAG, e.getMessage());
     }
     return decodedBytes;
   }
 
+  /**
+   * Retrieve encrypted key from SharedPreferences
+   * @param context - Context
+   * @return - decrpyted Key
+   * @throws Exception
+   */
   private Key getSecretKey(Context context) throws Exception{
-    SharedPreferences pref = context.getSharedPreferences(SHARED_PREFENCE_NAME, Context.MODE_PRIVATE);
-    String enryptedKeyB64 = pref.getString(ENCRYPTED_KEY, null);
+    final SharedPreferences pref = context.getSharedPreferences(SHARED_PREFENCE_NAME, Context.MODE_PRIVATE);
+    final String enryptedKeyB64 = pref.getString(ENCRYPTED_KEY, null);
     // need to check null, omitted here
-    byte[] encryptedKey = Base64.decode(enryptedKeyB64, Base64.DEFAULT);
-    byte[] key = rsaDecrypt(encryptedKey);
+    final byte[] encryptedKey = Base64.decode(enryptedKeyB64, Base64.DEFAULT);
+    final byte[] key = rsaDecrypt(encryptedKey);
     return new SecretKeySpec(key, "AES");
   }
-  /**
-   * Key Generation
-   Generate a pair of RSA keys;
-   Generate a random AES key;
-   Encrypt the AES key using the RSA public key;
-   Store the encrypted AES key in Preferences.
-
-   Encrypting and Storing the data
-   Retrieve the encrypted AES key from Preferences;
-   Decrypt the above to obtain the AES key using the private RSA key;
-   Encrypt the data using the AES key;
-
-   Retrieving and decrypting the data
-   Retrieve the encrypted AES key from Preferences;
-   Decrypt the above to obtain the AES key using the private RSA key;
-   Decrypt the data using the AES key
-   */
 }

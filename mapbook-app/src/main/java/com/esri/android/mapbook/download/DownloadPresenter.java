@@ -136,14 +136,16 @@ public class DownloadPresenter implements DownloadContract.Presenter {
         mView.dismissProgressDialog();
 
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
+
+          // Grab credential cache contents
           String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
           Log.i(TAG, "JSON credential cache = " + jsonCredentials);
-          String filePath = mCredentialCryptographer.rsaEncryptData(jsonCredentials.getBytes(), Constants.CRED_FILE);
-          Log.i(TAG, "Data encrypted to file path = " + filePath);
-          String reconstitutedData = mCredentialCryptographer.rsaDecrpytData(Constants.CRED_FILE);
-          Log.i(TAG, "Reconstituted JSON data = " + reconstitutedData);
 
-          Log.i(TAG, "User " + mPortal.getCredential().getUsername());
+          // Encrypt json credentials on device
+          String filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(), Constants.CRED_FILE);
+          Log.i(TAG, "Data encrypted to file path = " + filePath);
+
+          // Start up a new thread dedicated to downloading mobile map package
           final Handler handler = new Handler() ;
           handler.post(new Runnable() {
             @Override public void run() {
@@ -152,7 +154,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
             }
           });
 
-        }else{
+        }else{ // There was a problem loading the Portal
           final String errorMessage = mPortal.getLoadError().getMessage();
           final String cause = mPortal.getLoadError().getCause().getMessage();
           final String message = "Error accessing portal, " + errorMessage +". " + cause;
@@ -178,11 +180,15 @@ public class DownloadPresenter implements DownloadContract.Presenter {
    */
   @Override public void update() {
     //Check for valid credentials
-    String credentialString = mCredentialCryptographer.rsaDecrpytData(Constants.CRED_FILE);
+    String credentialString = mCredentialCryptographer.decrypt();
 
     if (credentialString == null){
       Log.i(TAG,"Downloading with cached credentials");
+
+      // Rehydrate the credential cache from the decrypted file
       AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
+
+      //Kick off a thread to handle mobile map package download
       final Handler handler = new Handler() ;
       handler.post(new Runnable() {
         @Override public void run() {
@@ -191,7 +197,8 @@ public class DownloadPresenter implements DownloadContract.Presenter {
         }
       });
     }else{
-      Log.i(TAG,"Credential cache cannot be reconstituted from null credentials");
+      // If credentials are null, we'll prompt user for credentials
+      Log.i(TAG,"Credential cache cannot be reconstituted from null credentials, so asking using to provide credentials...");
       signIn();
     }
   }

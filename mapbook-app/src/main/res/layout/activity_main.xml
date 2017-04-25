@@ -27,7 +27,10 @@
             android:background="?attr/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:layout_weight="1.02"></android.support.v7.widget.Toolbar>
+            android:layout_weight="1.02">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sandie"/>
+        </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
 

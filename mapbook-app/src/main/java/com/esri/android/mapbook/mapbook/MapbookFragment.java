@@ -39,9 +39,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,6 +104,32 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   }
 
   /**
+   * Set up the menu options for the view
+   * @param menu
+   * @param inflater
+   */
+  @Override
+  public final void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+    getActivity().getMenuInflater().inflate(R.menu.logout, menu);
+
+  }
+
+  /**
+   * Logic for menu options
+   * @param menuItem - MenuItem
+   * @return boolean
+   */
+  @Override
+  public boolean onOptionsItemSelected(final MenuItem menuItem){
+    super.onOptionsItemSelected(menuItem);
+
+    if (menuItem.getItemId() == R.id.action_logout){
+      mPresenter.logout();
+    }
+
+    return true;
+  }
+  /**
    * Set up the view components and attach a listener
    * to the map book adapter
    * @param inflater - LayoutInflater
@@ -140,6 +164,10 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         downloadMapbook(mPresenter.getMapbookPath());
       }
     });
+
+    // Enable fragment to have options menu
+    setHasOptionsMenu(true);
+
     return null;
   }
 
@@ -275,6 +303,21 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     }
   }
 
+  /**
+   * Set the user name field in the view
+   * @param userName - String
+   */
+  @Override public void setUserName(String userName) {
+    TextView txtUserName = (TextView) getActivity().findViewById(R.id.txtUserName);
+    txtUserName.setText(userName);
+  }
+
+  /**
+   * Exit the app
+   */
+  @Override public void exit() {
+    getActivity().finish();
+  }
 
   /**
    * Logic for handling results from the returned activity.

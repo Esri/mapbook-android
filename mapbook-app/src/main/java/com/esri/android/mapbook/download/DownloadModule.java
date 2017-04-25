@@ -115,9 +115,5 @@ public  class DownloadModule {
   public ConnectivityManager providesNetworkInfo(){
     return (ConnectivityManager) mActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
   }
-  @Provides
-  @MapbookApplicationScope
-  public CredentialCryptographer providesCredentialManager(final Context context){
-    return new CredentialCryptographer( context);
-  }
+
 }

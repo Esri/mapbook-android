@@ -38,6 +38,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.MapBookApplication;
@@ -83,7 +85,10 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
     if (toolbar != null){
       final ActionBar actionBar = (this).getSupportActionBar();
       if (actionBar != null){
+
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
         actionBar.setTitle(R.string.title);
+        actionBar.setCustomView(R.layout.logged_in_user);
       }
       toolbar.setNavigationIcon(null);
     }
