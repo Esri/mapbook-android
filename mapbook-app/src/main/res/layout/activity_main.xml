@@ -99,7 +99,7 @@
                 android:layout_marginTop="16dp"/>
 
         <ImageView
-                android:id="@+id/imageView2"
+                android:id="@+id/imageDownloadBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_refresh_black_36px"
@@ -108,6 +108,12 @@
                 app:layout_constraintLeft_toRightOf="@id/txtDescription"
                  android:layout_marginLeft="21dp"/>
 
+        <TextView android:layout_width="100dp"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/txtUpdate"
+                  app:layout_constraintLeft_toRightOf="@id/txtDescription"
+                  app:layout_constraintTop_toBottomOf="@+id/imageDownloadBtn" android:visibility="invisible"
+                  android:text="Download latest version" android:lines="2" android:textAlignment="center"/>
 
         <android.support.v7.widget.RecyclerView
                 android:layout_width="930dp"

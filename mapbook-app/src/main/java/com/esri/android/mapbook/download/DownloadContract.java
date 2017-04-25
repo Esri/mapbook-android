@@ -53,6 +53,11 @@ public interface DownloadContract {
      * @return true for connected, false for no connection
      */
     boolean checkForInternetConnectivity();
+
+    /**
+     * Update mobile map package with latest version
+     */
+    void update();
   }
   interface View extends BaseView<DownloadContract.Presenter> {
     /**

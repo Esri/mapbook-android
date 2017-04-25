@@ -163,4 +163,21 @@ public class MapbookPresenter implements MapbookContract.Presenter {
   @Override public String getMapbookPath() {
     return mPath;
   }
+
+  /**
+   * Process PortalItemUpdateService Broadcast.  If
+   * there's a newer version of the mobile map package
+   * on the server, then enable the download button.
+   * @param modifiedMillis long - The milliseconds representing modified date of PortalItem
+   */
+  @Override public void processBroadcast(long modifiedMillis) {
+    long mapbookModMillis = mFileManager.getModifiedDate();
+    Log.i(TAG, "Mapbook modified milliseconds "+ mapbookModMillis);
+
+    if (modifiedMillis > mapbookModMillis){
+      mView.toggleDownloadVisibility(true);
+    }else{
+      mView.toggleDownloadVisibility(false);
+    }
+  }
 }

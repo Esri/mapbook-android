@@ -90,12 +90,12 @@ public interface MapbookContract {
      */
     void downloadMapbook(String path);
 
-
     /**
-     * Start an IntentService to check for any
-     * updated versions of the mobile map package
+     * Toggle the visibility of
+     * the download button
+     * @param display - boolean, true for show, false for hide
      */
-    void checkForUpdatedPortalItem();
+    void toggleDownloadVisibility(boolean display);
   }
 
   interface Presenter extends BasePresenter {
@@ -117,5 +117,10 @@ public interface MapbookContract {
      */
     String getMapbookPath();
 
+    /**
+     * Process PortalItemUpdateService Broadcast
+     * @param modifiedMillis long - The milliseconds representing modified date of PortalItem
+     */
+    void processBroadcast(long modifiedMillis);
   }
 }
