@@ -141,6 +141,8 @@ public class DownloadPresenter implements DownloadContract.Presenter {
           String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
           Log.i(TAG, "JSON credential cache = " + jsonCredentials);
 
+          mCredentialCryptographer.setUserNameFromCredentials(jsonCredentials);
+
           // Encrypt json credentials on device
           String filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(), Constants.CRED_FILE);
           Log.i(TAG, "Data encrypted to file path = " + filePath);
