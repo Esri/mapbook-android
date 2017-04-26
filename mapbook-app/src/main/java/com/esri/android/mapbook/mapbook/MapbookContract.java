@@ -138,5 +138,10 @@ public interface MapbookContract {
      * Logout current user
      */
     void logout();
+
+    /**
+     * Get username from credentials
+     */
+    String getUserName();
   }
 }

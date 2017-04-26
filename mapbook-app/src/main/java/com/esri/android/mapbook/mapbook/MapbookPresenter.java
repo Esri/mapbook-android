@@ -36,6 +36,10 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Item;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.security.AuthenticationManager;
+import com.esri.arcgisruntime.security.Credential;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -74,7 +78,7 @@ public class MapbookPresenter implements MapbookContract.Presenter {
 
   @Override final public void start() {
     checkForMapbook();
-
+    checkForUserName();
   }
 
   /**
@@ -133,8 +137,6 @@ public class MapbookPresenter implements MapbookContract.Presenter {
         }
       });
 
-      // Kick off an intent service to check for any mobile map package updates
-     // mView.checkForUpdatedPortalItem();
 
     }else{
       // Mapbook file isn't found, try downloading it...
@@ -203,5 +205,23 @@ public class MapbookPresenter implements MapbookContract.Presenter {
 
     // Exit app
     mView.exit();
+  }
+
+  /**
+   * Check for user credentials on the device using the
+   * stored credential file.
+   */
+  @Override public String getUserName() {
+    return mCredentialCryptopgrapher.getUserName();
+  }
+  /**
+   * Get the user name if known
+   */
+  private void checkForUserName(){
+    if (getUserName()== null){
+      mCredentialCryptopgrapher.setUserNameFromCredentials(null);
+    }
+    mView.setUserName(getUserName());
+
   }
 }

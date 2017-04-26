@@ -34,13 +34,18 @@ import android.os.Build;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 import com.esri.android.mapbook.Constants;
 import com.esri.android.mapbook.mapbook.MapbookContract;
+import com.esri.arcgisruntime.security.Credential;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.crypto.SecretKey;
 import javax.crypto.KeyGenerator;
@@ -85,6 +90,7 @@ public class CredentialCryptographer {
   private static final String ALIAS = "CRED_KEY";
   private static final String ENCRYPTED_KEY = "ENCRYPTED_KEY";
   private static final String SHARED_PREFENCE_NAME = "MAPBOOK_PREFERENCES";
+  private String mUserName = null;
 
   @Inject Context mContext;
 
@@ -526,5 +532,43 @@ public class CredentialCryptographer {
     final byte[] encryptedKey = Base64.decode(enryptedKeyB64, Base64.DEFAULT);
     final byte[] key = rsaDecrypt(encryptedKey);
     return new SecretKeySpec(key, "AES");
+  }
+
+  /**
+   * Set the username based on encrypted credentials
+   * @param jsonCredentialCache - A nullable JSON string representing CredentialCache
+   *                            If null, then an attempt is made to extract user name from
+   *                            encrypted credential file on device.
+   */
+  public void setUserNameFromCredentials(@Nullable String jsonCredentialCache){
+    if (jsonCredentialCache == null){
+      jsonCredentialCache = this.decrypt();
+    }
+    if (jsonCredentialCache != null){
+      try {
+        JSONArray jsonArray = new JSONArray(jsonCredentialCache);
+        if (jsonArray.get(0) != null){
+          JSONObject jsonCredentials = jsonArray.getJSONObject(0);
+          if (jsonCredentials.has("credential")){
+            String jCred = jsonCredentials.getString("credential");
+            Credential credential = Credential.fromJson(jCred);
+
+            if (credential != null){
+              mUserName = credential.getUsername();
+              Log.i(TAG, "****SETTING user name from credentials " + mUserName);
+            }
+          }
+        }
+      } catch (JSONException e) {
+        Log.e(TAG, "JSON exception " + e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Get the user name
+   */
+  public String getUserName(){
+    return mUserName;
   }
 }
