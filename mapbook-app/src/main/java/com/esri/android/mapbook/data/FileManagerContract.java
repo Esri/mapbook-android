@@ -57,4 +57,8 @@ public interface FileManagerContract {
    */
   String fileExists();
 
+  /**
+   * Delete mobile map package
+   */
+  boolean deleteMmpk();
 }

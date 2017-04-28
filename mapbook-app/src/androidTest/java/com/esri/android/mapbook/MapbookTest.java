@@ -72,9 +72,9 @@ public class MapbookTest {
   @Test
   public void checkIfTitleIsDisplayed() throws Exception{
     Assert.assertNotNull(solo.waitForActivity("MapbookActivity", 2000));
-    ActionBar actionBar = mActivityRule.getActivity().getSupportActionBar();
+    final ActionBar actionBar = mActivityRule.getActivity().getSupportActionBar();
     Assert.assertNotNull(actionBar);
-    Assert.assertTrue(actionBar.getTitle() == solo.getString(R.string.title));
+    Assert.assertTrue(solo.waitForText( solo.getString(R.string.title)));
   }
 
   /**
@@ -87,34 +87,34 @@ public class MapbookTest {
     Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
     Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
 
-    TextView title = (TextView) solo.getView(R.id.txtTitle);
+    final TextView title = (TextView) solo.getView(R.id.txtTitle);
     Assert.assertTrue(title.isShown());
     Assert.assertTrue(title.getText().length() > 0);
     Log.i(TAG, title.getText().toString());
 
-    TextView bookDate = (TextView) solo.getView(R.id.txtCrDate);
+    final TextView bookDate = (TextView) solo.getView(R.id.txtCrDate);
     Assert.assertTrue(bookDate.isShown());
     Assert.assertTrue(bookDate.getText().length() > 0);
     Log.i(TAG, bookDate.getText().toString());
 
-    TextView bookSize = (TextView) solo.getView(R.id.txtFileSize);
+    final TextView bookSize = (TextView) solo.getView(R.id.txtFileSize);
     Assert.assertTrue(bookSize.isShown());
     Assert.assertTrue(bookSize.getText().length()>0);
     Log.i(TAG, bookSize.getText().toString());
 
-    TextView mapCount = (TextView) solo.getView(R.id.txtMapCount);
+    final TextView mapCount = (TextView) solo.getView(R.id.txtMapCount);
     Assert.assertTrue(mapCount.isShown());
     Assert.assertTrue(mapCount.getText().length() > 0);
     Log.i(TAG, mapCount.getText().toString());
 
     // We assume at least one map is present
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
+    final RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
     Assert.assertTrue(mapRecyclerView.isShown());
     Assert.assertTrue(mapRecyclerView.getAdapter().getItemCount()>0);
 
     // Get the content for the map
-    ArrayList<View> views = solo.getViews(mapRecyclerView);
-    ImageView mapThumbnail = solo.getImage(0);
+    final ArrayList<View> views = solo.getViews(mapRecyclerView);
+    final ImageView mapThumbnail = solo.getImage(0);
     solo.clickOnView(mapThumbnail);
     Assert.assertNotNull(mapThumbnail);
     Assert.assertTrue(mapThumbnail.isShown());
@@ -132,7 +132,7 @@ public class MapbookTest {
     solo.waitForActivity("MapbookActivity", 2000);
     solo.waitForFragmentById(R.id.mapbookViewFragment);
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
+    final RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
     Assert.assertNotNull(mapRecyclerView);
     // Click on first item in recycler view
     solo.clickOnView(mapRecyclerView);
@@ -141,7 +141,7 @@ public class MapbookTest {
     solo.waitForActivity(MapActivity.class, 2000);
     solo.waitForFragmentById(R.id.mapLinearLayout);
 
-    MapView mapView = (MapView) solo.getView(R.id.mapView);
+    final MapView mapView = (MapView) solo.getView(R.id.mapView);
     mapView.getMap().addDoneLoadingListener(new Runnable() {
       @Override public void run() {
         solo.sleep(1000);
@@ -160,13 +160,13 @@ public class MapbookTest {
 
     navigateToMap();
 
-    SearchView search = (SearchView) solo.getView(R.id.action_search);
+    final SearchView search = (SearchView) solo.getView(R.id.action_search);
     Assert.assertTrue(search.isShown());
 
-    ActionMenuItemView bookmarks = (ActionMenuItemView) solo.getView(R.id.bookmarks);
+    final ActionMenuItemView bookmarks = (ActionMenuItemView) solo.getView(R.id.bookmarks);
     Assert.assertTrue(bookmarks.isShown());
 
-    ActionMenuItemView layers = (ActionMenuItemView) solo.getView(R.id.action_layers);
+    final ActionMenuItemView layers = (ActionMenuItemView) solo.getView(R.id.action_layers);
     Assert.assertTrue(layers.isShown());
   }
 
@@ -178,11 +178,11 @@ public class MapbookTest {
 
     navigateToMap();
 
-    ActionMenuItemView layers = (ActionMenuItemView) solo.getView(R.id.action_layers);
+    final ActionMenuItemView layers = (ActionMenuItemView) solo.getView(R.id.action_layers);
     solo.clickOnView(layers);
 
     // Clicking on layers should reveal the TOC
-    View toc = solo.getView(R.id.mapLayerRecyclerView);
+    final View toc = solo.getView(R.id.mapLayerRecyclerView);
     Assert.assertTrue(toc.isShown());
 
     solo.sleep(2000);
@@ -201,10 +201,10 @@ public class MapbookTest {
 
     navigateToMap();
 
-    SearchView search = (SearchView) solo.getView(R.id.action_search);
+    final SearchView search = (SearchView) solo.getView(R.id.action_search);
     solo.clickOnView(search);
 
-    String queryHint = search.getQueryHint().toString();
+    final String queryHint = search.getQueryHint().toString();
 
     Assert.assertTrue(queryHint.equalsIgnoreCase(mActivityRule.getActivity().getString(R.string.query_hint)));
 
@@ -212,12 +212,12 @@ public class MapbookTest {
     solo.takeScreenshot("SEARCH_VIEW");
 
     // Type some text into search view
-    EditText editText = solo.getEditText(0);
+    final EditText editText = solo.getEditText(0);
     solo.typeText(editText, "123");
     solo.sleep(4000);
 
     // Grab the list displaying the suggestions
-    ListView listView = solo.getView(ListView.class,0);
+    final ListView listView = solo.getView(ListView.class,0);
     Assert.assertNotNull(listView);
     // Assert there are at least 1  or more suggestions
     Assert.assertTrue(listView.getAdapter().getCount()>0);
@@ -229,11 +229,11 @@ public class MapbookTest {
 
     navigateToMap();
 
-    SearchView search = (SearchView) solo.getView(R.id.action_search);
+    final SearchView search = (SearchView) solo.getView(R.id.action_search);
     solo.clickOnView(search);
 
     // Type an address into search view
-    EditText editText = solo.getEditText(0);
+    final EditText editText = solo.getEditText(0);
     solo.typeText(editText, "123 Spring Ave");
 
     solo.sleep(4000);
@@ -241,35 +241,33 @@ public class MapbookTest {
     solo.sleep(4000);
 
     // Map view should have a pin in the graphics layer
-    MapView mapView = (MapView) solo.getView(R.id.mapView);
-    Graphic graphic = mapView.getGraphicsOverlays().get(0).getGraphics().get(0);
+    final MapView mapView = (MapView) solo.getView(R.id.mapView);
+    final Graphic graphic = mapView.getGraphicsOverlays().get(0).getGraphics().get(0);
     Assert.assertNotNull(graphic);
     Assert.assertTrue(mapView.getGraphicsOverlays().get(0).getGraphics().size()==1);
-    solo.takeScreenshot("SEARCH_RESULT");
+
 
     solo.sleep(3000);
 
     // Simulate the same location being tapped
-    Geometry point = graphic.getGeometry();
-    android.graphics.Point derivedScreenLocation = deriveScreenPointForLocation(point);
+    final Geometry point = graphic.getGeometry();
+    final android.graphics.Point derivedScreenLocation = deriveScreenPointForLocation(point);
     solo.clickOnScreen(derivedScreenLocation.x, derivedScreenLocation.y);
 
     solo.sleep(3000);
-
     Assert.assertTrue(solo.waitForView(R.id.calloutLinearLayout));
-
-
   }
-  private android.graphics.Point deriveScreenPointForLocation(Geometry location){
-    MapView mapView = (MapView) solo.getView(R.id.mapView) ;
-    DisplayMetrics metrics = new DisplayMetrics();
-    mActivityRule.getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);;
-    float screenHeight = metrics.heightPixels;
-    float mapViewHeight = mapView.getHeight();
-    float buffer = screenHeight - mapViewHeight;
-    Point projectedPoint = (Point) GeometryEngine.project(location, SpatialReference.create(3857));
 
-    android.graphics.Point derivedPoint =  mapView.locationToScreen(projectedPoint);
+  private android.graphics.Point deriveScreenPointForLocation(final Geometry location){
+    final MapView mapView = (MapView) solo.getView(R.id.mapView) ;
+    final DisplayMetrics metrics = new DisplayMetrics();
+    mActivityRule.getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);;
+    final float screenHeight = metrics.heightPixels;
+    final float mapViewHeight = mapView.getHeight();
+    final float buffer = screenHeight - mapViewHeight;
+    final Point projectedPoint = (Point) GeometryEngine.project(location, SpatialReference.create(3857));
+
+    final android.graphics.Point derivedPoint =  mapView.locationToScreen(projectedPoint);
 
     return new android.graphics.Point(derivedPoint.x,derivedPoint.y+Math.round(buffer));
 
@@ -302,13 +300,13 @@ public class MapbookTest {
     boolean bookmarkExtentsDiffer = false;
 
     // Click on the second bookmark
-    RecyclerView bookmarkRecylerView = (RecyclerView) bookmarkView;
-    int bookmarkCount = bookmarkRecylerView.getAdapter().getItemCount();
+    final RecyclerView bookmarkRecylerView = (RecyclerView) bookmarkView;
+    final int bookmarkCount = bookmarkRecylerView.getAdapter().getItemCount();
     if (bookmarkCount > 1) {
       for (int x = 0; x < bookmarkCount; x++) {
         solo.clickInRecyclerView(x);
         solo.sleep(2000);
-        double bookmarkScale = mapView.getMapScale();
+        final double bookmarkScale = mapView.getMapScale();
         Log.i(TAG, mapScale + " bookmark scale "+ bookmarkScale);
         if (bookmarkScale != mapScale) {
           bookmarkExtentsDiffer = true;
@@ -343,7 +341,7 @@ public class MapbookTest {
     Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
     Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
 
-    RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
+    final RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
     Assert.assertNotNull(mapRecyclerView);
     // Click on first item in recycler view
     solo.clickOnView(mapRecyclerView);

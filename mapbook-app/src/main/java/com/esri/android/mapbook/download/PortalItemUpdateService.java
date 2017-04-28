@@ -32,7 +32,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.esri.android.mapbook.ApplicationModule;
-import com.esri.android.mapbook.Constants;
 import com.esri.android.mapbook.MapBookApplication;
 import com.esri.android.mapbook.R;
 import com.esri.arcgisruntime.portal.Portal;
@@ -74,14 +73,14 @@ public class PortalItemUpdateService extends IntentService {
    * Broadcast the modified date for a given portal item
    * @param intent - Intent
    */
-  @Override protected void onHandleIntent(@Nullable Intent intent) {
+  @Override protected void onHandleIntent(@Nullable final Intent intent) {
     Log.i(TAG, "onHandleIntent");
 
-    String credentialString = mCredCryptographer.decrypt();
+    final String credentialString = mCredCryptographer.decrypt();
 
     if (credentialString == null){
       // Send a broadcast out with latest time stamp from portal item
-      Intent errorIntent =
+      final Intent errorIntent =
           new Intent(getString(R.string.BROADCAST_ACTION));
       broadcastIntent(errorIntent);
     }else{
@@ -94,11 +93,11 @@ public class PortalItemUpdateService extends IntentService {
       portalItem.loadAsync();
       portalItem.addDoneLoadingListener(new Runnable() {
         @Override public void run() {
-          Calendar dateModified = portalItem.getModified();
-          long timeInMillis = dateModified.getTimeInMillis();
+          final Calendar dateModified = portalItem.getModified();
+          final long timeInMillis = dateModified.getTimeInMillis();
 
           // Send a broadcast out with latest time stamp from portal item
-          Intent localIntent =
+          final Intent localIntent =
               new Intent(getString(R.string.BROADCAST_ACTION))
                   // Puts the status into the Intent
                   .putExtra(getString(R.string.LATEST_DATE), timeInMillis);
@@ -112,7 +111,7 @@ public class PortalItemUpdateService extends IntentService {
    * Send the broadcast
    * @param intent - Intent
    */
-  private void broadcastIntent(Intent intent) {
+  private void broadcastIntent(final Intent intent) {
     // Broadcasts the Intent to receivers in this app.
     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     Log.i(TAG, "Broadcast sent");

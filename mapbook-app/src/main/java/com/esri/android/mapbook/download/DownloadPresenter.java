@@ -138,13 +138,13 @@ public class DownloadPresenter implements DownloadContract.Presenter {
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
 
           // Grab credential cache contents
-          String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
+          final String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
           Log.i(TAG, "JSON credential cache = " + jsonCredentials);
 
           mCredentialCryptographer.setUserNameFromCredentials(jsonCredentials);
 
           // Encrypt json credentials on device
-          String filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(), Constants.CRED_FILE);
+          final String filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(), Constants.CRED_FILE);
           Log.i(TAG, "Data encrypted to file path = " + filePath);
 
           // Start up a new thread dedicated to downloading mobile map package
@@ -182,7 +182,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
    */
   @Override public void update() {
     //Check for valid credentials
-    String credentialString = mCredentialCryptographer.decrypt();
+    final String credentialString = mCredentialCryptographer.decrypt();
 
     if (credentialString == null){
       Log.i(TAG,"Downloading with cached credentials");

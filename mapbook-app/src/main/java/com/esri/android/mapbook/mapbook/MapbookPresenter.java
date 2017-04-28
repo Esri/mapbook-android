@@ -27,6 +27,7 @@
 package com.esri.android.mapbook.mapbook;
 
 import android.util.Log;
+import com.esri.android.mapbook.Constants;
 import com.esri.android.mapbook.data.DataManagerCallbacks;
 import com.esri.android.mapbook.data.FileManager;
 import com.esri.android.mapbook.download.CredentialCryptographer;
@@ -36,10 +37,6 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Item;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.security.AuthenticationManager;
-import com.esri.arcgisruntime.security.Credential;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -176,14 +173,16 @@ public class MapbookPresenter implements MapbookContract.Presenter {
    * on the server, then enable the download button.
    * @param modifiedMillis long - The milliseconds representing modified date of PortalItem
    */
-  @Override public void processBroadcast(long modifiedMillis) {
-    long mapbookModMillis = mFileManager.getModifiedDate();
+  @Override public void processBroadcast(final long modifiedMillis) {
+    final long mapbookModMillis = mFileManager.getModifiedDate();
     Log.i(TAG, "Mapbook modified milliseconds "+ mapbookModMillis);
 
     if (modifiedMillis > mapbookModMillis){
       mView.toggleDownloadVisibility(true);
+      mView.setDownloadText(Constants.UPDATE_AVAILABLE);
     }else{
       mView.toggleDownloadVisibility(false);
+      mView.setDownloadText(Constants.NO_UPDATE_AVAILABLE);
     }
   }
 
@@ -195,10 +194,10 @@ public class MapbookPresenter implements MapbookContract.Presenter {
     AuthenticationManager.CredentialCache.clear();
 
     // Delete cred file
-    boolean deletedCred =  mCredentialCryptopgrapher.deleteCredentialFile();
+    final boolean deletedCred =  mCredentialCryptopgrapher.deleteCredentialFile();
     Log.i(TAG, "Credentials deleted "+ deletedCred);
     // Delete mmpk
-    boolean deletedMmpk = mCredentialCryptopgrapher.deleteMobileMapPackage(mPath);
+    final boolean deletedMmpk = mFileManager.deleteMmpk();
     Log.i(TAG, "MMPK deleted "+ deletedMmpk);
     // Unset user name in action bar
     mView.setUserName("");
@@ -214,6 +213,17 @@ public class MapbookPresenter implements MapbookContract.Presenter {
   @Override public String getUserName() {
     return mCredentialCryptopgrapher.getUserName();
   }
+
+  /**
+   * Update the mobile map package
+   */
+  @Override public void updateMapbook() {
+    // Delete existing one
+    mFileManager.deleteMmpk();
+    // Download new one
+    mView.downloadMapbook(mFileManager.createMobileMapPackageFilePath());
+  }
+
   /**
    * Get the user name if known
    */

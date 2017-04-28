@@ -39,4 +39,10 @@ public class Constants {
 
   // Name of the file for storing bytes for GCM algorithm
   public static final String IV_FILE = "iv_file";
+
+  // Message indicating a new mmpk is available
+  public static final String UPDATE_AVAILABLE = "Download latest version";
+
+  // Message indicating there's no update
+  public static final String NO_UPDATE_AVAILABLE = "You have the latest version";
 }

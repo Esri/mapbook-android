@@ -29,7 +29,6 @@ package com.esri.android.mapbook.download;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Path;
 import android.os.Build;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
@@ -39,7 +38,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 import com.esri.android.mapbook.Constants;
-import com.esri.android.mapbook.mapbook.MapbookContract;
 import com.esri.arcgisruntime.security.Credential;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -94,7 +92,7 @@ public class CredentialCryptographer {
 
   @Inject Context mContext;
 
-  public CredentialCryptographer(Context context){
+  public CredentialCryptographer(final Context context){
     mContext   = context;
   }
 
@@ -130,25 +128,21 @@ public class CredentialCryptographer {
    * @return boolean, true for successful delete, false for unsuccessful deletion
    */
   public boolean deleteCredentialFile(){
-    String filePath = getFilePath(Constants.CRED_FILE);
-    File f = new File(filePath);
+    final String filePath = getFilePath(Constants.CRED_FILE);
+    final File f = new File(filePath);
     return f.delete();
   }
 
-  public boolean deleteMobileMapPackage(String mmpkPath){
-    File f = new File(mmpkPath);
-    return f.delete();
-  }
   /**
    * Create a new key in the Keystore
    */
   @TargetApi(23)
   private void createNewKey(){
     try {
-      KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
       keyStore.load(null);
 
-      KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, AndroidKeyStore);
+      final KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, AndroidKeyStore);
 
       // Build one key to be used for encrypting and decrypting the file
       keyGenerator.init(
@@ -162,7 +156,7 @@ public class CredentialCryptographer {
 
     }catch (KeyStoreException | InvalidAlgorithmParameterException | NoSuchProviderException | NoSuchAlgorithmException | CertificateException  kS){
       Log.e(TAG, kS.getMessage());
-    } catch (IOException io){
+    } catch (final IOException io){
       Log.e(TAG, io.getMessage());
     }
   }
@@ -172,16 +166,16 @@ public class CredentialCryptographer {
    * @param fileName - String representing file name
    * @return String representing the absolute path to the file
    */
-  private final String getFilePath(String fileName){
+  private final String getFilePath(final String fileName){
     String filepath = null;
-    File [] dirFiles = ContextCompat.getExternalFilesDirs(mContext, null);
+    final File [] dirFiles = ContextCompat.getExternalFilesDirs(mContext, null);
     for (int x=0 ; x < dirFiles.length ; x++){
-      File f = dirFiles[x];
+      final File f = dirFiles[x];
       Log.i(TAG, f.getAbsolutePath());
       if (f.isDirectory()){
-        File [] contents = f.listFiles();
+        final File [] contents = f.listFiles();
         for (int y = 0; y < contents.length; y++){
-          File dirContent = contents[y];
+          final File dirContent = contents[y];
           Log.i(TAG, dirContent.getAbsolutePath());
         }
       }
@@ -191,7 +185,7 @@ public class CredentialCryptographer {
       Log.i(TAG, "Data cannot be encrypted because no app directories were found.");
       return filepath;
     }else{
-      File f = dirFiles[0];
+      final File f = dirFiles[0];
       filepath = f.getAbsolutePath() + File.separator + fileName;
     }
     return filepath;
@@ -203,7 +197,7 @@ public class CredentialCryptographer {
    * @return String representing encrypted file or null if encryption fails.
    */
   @TargetApi(23)
-  private String encryptData(byte [] input,  String fileName){
+  private String encryptData(final byte [] input,  final String fileName){
 
     String encryptedDataFilePath = null;
     try {
@@ -235,7 +229,7 @@ public class CredentialCryptographer {
     }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | NoSuchPaddingException
         | UnrecoverableKeyException | InvalidKeyException ke){
       Log.e(TAG, ke.getMessage());
-    }catch (IOException io){
+    }catch (final IOException io){
       Log.e(TAG, io.getMessage());
     }
     return encryptedDataFilePath;
@@ -248,7 +242,7 @@ public class CredentialCryptographer {
    * @return Decrypted string or null if decryption fails
    */
   @TargetApi(23)
-  private String decryptData (String encryptedDataFileName){
+  private String decryptData (final String encryptedDataFileName){
     String decryptedString = null;
     try {
 
@@ -289,7 +283,7 @@ public class CredentialCryptographer {
         NoSuchPaddingException | UnrecoverableKeyException | InvalidKeyException |
         InvalidAlgorithmParameterException |UnsupportedEncodingException ke){
       Log.e(TAG, ke.getMessage());
-    } catch (IOException io) {
+    } catch (final IOException io) {
       Log.e(TAG, io.getMessage());
     }
 
@@ -345,7 +339,7 @@ public class CredentialCryptographer {
 
     }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ke){
       Log.e(TAG, ke.getMessage());
-    } catch (Exception e){
+    } catch (final Exception e){
       Log.e(TAG, e.getMessage());
     }
     return encryptedDataFilePath;
@@ -363,7 +357,7 @@ public class CredentialCryptographer {
       final byte[] decryptedBytes = decrypt(mContext, data);
       decryptedData = new String(decryptedBytes, Charsets.UTF_8);
 
-    }catch (IOException e){
+    }catch (final IOException e){
       Log.e(TAG,e.getMessage());
     }
     return decryptedData;
@@ -382,7 +376,7 @@ public class CredentialCryptographer {
         final Calendar start = Calendar.getInstance();
         final Calendar end = Calendar.getInstance();
         end.add(Calendar.YEAR, 30);
-        KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(mContext)
+        final KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(mContext)
             .setAlias(ALIAS)
             .setSubject(new X500Principal("CN=" + ALIAS))
             .setSerialNumber(BigInteger.TEN)
@@ -395,12 +389,12 @@ public class CredentialCryptographer {
       }
     }catch (KeyStoreException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchProviderException | CertificateException ke){
         Log.e(TAG, ke.getMessage());
-    }catch (IOException e){
+    }catch (final IOException e){
       Log.e(TAG, e.getMessage());
     }
 
   }
-  private byte[] rsaEncrypt(byte[] secret) throws Exception{
+  private byte[] rsaEncrypt(final byte[] secret) throws Exception{
     final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
     keyStore.load(null);
     final KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(ALIAS, null);
@@ -461,7 +455,7 @@ public class CredentialCryptographer {
         Log.e(TAG, e.getMessage());
       }
       encryptedKey64 = Base64.encodeToString(encryptedKey, Base64.DEFAULT);
-      SharedPreferences.Editor edit = pref.edit();
+      final SharedPreferences.Editor edit = pref.edit();
       edit.putString(ENCRYPTED_KEY, encryptedKey64);
       edit.commit();
 
@@ -479,7 +473,7 @@ public class CredentialCryptographer {
    * @param input - array of bytes
    * @return Encrypted array of bytes or null if an exception is encountered
    */
-  private byte[] encrypt(Context context, byte[] input) {
+  private byte[] encrypt(final Context context, final byte[] input) {
     Cipher c = null;
     byte[] encodedBytes = null;
     try {
@@ -492,7 +486,7 @@ public class CredentialCryptographer {
     } catch (IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException |
         NoSuchProviderException | NoSuchPaddingException e) {
       Log.e(TAG, e.getMessage());
-    } catch (Exception e){
+    } catch (final Exception e){
       Log.e(TAG, e.getMessage());
     }
     return encodedBytes;
@@ -504,7 +498,7 @@ public class CredentialCryptographer {
    * @param encrypted - array of bytes
    * @return Array of decoded bytes or null if exception encountered
    */
-  private byte[] decrypt(Context context, byte[] encrypted) {
+  private byte[] decrypt(final Context context, final byte[] encrypted) {
     byte [] decodedBytes = null;
     try{
       final Cipher c = Cipher.getInstance(AES_MODE, "BC");
@@ -525,7 +519,7 @@ public class CredentialCryptographer {
    * @return - decrpyted Key
    * @throws Exception
    */
-  private Key getSecretKey(Context context) throws Exception{
+  private Key getSecretKey(final Context context) throws Exception{
     final SharedPreferences pref = context.getSharedPreferences(SHARED_PREFENCE_NAME, Context.MODE_PRIVATE);
     final String enryptedKeyB64 = pref.getString(ENCRYPTED_KEY, null);
     // need to check null, omitted here
@@ -546,12 +540,12 @@ public class CredentialCryptographer {
     }
     if (jsonCredentialCache != null){
       try {
-        JSONArray jsonArray = new JSONArray(jsonCredentialCache);
+        final JSONArray jsonArray = new JSONArray(jsonCredentialCache);
         if (jsonArray.get(0) != null){
-          JSONObject jsonCredentials = jsonArray.getJSONObject(0);
+          final JSONObject jsonCredentials = jsonArray.getJSONObject(0);
           if (jsonCredentials.has("credential")){
-            String jCred = jsonCredentials.getString("credential");
-            Credential credential = Credential.fromJson(jCred);
+            final String jCred = jsonCredentials.getString("credential");
+            final Credential credential = Credential.fromJson(jCred);
 
             if (credential != null){
               mUserName = credential.getUsername();
@@ -559,7 +553,7 @@ public class CredentialCryptographer {
             }
           }
         }
-      } catch (JSONException e) {
+      } catch (final JSONException e) {
         Log.e(TAG, "JSON exception " + e.getMessage());
       }
     }
