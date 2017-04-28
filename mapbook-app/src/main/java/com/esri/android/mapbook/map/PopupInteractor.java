@@ -58,7 +58,7 @@ public class PopupInteractor implements PopupInteractorContract {
     final PopupFieldFormat dateFormat = new PopupFieldFormat();
     dateFormat.setDateFormat(PopupFieldFormat.DateFormat.SHORT_DATE_SHORT_TIME);
 
-    PopupManager mPopupManager = new PopupManager(mContext, popup);
+    final PopupManager mPopupManager = new PopupManager(mContext, popup);
     final List<Entry> entries = new ArrayList<>();
     final List<PopupField> fields = mPopupManager.getDisplayedFields();
     for (final PopupField field : fields) {

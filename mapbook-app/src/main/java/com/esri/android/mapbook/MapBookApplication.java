@@ -60,7 +60,7 @@ public class MapBookApplication extends Application {
   }
 
   private final static class DaggerComponentInitializer {
-    public static ApplicationComponent init (MapBookApplication app){
+    public static ApplicationComponent init (final MapBookApplication app){
       return DaggerApplicationComponent.builder()
           .applicationModule(new ApplicationModule(app.getApplicationContext()))
           .build();

@@ -228,9 +228,12 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
 
         path =  data.getPath();
 
-      } catch (final Exception e) {
-        Log.e(TAG, "Async Task Exception " + e.getMessage());
-      } finally {
+      } catch (final FileNotFoundException  e) {
+        Log.e(TAG, e.getClass().getSimpleName()+ " " + e.getMessage());
+      } catch (final IOException e){
+        Log.e(TAG, e.getClass().getSimpleName()+ " " + e.getMessage());
+      }
+      finally {
         try {
           if (os != null)
             os.close();

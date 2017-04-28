@@ -44,11 +44,11 @@ public class ActivityUtils {
    * performed by the {@code fragmentManager}.
    *
    */
-  public static void addFragmentToActivity (FragmentManager fragmentManager,
-      Fragment fragment, int frameId) {
+  public static void addFragmentToActivity (final FragmentManager fragmentManager,
+      final Fragment fragment, final int frameId) {
     checkNotNull(fragmentManager);
     checkNotNull(fragment);
-    FragmentTransaction transaction = fragmentManager.beginTransaction();
+    final FragmentTransaction transaction = fragmentManager.beginTransaction();
     transaction.add(frameId, fragment);
     transaction.commit();
   }
@@ -58,11 +58,11 @@ public class ActivityUtils {
    * performed by the {@code fragmentManager}.
    *
    */
-  public static void addFragmentToActivity (FragmentManager fragmentManager,
-      Fragment fragment, String tag) {
+  public static void addFragmentToActivity (final FragmentManager fragmentManager,
+      final Fragment fragment, final String tag) {
     checkNotNull(fragmentManager);
     checkNotNull(fragment);
-    FragmentTransaction transaction = fragmentManager.beginTransaction();
+    final FragmentTransaction transaction = fragmentManager.beginTransaction();
     transaction.add(fragment, tag);
     transaction.commit();
   }
@@ -71,11 +71,11 @@ public class ActivityUtils {
    * @param calendar - Calendar
    * @return String with date format YEAR/MONTH/DAY
    */
-  public static String getDateString(Calendar calendar){
+  public static String getDateString(final Calendar calendar){
 
-    int year = calendar.get(Calendar.YEAR) ;
-    int month = calendar.get(Calendar.MONTH);
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
+    final int year = calendar.get(Calendar.YEAR) ;
+    final int month = calendar.get(Calendar.MONTH);
+    final int day = calendar.get(Calendar.DAY_OF_MONTH);
 
     return String.format("%4d/%02d/%02d",  year, month+1, day);
   }

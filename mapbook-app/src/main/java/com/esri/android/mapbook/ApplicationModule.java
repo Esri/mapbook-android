@@ -38,9 +38,9 @@ import dagger.Provides;
 @Module
 public class ApplicationModule {
 
-  private Context mContext;
+  private final Context mContext;
 
-  public ApplicationModule(Context context)
+  public ApplicationModule(final Context context)
   {
     mContext = context;
   }

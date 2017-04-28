@@ -107,6 +107,11 @@ public interface MapbookContract {
      * Exit the application
      */
     void exit();
+
+    /**
+     * Update the text for the download button
+     */
+    void setDownloadText(String text);
   }
 
   interface Presenter extends BasePresenter {
@@ -143,5 +148,10 @@ public interface MapbookContract {
      * Get username from credentials
      */
     String getUserName();
+
+    /**
+     * Update the mobile map package
+     */
+    void updateMapbook();
   }
 }

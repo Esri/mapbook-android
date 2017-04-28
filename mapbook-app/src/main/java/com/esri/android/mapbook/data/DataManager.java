@@ -51,7 +51,7 @@ public class DataManager implements DataManagerContract {
     mGeocodeParameters.getResultAttributeNames().add("*");
     mGeocodeParameters.setMaxResults(1);
 
-    ReverseGeocodeParameters mReverseGeocodeParameters = new ReverseGeocodeParameters();
+    final ReverseGeocodeParameters mReverseGeocodeParameters = new ReverseGeocodeParameters();
     mReverseGeocodeParameters.getResultAttributeNames().add("*");
     mReverseGeocodeParameters.setMaxResults(1);
   }

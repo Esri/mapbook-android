@@ -90,4 +90,16 @@ public class FileManager implements FileManagerContract {
     }
     return path;
   }
+
+  /**
+   * Delete the mobile map package
+   * @return boolean - true if deleted, false if not deleted.
+   */
+  @Override public boolean deleteMmpk() {
+    boolean fileDeleted = false;
+    if (file.exists()){
+      fileDeleted = file.delete();
+    }
+    return fileDeleted;
+  }
 }

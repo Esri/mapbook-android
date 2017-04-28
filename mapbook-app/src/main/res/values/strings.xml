@@ -2,7 +2,7 @@
     <string name="app_name">mapbook</string>
     <string name="title">My Offline Map Book</string>
     <string name="portal">https://www.arcgis.com</string>
-    <string name="portalId">1fe928ff591544fb814b8a2fbc944cae</string>
+    <string name="portalId">219e6bc23dc64b3696ab6bc4f09deadb</string>
     <string name="mobileMapPackageName">OfflineMapbook_v4</string>
     <string name="offlineDirectory">Data</string>
     <string name="mmpk_extension">.mmpk</string>

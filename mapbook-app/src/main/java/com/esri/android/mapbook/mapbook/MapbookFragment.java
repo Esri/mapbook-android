@@ -87,15 +87,15 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   }
 
   @Override
-  final public void onCreate (Bundle savedInstanceState){
+  final public void onCreate (final Bundle savedInstanceState){
     super.onCreate(savedInstanceState);
 
     // The filter's action is BROADCAST_ACTION
-    IntentFilter latestVersionIntentFilter = new IntentFilter(
+    final IntentFilter latestVersionIntentFilter = new IntentFilter(
         getString(R.string.BROADCAST_ACTION));
 
     // Instantiates a new PortalItemBroadcastReceiver
-    PortalItemBroadcastReceiver portalItemBroadcastReceiver =
+    final PortalItemBroadcastReceiver portalItemBroadcastReceiver =
         new PortalItemBroadcastReceiver();
     // Registers the PortalItemBroadcastReceiver and its intent filters
     LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
@@ -141,7 +141,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   final public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
       final Bundle savedInstanceState) {
     mRoot = (ConstraintLayout) container;
-    RecyclerView mRecyclerView = (RecyclerView) mRoot.findViewById(R.id.recyclerView);
+    final RecyclerView mRecyclerView = (RecyclerView) mRoot.findViewById(R.id.recyclerView);
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager( layoutManager);
     mapAdapter = new MapbookAdapter(new MapbookAdapter.OnItemClickListener() {
@@ -157,9 +157,9 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
     // Set on click listener for download button
-    ImageView downloadBtn = (ImageView) getActivity().findViewById(R.id.imageDownloadBtn);
+    final ImageView downloadBtn = (ImageView) getActivity().findViewById(R.id.imageDownloadBtn);
     downloadBtn.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
+      @Override public void onClick(final View v) {
         Log.i(TAG, "Download button clicked");
         downloadMapbook(mPresenter.getMapbookPath());
       }
@@ -291,9 +291,9 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
    * Toggle the visibility of the download button and text
    * @param display - boolean, true for show, false for hide
    */
-  @Override public void toggleDownloadVisibility(boolean display) {
-    ImageView downloadBtn = (ImageView) getActivity().findViewById(R.id.imageDownloadBtn);
-    TextView txtUpdateFile = (TextView) getActivity().findViewById(R.id.txtUpdate);
+  @Override public void toggleDownloadVisibility(final boolean display) {
+    final ImageView downloadBtn = (ImageView) getActivity().findViewById(R.id.imageDownloadBtn);
+    final TextView txtUpdateFile = (TextView) getActivity().findViewById(R.id.txtUpdate);
     if (display){
       downloadBtn.setVisibility(View.VISIBLE);
       txtUpdateFile.setVisibility(View.VISIBLE);
@@ -307,8 +307,8 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
    * Set the user name field in the view
    * @param userName - String
    */
-  @Override public void setUserName(String userName) {
-    TextView txtUserName = (TextView) getActivity().findViewById(R.id.txtUserName);
+  @Override public void setUserName(final String userName) {
+    final TextView txtUserName = (TextView) getActivity().findViewById(R.id.txtUserName);
     txtUserName.setText(userName);
   }
 
@@ -317,6 +317,12 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
    */
   @Override public void exit() {
     getActivity().finish();
+  }
+
+
+  @Override public void setDownloadText(final String text) {
+    final TextView downloadMessage = (TextView) getActivity().findViewById(R.id.txtUpdate);
+    downloadMessage.setText(text);
   }
 
   /**
@@ -356,13 +362,13 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     // Prevents instantiation TODO: Does this comment make sense?
     private PortalItemBroadcastReceiver(){}
 
-    @Override public void onReceive(Context context, Intent intent) {
+    @Override public void onReceive(final Context context, final Intent intent) {
 
       /*
        * Handle Intents here.
        */
       if (intent.getExtras() !=  null){
-        long timeUpdated = intent.getLongExtra(getString(R.string.LATEST_DATE),0);
+        final long timeUpdated = intent.getLongExtra(getString(R.string.LATEST_DATE),0);
         mPresenter.processBroadcast(timeUpdated);
         Log.i(TAG, "Portal item's modified date in milliseconds " + timeUpdated);
       }

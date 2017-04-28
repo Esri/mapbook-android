@@ -82,7 +82,7 @@ public class MapbookModule {
   @Named("storageDirectory")
   public File providesStorageDirectory(final Context context) {
     File directory = null;
-    File [] files = ContextCompat.getExternalFilesDirs(context, null);
+    final File [] files = ContextCompat.getExternalFilesDirs(context, null);
     if (files.length > 0){
       directory = files[0];
     }else{

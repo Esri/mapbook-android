@@ -34,7 +34,7 @@ import com.esri.android.mapbook.mapbook.MapbookActivity;
  */
 public  class SplashActivity extends AppCompatActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     final Intent intent = new Intent(this, MapbookActivity.class);

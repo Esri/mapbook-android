@@ -38,8 +38,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.MapBookApplication;
@@ -49,7 +47,6 @@ import com.esri.android.mapbook.download.PortalItemUpdateService;
 import com.esri.android.mapbook.util.ActivityUtils;
 
 import javax.inject.Inject;
-import java.io.File;
 
 /**
  * The MapbookActivity checks for READ EXTERNAL storage permissions, starts the background service
@@ -177,7 +174,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
    * updated versions of the mobile map package
    */
   public void checkForUpdatedPortalItem() {
-    Intent portalItemUpdateServiceIntent = new Intent(this, PortalItemUpdateService.class);
+    final Intent portalItemUpdateServiceIntent = new Intent(this, PortalItemUpdateService.class);
     this.startService(portalItemUpdateServiceIntent);
   }
 }
