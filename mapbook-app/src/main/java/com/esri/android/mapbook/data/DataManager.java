@@ -32,7 +32,11 @@ import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
-import com.esri.arcgisruntime.tasks.geocode.*;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
+import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
+import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
+import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -50,10 +54,6 @@ public class DataManager implements DataManagerContract {
     mGeocodeParameters = new GeocodeParameters();
     mGeocodeParameters.getResultAttributeNames().add("*");
     mGeocodeParameters.setMaxResults(1);
-
-    final ReverseGeocodeParameters mReverseGeocodeParameters = new ReverseGeocodeParameters();
-    mReverseGeocodeParameters.getResultAttributeNames().add("*");
-    mReverseGeocodeParameters.setMaxResults(1);
   }
 
 

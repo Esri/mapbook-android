@@ -23,8 +23,12 @@ import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.robotium.solo.Solo;
-import org.junit.*;
+import org.junit.Rule;
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.Assert;
 
 import java.util.ArrayList;
 
