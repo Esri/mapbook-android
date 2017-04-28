@@ -38,7 +38,12 @@ import android.util.Log;
 import android.widget.Toast;
 import com.esri.android.mapbook.R;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.File;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
