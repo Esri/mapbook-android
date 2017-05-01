@@ -44,23 +44,22 @@
         <Button android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:id="@+id/btnPrev" android:alpha="0.3"
-                android:theme="@style/PrevButton"
-                style="@style/Widget.AppCompat.Button.Colored" android:paddingTop="3dp"/>
+                android:background="@drawable/ic_navigate_before_black_36px"
+                android:paddingTop="3dp"/>
 
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:id="@+id/popupCount" android:text="1 of 4"/>
+                  android:id="@+id/popupCount"/>
 
         <Button android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:id="@+id/btnNext"
-                android:theme="@style/NextButton"
-                style="@style/Widget.AppCompat.Button.Colored" android:paddingTop="3dp"/>
+                android:background="@drawable/ic_navigate_next_black_36px"
+                android:paddingTop="3dp"/>
         <Button android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:id="@+id/btnClose"
-                android:theme="@style/CloseButton"
-                style="@style/Widget.AppCompat.Button.Colored" android:paddingTop="3dp"/>
+                android:background="@drawable/ic_close_black_36px" android:paddingTop="3dp"/>
 
     </LinearLayout>
 
