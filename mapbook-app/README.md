@@ -88,7 +88,7 @@ The second method for getting a locally-saved mobile map package to a Portal for
 Now that the mobile map package has been created and published, it can be downloaded by the app using an authenticated connection.
 
 ### Authentication
-When the mapbook app launches, it checks for the mobile map package (.mmpk) on the device.  The app will attempt to download the mobile map package from [AGOL](https://arcgisruntime.maps.arcgis.com) and leverages the ArcGIS [identity](https://developers.arcgis.com/authentication/) to provide access to resources via the the [named user](https://developers.arcgis.com/authentication/#named-user-login) login pattern. The app prompts you for your organization’s ArcGIS Online credentials used to obtain a token later consumed by the Portal. The ArcGIS Runtime SDKs provide a simple to use API for dealing with ArcGIS logins.
+When the mapbook app launches, it checks for the ```MobileMapPackage``` (.mmpk) on the device.  The app will attempt to download the mobile map package from [AGOL](https://arcgisruntime.maps.arcgis.com) and leverages the ArcGIS [identity](https://developers.arcgis.com/authentication/) to provide access to resources via the the [named user](https://developers.arcgis.com/authentication/#named-user-login) login pattern. The app prompts you for your organization’s ArcGIS Online credentials used to obtain a token later consumed by the Portal. The ArcGIS Runtime SDKs provide a simple to use API for dealing with ArcGIS logins.
 
 ![](assets/identity.png)
 
@@ -127,10 +127,8 @@ Anytime a secured service issues an authentication challenge, the ```DefaultAuth
        
 Note the value for android:scheme in the XML. This is [redirect URI](https://developers.arcgis.com/authentication/browser-based-user-logins/#configuring-a-redirect-uri) that you configured when you registered your app [here](https://developers.arcgis.com/). For more details on the user authorization flow, see the [Authorize REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/#/Authorize/02r300000214000000/).
 
-(Add detail about how credentials are stored on device or include in platform specific section below)
-
 ### Mobile Map Packages
-The Mapbook uses a [```MobileMapPackage```](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm) composed of a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.  The ```MobileMapPackage``` contents can be accessed after the package has loaded and metadata about the package can be displayed and maps can be viewed.
+The [```MobileMapPackage```](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm)  is downloaded from the ```Portal``` into the application-specific directory on the device.  The Naperville Water Company Mapbook  ```MobileMapPackage``` used in this app contains a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.  The ```MobileMapPackage``` must first be [loaded](https://developers.arcgis.com/android/latest/guide/loadable-pattern.htm) before metadata about the package can be displayed.
 
 ![](assets/mapbook_main.png)
 
@@ -264,6 +262,7 @@ Callout mCallout = mMapView.getCallout();
 callout.Style style = new Callout.Style(getContext());
 
 // Optionally set the dimensions
+
 style.setMinWidth(350);
 style.setMaxWidth(350);
 
@@ -272,11 +271,14 @@ style.setLeaderPosition(Callout.Style.LeaderPosition.UPPER_MIDDLE);
 
 // Sets the location of the callout by specifying a Point in map coordinates. 
 // This is the Point the callout leader points to.
+
 mCallout.setLocation(resultPoint);
 
-//The calloutContent is a View you construct
-View calloutContent = customizedContent();
-mCallout.setContent(calloutContent);
+//The customView is a View you construct
+// using your own version of "buildContentView()"
+
+View customView = buildContentView();
+mCallout.setContent(customView);
 
 // Animate the display, but don't recenter the MapView when Callout is shown.
 mCallout.setShowOptions(new Callout.ShowOptions(true,false,false));
@@ -288,9 +290,64 @@ mCallout.show();
 ![](assets/callout.png)
 
 
-### TOC, Legends, and Bookmarks
+### TOC, Legend, and Bookmarks
 
+Layer visibility can be toggled in the table of contents (TOC).  In addition to the layer name, a legend is also shown for each layer.  A set of nested RecyclerViews are used to display the TOC and legend, obtained from the map as [operational layers](https://developers.arcgis.com/android/latest/guide/layers.htm#ESRI_SECTION1_272346C9CB0049938539D5F8970624F2).
+```java
+// Get the list of Layer items from the map
+List<Layer> layerList = map.getOperationalLayers();
+
+// Assign the list to the MapLayerAdapter 
+ mMapLayerAdapter.setLayerList(layerList);
+ 
+...
+
+// The layer name is assigned within the 
+// onBindViewHolder method of the adapter
+
+holder.layerName.setText(layer.getName());
+
+// The MapLegendAdapter is also setup and assigned
+// within MapLayerAdapter's onVindViewHolder method
+
+MapLegendAdapter legendAdapter = new MapLegendAdapter(mContext);
+
+holder.legendItems.setLayoutManager(new LinearLayoutManager (mContext));
+
+holder.legendItems.setAdapter(legendAdapter);
+
+// Retrieve any legend info from the FeatureLayer
+if (layer instanceof FeatureLayer) {
+      
+    // Fetch legend data asynchronously
+    ListenableFuture<List<LegendInfo>> legendInfoFuture = layer.fetchLegendInfosAsync();
+      
+    legendInfoFuture.addDoneListener(new Runnable() {
+      @Override public void run() {
+        try {
+          List<LegendInfo> legendList = legendInfoFuture.get();
+          legendAdapter.setLegendInfo(legendList);
+          legendAdapter.notifyDataSetChanged();
+        } catch (InterruptedException | ExecutionException e) {
+          Log.e(TAG, e.getMessage());
+         }
+      }
+    });
+}
+
+```
 ![](assets/toc_legend.png)
+
+A ```Bookmark``` identifies a particular geographic location and time on an ArcGISMap.  In the mapbook app, the ```Bookmark``` name is displayed in a simple RecylerView and when clicked the ```MapView's``` viewpoint is updated with the bookmared viewpoint.
+
+```java
+mBookmarkAdapter = new MapBookmarkAdapter(new MapBookmarkAdapter.OnBookmarkClickListener() {
+    @Override public void onItemClick(final Viewpoint viewpoint) {
+        mMapView.setViewpoint(viewpoint);
+    }
+ });
+```
+
 
 ### Suggestions & Search
 
@@ -359,14 +416,12 @@ geocodeFuture.addDoneListener(new Runnable() {
             List<GeocodeResult> geocodeResults = geocodeFuture.get();
             showGeocodeResults(geocodeResuts);
 
-            } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
 
-                handleGeocodeError(e);
-            }
+           handleGeocodeError(e);
+        }
      }
 });
-
-
 ```
 
 
