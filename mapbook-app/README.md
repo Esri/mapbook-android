@@ -130,20 +130,23 @@ Note the value for android:scheme in the XML. This is [redirect URI](https://dev
 (Add detail about how credentials are stored on device or include in platform specific section below)
 
 ### Mobile Map Packages
-The offline mapbook in the app uses a [mobile map package](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm) composed of a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.
+The Mapbook uses a [```MobileMapPackage```](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm) composed of a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.  The ```MobileMapPackage``` contents can be accessed after the package has loaded and metadata about the package can be displayed and maps can be viewed.
 
 ![](assets/mapbook_main.png)
 
-The mobile map package contents can be accessed after the mobile map package has loaded and metadata about the package can be displayed and maps can be viewed.
+
 
 ```java
 MobileMapPackage mobileMapPackage = new MobileMapPackage(mmpkPath);
 
 mobileMapPackage.addDoneLoadingListener(new Runnable() {
+
 @Override public void run() {
     if (mobileMapPackage.getLoadStatus() == LoadStatus.LOADED) {
+    
        // Show mapbook metadata like map thumbnails, 
        // mapbook size, mapbook modified dates, etc.
+       
        showMapbook(mobileMapPackage);
 
        // Get the list of maps in the mobile map package
@@ -159,21 +162,16 @@ mobileMapPackage.loadAsync();
 ```
 
 ### Identify
-As the user taps on a map in the mapbook, the [identify](https://developers.arcgis.com/android/latest/guide/identify-features.htm) operation is used to retrieve all of the data for that location from the map's visible feature layers.  In this mobile map package, every map has multiple feature layers and so the method to identify features in all layers is used.  By extending the [```DefaultMapViewOnTouchListener```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/DefaultMapViewOnTouchListener.html), the clicked location is used to identify features in the visible layers. 
+As the user taps on a map in the mapbook, the [identify](https://developers.arcgis.com/android/latest/guide/identify-features.htm) operation is used to retrieve all of the data for that location from the map's visible feature layers.  In this mobile map package, every map has multiple feature layers and so the method to identify features in all layers is used.  By extending the [```DefaultMapViewOnTouchListener```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/DefaultMapViewOnTouchListener.html) and overriding the ```onSingleTapConfirmed``` method, the clicked location is used to identify features in the visible layers. 
 
 ```java
-  private class MapTouchListener extends DefaultMapViewOnTouchListener {
-
-    public MapTouchListener(final Context context, final MapView mapView) {
-      super(context, mapView);
-    }
 
     /**
-     * When a user taps on the map, an identify action is initiated and
-     * any features found are displayed in a callout view.
+     * When a user taps on the map, an identify action is initiated and any features found are displayed in a callout view.
      * @param e - MotionEvent
      * @return boolean
      */
+    
     @Override
     public boolean onSingleTapConfirmed(final MotionEvent e) {
       // get the screen point where user tapped
@@ -209,42 +207,83 @@ As the user taps on a map in the mapbook, the [identify](https://developers.arcg
 
       return super.onSingleTapConfirmed(e);
     }
-  }
+
 ```
 The API provides the ability to identify multiple layer types, with results being stored in ```Layer.getSubLayerContents```. Developers should note that if they choose to identify other layer types, like ```ArcGISMapImageLayer``` for example, they would need to add that implementation themselves.
 
-### Callouts
+### Displaying Identify Results 
+
+Results of the identify action are displayed using ```Popup``` and ```Callout``` objects. 
+
+#### Popups
+The layers in this app have been configured using ArcGIS Pro to support [```PopUp```](https://developers.arcgis.com/android/latest/guide/essential-vocabulary.htm#GUID-F67C6CED-142A-498C-9CC2-3D14582DB0D3) objects.  The ```IdentifyLayerResult``` returns pop-up content that is customized for display in a ```Callout``` widget.
+
+```java
+
+List<IdentifyLayerResult> results = identifyLayers.get();
+  
+FeatureLayer featureLayer = null;
+            
+// In this app, we only care about FeatureLayer results
+if (result.getLayerContent() instanceof FeatureLayer) {
+    for (IdentifyLayerResult result : results){
+    
+    }
+         List<Popup> popups = result.getPopups();
+        
+         // Iterate through all of the popups associated with the identified result
+         for ( Popup popup : popups){ 
+          
+             // Use a PopupManager to get popup field names and values
+             PopupManager mPopupManager = new PopupManager(mContext, popup);
+             
+             List<PopupField> fields = mPopupManager.getDisplayedFields();
+             
+             // Iterate over all the fields in the popup
+             // and customize the content
+             
+             for (PopupField field : fields) {
+                 Field.Type fieldType = mPopupManager.getFieldType(field);
+                 Object fieldValue = mPopupManager.getFieldValue(field);
+                 String fieldLabel = field.getLabel();
+                 
+                 buildCalloutContent(fieldValue, fieldLabel);
+         }
+    }
+}
+```
+#### Callouts
 The ```MapView's``` [Callout](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.html) widget is used to display details about the identified features.  A ```Callout``` displays an Android View that contains text and/or other content. The behavior of the ```Callout``` is managed by the ```MapView``` but the callout's style can be modified as needed using the [```Callout.Style```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.Style.html) class.  [```CalloutOut.ShowOptions```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.ShowOptions.html) can be configured to control ```Callout``` animation and centering behaviors.  The ```Callout``` is obtained from the ```MapView``` as shown below:
 
 ```java
 
-    // Get the callout from the MapView
-    Callout mCallout = mMapView.getCallout();
+// Get the callout from the MapView
+Callout mCallout = mMapView.getCallout();
 
-    // Create a style for the Callout
-    callout.Style style = new Callout.Style(getContext());
+// Create a style for the Callout
+callout.Style style = new Callout.Style(getContext());
 
-    // Optionally set the dimensions
-    style.setMinWidth(350);
-    style.setMaxWidth(350);
+// Optionally set the dimensions
+style.setMinWidth(350);
+style.setMaxWidth(350);
 
-    // Specify where to position the leader
-    style.setLeaderPosition(Callout.Style.LeaderPosition.UPPER_MIDDLE);
+// Specify where to position the leader
+style.setLeaderPosition(Callout.Style.LeaderPosition.UPPER_MIDDLE);
 
-    // Sets the location of the callout by specifying a Point in map coordinates. 
-    // This is the Point the callout leader points to.
-    mCallout.setLocation(resultPoint);
+// Sets the location of the callout by specifying a Point in map coordinates. 
+// This is the Point the callout leader points to.
+mCallout.setLocation(resultPoint);
 
-    //The calloutContent is a View you construct
-    View calloutContent = customizedContent();
-    mCallout.setContent(calloutContent);
+//The calloutContent is a View you construct
+View calloutContent = customizedContent();
+mCallout.setContent(calloutContent);
 
-    // Animate the display, but don't recenter the MapView when Callout is shown.
-    mCallout.setShowOptions(new Callout.ShowOptions(true,false,false));
+// Animate the display, but don't recenter the MapView when Callout is shown.
+mCallout.setShowOptions(new Callout.ShowOptions(true,false,false));
 
-    mCallout.setStyle(style);
+mCallout.setStyle(style);
 
-    mCallout.show();
+mCallout.show();
 ```
 ![](assets/callout.png)
 
@@ -255,94 +294,79 @@ The ```MapView's``` [Callout](https://developers.arcgis.com/android/latest/api-r
 
 ### Suggestions & Search
 
-Typing the first few letters of an address into the Mapbook search box (e.g. “123”) shows a number of matched suggestions.  This is accomplished by leveraging the suggest capability of the locator in the mmpk.  The LocatorTask has various asynchronous methods that we use to provide address suggestions when searching for places or geocoding locations.  Be sure to query the [```LocatorTask```](http://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_62AE6A47EB4B403ABBC72337A1255F8A) for ```LocatorInfo``` to ensure the locator supports suggestions.
+Typing the first few letters of an address into the Mapbook search box (e.g. “123”) shows a number of matched suggestions.  This is accomplished by leveraging the suggest capability of the locator in the ```MobileMapPackage```.  The LocatorTask has various asynchronous methods that we use to provide address suggestions when searching for places or geocoding locations. The first step is to confirm that a ```MobileMapPackage``` contains a ```LocatorTask```.  If it does, be sure to query the  [```LocatorTask```](http://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_62AE6A47EB4B403ABBC72337A1255F8A) for ```LocatorInfo``` to ensure the locator supports suggestions.
 
 ![](assets/mapbook_suggest.png)
 
-```
+```java
 
-LocatorTask mLocatorTask = mMobileMapPackage.getLocatorTask();
+    LocatorTask mLocatorTask = mMobileMapPackage.getLocatorTask();
 
-// Attach a listener to the locator task since the LocatorTask may or may not be loaded the
-// the very first time a user types text into the search box.  If the Locator is already loaded,
-// the following listener is invoked immediately.
+    // Make sure the mobile map package has a non-null LocatorTask
+    if (mLocatorTask != null){
 
-mLocator.addDoneLoadingListener(new Runnable() {
-    @Override 
-    public void run() {
-    
-        LocatorInfo locatorInfo = mLocatorTask.getLocatorInfo ();
-        
-        // Does the locator have suggestion support?
-        if (locatorInfo.isSupportsSuggestions ()){
-        
-         ListenableFuture> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
-                
-         // Attach a done listener that executes upon completion of the async call
-         
-         suggestionsFuture.addDoneListener(new Runnable() {
+      // Attach a listener to the locator task since the LocatorTask may or may not be loaded the
+      // the very first time a user types text into the search box.  If the Locator is already loaded,
+      // the following listener is invoked immediately.
+
+      mLocator.addDoneLoadingListener(new Runnable() {
+        @Override
+        public void run() {
+
+          LocatorInfo locatorInfo = mLocatorTask.getLocatorInfo ();
+
+          // Does the locator have suggestion support?
+          if (locatorInfo.isSupportsSuggestions ()){
+
+            ListenableFuture> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
+
+            // Attach a done listener that executes upon completion of the async call
+
+            suggestionsFuture.addDoneListener(new Runnable() {
               @Override
-               public void run() {
-                   try {
-                       // Get the suggestions returned from the locator task.
-                       // Process and display
-        
-                    } catch (Exception e) {
-                        dealWithException(e);
-                     }
-                }
-          });
-                
-        }
-
-    }
-});
-// Initiate the asynchronous call
-mLocator.loadAsync();
-```
-
-
-Once a suggestion is selected, the ```LocatorTask``` uses [geocoding](https://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04)  to transform an address or a place name to a specific geographic location. 
-
-In this app, there is one predefined LocatorTask in the mobile map package representing a composite locator that searches all visible layers. 
-
-```
-
-// If locator task is still null, then the mobile map package doesn't have a locator
-if (mLocatorTask != null){
-
-      // Wait for the locator to load
-      mLocatorTask.addDoneLoadingListener(new Runnable() {
-      
-        @Override public void run() {
-          if (mLocatorTask.getLoadStatus() == LoadStatus.LOADED){
-          
-            // Call geocodeAsync passing in an address
-            ListenableFuture<List<GeocodeResult>> geocodeFuture = mLocatorTask.geocodeAsync(address,
-                mGeocodeParameters);
-                
-            geocodeFuture.addDoneListener(new Runnable() {
-            
-              @Override public void run() {
-
+              public void run() {
                 try {
-                
-                  List<GeocodeResult> geocodeResults = geocodeFuture.get();
-                  showGeocodeResults(geocodeResuts);
+                  // Get the suggestions returned from the locator task.
+                  // Process and display
 
-                } catch (InterruptedException | ExecutionException e) {
-
-                  handleGeocodeError(e);
+                } catch (Exception e) {
+                  dealWithException(e);
                 }
               }
             });
           }
         }
       });
-      
-      // Load the locator task
-      mLocatorTask.loadAsync();
-}
+
+      // Initiate the asynchronous call
+      mLocator.loadAsync();
+```
+
+
+Once a suggestion is selected, the loaded ```LocatorTask``` uses [geocoding](https://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04)  to transform an address or a place name to a specific geographic location. In this app, there is one predefined composite locator that searches all visible layers. 
+
+```java
+
+// Call geocodeAsync passing in an address
+ListenableFuture<List<GeocodeResult>> geocodeFuture = mLocatorTask.geocodeAsync(address, mGeocodeParameters);
+
+geocodeFuture.addDoneListener(new Runnable() {
+
+    @Override public void run() {
+
+        try {
+
+            List<GeocodeResult> geocodeResults = geocodeFuture.get();
+            showGeocodeResults(geocodeResuts);
+
+            } catch (InterruptedException | ExecutionException e) {
+
+                handleGeocodeError(e);
+            }
+     }
+});
+
+
 ```
 
 
