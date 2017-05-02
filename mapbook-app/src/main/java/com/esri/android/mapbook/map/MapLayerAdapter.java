@@ -90,7 +90,7 @@ public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLay
    */
   @Override public void onBindViewHolder(final MapLayerViewHolder holder, final int position) {
     final Layer layer = mLayers.get(position);
-    holder.mapContentName.setText(layer.getName());
+    holder.layerName.setText(layer.getName());
 
     final boolean layerVisible = (layer.isVisible());
     holder.checkBox.setChecked(layerVisible);
@@ -133,14 +133,14 @@ public class MapLayerAdapter extends RecyclerView.Adapter<MapLayerAdapter.MapLay
 
   public class MapLayerViewHolder extends RecyclerView.ViewHolder{
 
-    public final TextView mapContentName;
+    public final TextView layerName;
     public final CheckBox checkBox;
     public final RecyclerView legendItems;
 
     public MapLayerViewHolder(final View view){
       super(view);
       checkBox = (CheckBox) view.findViewById(R.id.cbLayer) ;
-      mapContentName = (TextView) view.findViewById(R.id.txtMapContentName);
+      layerName = (TextView) view.findViewById(R.id.txtLayerName);
       legendItems = (RecyclerView) view.findViewById(R.id.legendRecylerView);
     }
   }

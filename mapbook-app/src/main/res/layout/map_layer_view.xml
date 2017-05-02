@@ -12,7 +12,7 @@
                   android:id="@+id/cbLayer"/>
 
         <TextView android:layout_width="wrap_content"
-                  android:id="@+id/txtMapContentName"
+                  android:id="@+id/txtLayerName"
                   android:layout_height="wrap_content" android:padding="5dp"/>
     </LinearLayout>
 
