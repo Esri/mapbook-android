@@ -59,7 +59,7 @@ The following layers in the app are searchable:
 Once an address locator, or .loc file, is created for each layer, it was time to run the [Create Composite Address Locator](http://pro.arcgis.com/en/pro-app/tool-reference/geocoding/create-composite-address-locator.htm) geoprocessing tool. The Create Composite Locator tool allows multiple, individual .loc files to be specified as an input so that it can package the contents into a single resulting _composite_ .loc file. Worth noting is that a composite address locator does not store the address indexing information as would a standalone .loc file, but rather references the data from the input locators that are specified when it's generated. This composite locator (.loc) file was later specified when building the mobile map package.
 
 #### Setting bookmarks
-The Offline Mapbook app supports viewing of predefined, bookmarked locations. [Bookmarks](http://pro.arcgis.com/en/pro-app/help/mapping/navigation/bookmarks.htm) were set in ArcGIS Pro for each map and are included in the mobile map package. When a given map is opened in the app, clicking the 'bookmark' icon in the upper right corner will open a side pane which presents a list of all bookmarks saved with that map. Clicking a bookmark will zoom to its extent. To highlight this capability, two bookmarks were saved for each of the three maps. 
+The Offline Mapbook app supports viewing of predefined, bookmarked locations. Two [bookmarks](http://pro.arcgis.com/en/pro-app/help/mapping/navigation/bookmarks.htm) were set in ArcGIS Pro for each map and are included in the mobile map package.
 
 #### Metadata and thumbnails
 Before finalizing the maps for publishing, metadata was created for each map. The Title and Summary properties for each map are accessed in ArcGIS Pro by opening the Map Properties window, double clicking the map title from the Contents pane, and clicking the Metadata tab within. Like the map title and summary, a map thumbnail can also provide context. The thumbnail image for a map can be generated in ArcGIS Pro by right clicking a map's title in the Contents pane and selecting 'Create Thumbnail' from the context menu that appears. The created thumbnail can be viewed by hovering the mouse cursor over the map from the Project pane under the 'Maps' section.
@@ -69,6 +69,7 @@ In order for this data to be consumed within the Mapbook app, it had to first be
 
 #### Including multiple maps
 Because multiple maps were authored to be used for the Offline Mapbook app, multiple maps had to be specified when running the Create Mobile Map Package tool. The first parameter of the tool is 'Input Map' and can accommodate for the specification of multiple entries. By default, each dropdown will present a list of maps that exist within the current ArcGIS Pro project. For this mobile-map-packaging, each of the three maps was specified once.
+
 ![Multiple Maps](assets/MulitpleMaps_MMPK.png)
 
 #### Including the locator
@@ -130,6 +131,8 @@ Note the value for android:scheme in the XML. This is [redirect URI](https://dev
 
 ### Mobile Map Packages
 The offline mapbook in the app uses a [mobile map package](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm) composed of a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.
+
+![](assets/mapbook_main.png)
 
 The mobile map package contents can be accessed after the mobile map package has loaded and metadata about the package can be displayed and maps can be viewed.
 
@@ -208,14 +211,15 @@ As the user taps on a map in the mapbook, the [identify](https://developers.arcg
     }
   }
 ```
-The API provides the ability to identify multiple layer types, with results being stored in ```Layer.getSubLayerContents```. Developers should note that if they choose to identify other layer types, like ```ArcGISMapImageLayer``` for example, they would need to add that implementation themselves. (**Suggestion**: show an example code snippet demonstrating this).
+The API provides the ability to identify multiple layer types, with results being stored in ```Layer.getSubLayerContents```. Developers should note that if they choose to identify other layer types, like ```ArcGISMapImageLayer``` for example, they would need to add that implementation themselves.
 
 ### Callouts
-The ```MapView's``` [Callout](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.html) widget is used to display details about the identified features.  A ```Callout``` displays an Android View that contains text and/or other content. The behavior of the ```Callout``` is managed by the ```MapView``` but the callout's style can be modified as needed using the [```Callout.Style```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.Style.html) class.  [```CalloutOut.ShowOptions```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.ShowOptions.html) is used to control how the ```Callout``` is displayed (e.g. animation and centering behaviors).
+The ```MapView's``` [Callout](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.html) widget is used to display details about the identified features.  A ```Callout``` displays an Android View that contains text and/or other content. The behavior of the ```Callout``` is managed by the ```MapView``` but the callout's style can be modified as needed using the [```Callout.Style```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.Style.html) class.  [```CalloutOut.ShowOptions```](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/Callout.ShowOptions.html) can be configured to control ```Callout``` animation and centering behaviors.  The ```Callout``` is obtained from the ```MapView``` as shown below:
 
 ```java
+
     // Get the callout from the MapView
-    mCallout = mMapView.getCallout();
+    Callout mCallout = mMapView.getCallout();
 
     // Create a style for the Callout
     callout.Style style = new Callout.Style(getContext());
@@ -242,13 +246,105 @@ The ```MapView's``` [Callout](https://developers.arcgis.com/android/latest/api-r
 
     mCallout.show();
 ```
-![](assets/callout.jpg)
+![](assets/callout.png)
 
-### TOC and Legends (Mara)
 
-### Locator & Search(Mara)
+### TOC, Legends, and Bookmarks
 
-### Bookmarks (Mara) 
+![](assets/toc_legend.png)
+
+### Suggestions & Search
+
+Typing the first few letters of an address into the Mapbook search box (e.g. “123”) shows a number of matched suggestions.  This is accomplished by leveraging the suggest capability of the locator in the mmpk.  The LocatorTask has various asynchronous methods that we use to provide address suggestions when searching for places or geocoding locations.  Be sure to query the [```LocatorTask```](http://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_62AE6A47EB4B403ABBC72337A1255F8A) for ```LocatorInfo``` to ensure the locator supports suggestions.
+
+![](assets/mapbook_suggest.png)
+
+```
+
+LocatorTask mLocatorTask = mMobileMapPackage.getLocatorTask();
+
+// Attach a listener to the locator task since the LocatorTask may or may not be loaded the
+// the very first time a user types text into the search box.  If the Locator is already loaded,
+// the following listener is invoked immediately.
+
+mLocator.addDoneLoadingListener(new Runnable() {
+    @Override 
+    public void run() {
+    
+        LocatorInfo locatorInfo = mLocatorTask.getLocatorInfo ();
+        
+        // Does the locator have suggestion support?
+        if (locatorInfo.isSupportsSuggestions ()){
+        
+         ListenableFuture> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
+                
+         // Attach a done listener that executes upon completion of the async call
+         
+         suggestionsFuture.addDoneListener(new Runnable() {
+              @Override
+               public void run() {
+                   try {
+                       // Get the suggestions returned from the locator task.
+                       // Process and display
+        
+                    } catch (Exception e) {
+                        dealWithException(e);
+                     }
+                }
+          });
+                
+        }
+
+    }
+});
+// Initiate the asynchronous call
+mLocator.loadAsync();
+```
+
+
+Once a suggestion is selected, the ```LocatorTask``` uses [geocoding](https://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04)  to transform an address or a place name to a specific geographic location. 
+
+In this app, there is one predefined LocatorTask in the mobile map package representing a composite locator that searches all visible layers. 
+
+```
+
+// If locator task is still null, then the mobile map package doesn't have a locator
+if (mLocatorTask != null){
+
+      // Wait for the locator to load
+      mLocatorTask.addDoneLoadingListener(new Runnable() {
+      
+        @Override public void run() {
+          if (mLocatorTask.getLoadStatus() == LoadStatus.LOADED){
+          
+            // Call geocodeAsync passing in an address
+            ListenableFuture<List<GeocodeResult>> geocodeFuture = mLocatorTask.geocodeAsync(address,
+                mGeocodeParameters);
+                
+            geocodeFuture.addDoneListener(new Runnable() {
+            
+              @Override public void run() {
+
+                try {
+                
+                  List<GeocodeResult> geocodeResults = geocodeFuture.get();
+                  showGeocodeResults(geocodeResuts);
+
+                } catch (InterruptedException | ExecutionException e) {
+
+                  handleGeocodeError(e);
+                }
+              }
+            });
+          }
+        }
+      });
+      
+      // Load the locator task
+      mLocatorTask.loadAsync();
+}
+```
+
 
 #### Storing credentials on the device
 
@@ -262,6 +358,6 @@ Steps
 
 User credentials are stored the first time the user downloads the mapbook from AGOL.  The app uses the credentials to check for updates the AGOL mapbook.  If an updated mapbook is available, the app will notify the user that a newer version is available and offer to download the latest version.
 
-
+![](assets/download_option.png)
 
 
