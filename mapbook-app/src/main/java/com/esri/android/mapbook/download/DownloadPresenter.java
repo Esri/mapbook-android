@@ -100,23 +100,33 @@ public class DownloadPresenter implements DownloadContract.Presenter {
     portalItem.addDoneLoadingListener(new Runnable() {
       @Override public void run() {
 
-        final ListenableFuture<InputStream> future = portalItem.fetchDataAsync();
-        final long portalItemSize = portalItem.getSize();
-        future.addDoneListener(new Runnable() {
-          @Override public void run() {
+        if (portalItem.getLoadStatus() == LoadStatus.LOADED){
+          final ListenableFuture<InputStream> future = portalItem.fetchDataAsync();
+          final long portalItemSize = portalItem.getSize();
+          future.addDoneListener(new Runnable() {
+            @Override public void run() {
 
-            try {
-              final InputStream inputStream = future.get();
-              mView.executeDownload(portalItemSize, inputStream);
+              try {
+                final InputStream inputStream = future.get();
+                mView.executeDownload(portalItemSize, inputStream);
 
 
-            } catch (final InterruptedException | ExecutionException e) {
-              mView.showMessage("There was a problem downloading the file");
-              Log.e(TAG, "Problem downloading file " + e.getMessage());
-              mView.sendResult(RESULT_CANCELED, ERROR_STRING,  e.getMessage());
+              } catch (final InterruptedException | ExecutionException e) {
+                mView.showMessage("There was a problem downloading the file");
+                Log.e(TAG, "Problem downloading file " + e.getMessage());
+                mView.sendResult(RESULT_CANCELED, ERROR_STRING,  e.getMessage());
+              }
             }
+          });
+        }else{
+          String loadError = portalItem.getLoadError().getMessage();
+          if (portalItem.getLoadError().getCause() != null){
+            String cause = portalItem.getLoadError().getCause().getMessage();
+            Log.e(TAG,"Portal item didn't load " + portalItem.getLoadStatus().name() + " because " + cause);
           }
-        });
+          Log.e(TAG,"Portal item didn't load " + portalItem.getLoadStatus().name() + " and reported this load error " + loadError);
+          mView.sendResult(RESULT_CANCELED, ERROR_STRING,  loadError);
+        }
       }
     });
   }
