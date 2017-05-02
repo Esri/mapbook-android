@@ -19,6 +19,7 @@ This mapbook repo is an Android Studio Project and App Module that can be direct
 * Login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
 
 ![](Register1.png)
+
 * Once you've registered your version of the mapbook app, grab a copy of the client id from the registration and set the client id in the applications app_settings.xml file.  
 
 ```xml
@@ -78,13 +79,6 @@ If there are changes made in the Original repository, you can sync the fork to k
 3. ```git checkout master``` to checkout your fork's local master branch.
 4. ```git merge upstream/master``` to sync your local `master' branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
 
-## Provision your device
-1. Create an Data folder on your device. You can use the [Android Debug Bridge (adb)](https://developer.android.com/guide/developing/tools/adb.html) tool found in **<sdk-dir>/platform-tools**.
-2. Open up a command prompt and execute the ```adb shell``` command to start a remote shell on your target device.
-3. Navigate to your sdcard directory, e.g. ```cd /sdcard/```.  
-4. Create the ArcGIS/samples/MapPackage directory, ```mkdir Data```.
-5. You should now have the following directory on your target device, ```/sdcard/Data```. Note:  Directory may be slightly different on your device.  When the mapbook app first starts up, it will download the mapbook to this directory.
-6. Exit the shell with the, ```exit``` command.
 
 ## Testing With Robotium
 The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the mapbook-app will run best on an attached device, rather than in the emulator.  You will need to adjust the values in the app_settings.xml file to reflect your specific auth credentials and any local addresses the tests use.  Use the following steps to configure your environment for running the tests.
