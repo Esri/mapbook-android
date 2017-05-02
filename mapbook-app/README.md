@@ -100,7 +100,7 @@ When the mapbook app launches, it checks for the mobile map package (.mmpk) on t
 6. The identity manager stores the credential for this portal and all requests for secured content includes the token in the request.
 
 The ```DefaultAuthenticationChallengeHandler``` class takes care of steps 1-6 in the diagram above. For an application to use this pattern, follow these [guides](https://developers.arcgis.com/authentication/signing-in-arcgis-online-users/) to register your app.
-```
+```java
 // Add these four lines to your Android fragment or activity
 OAuthConfiguration oAuthConfiguration = new OAuthConfiguration("https://www.arcgis.com",clientId, redirectUri);
 DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(this);
@@ -110,7 +110,7 @@ AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
 
 Anytime a secured service issues an authentication challenge, the ```DefaultAuthenticationChallengeHandler``` and the corresponding ```DefaultOAuthIntentReceiver``` work together to broker the authentication transaction. In addition to the two lines above, the Android manifest.xml file must define a ```DefaultOAuthIntentReceiver``` that receives intents once a user has entered their credentials.
 
-```
+```xml
 <activity>
   android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
   android:label="OAuthIntentReceiver"
