@@ -35,7 +35,7 @@ import dagger.Provides;
 /**
  * This is a Dagger module. We use this to pass in the
  * {@link com.esri.android.mapbook.data.DataManager} and the
- * {@link com.esri.android.mapbook.map.PopupInteractor}
+ * {@link ContentExtractor}
  *  to the{@link MapActivity}.
  */
 @Module
@@ -56,6 +56,6 @@ public class MapModule {
   public MapContract.View providesMapContractView(){ return mView; }
 
   @Provides
-  public PopupInteractorContract providesPopupInteractor(final Context context){ return new PopupInteractor(context); }
+  public ContentExtractorContract providesPopupInteractor(final Context context){ return new ContentExtractor(context); }
 
 }

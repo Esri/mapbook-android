@@ -713,7 +713,7 @@ public class MapFragment extends Fragment implements MapContract.View {
       // get the screen point where user tapped
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
 
-      final ListenableFuture<List<IdentifyLayerResult>> identifyLayers = mMapView.identifyLayersAsync(screenPoint,5d,true);
+      final ListenableFuture<List<IdentifyLayerResult>> identifyLayers = mMapView.identifyLayersAsync(screenPoint,5d,false, 1);
 
       /*
       TODO Question for Dan, is there a better way to move this logic into the presenter?  Or is the separation between business logic and view good enough here?
@@ -741,6 +741,7 @@ public class MapFragment extends Fragment implements MapContract.View {
 
         }
       });
+
 
       return super.onSingleTapConfirmed(e);
     }
