@@ -107,7 +107,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
   /**
    * Create the mapbook fragment and load the presenter
    */
-  final private void initialize(){
+  private void initialize(){
     MapbookFragment mapbookFragment = (MapbookFragment) getSupportFragmentManager().findFragmentById(R.id.mapbookViewFragment);
     if (mapbookFragment == null){
       mapbookFragment = MapbookFragment.newInstance();
@@ -153,7 +153,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
   /**
    * Determine if we're able to read external storage
    */
-  final private void checkForReadStoragePermissions(){
+  private void checkForReadStoragePermissions(){
     // Explicitly check for file system privs
     final int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
@@ -173,7 +173,7 @@ public class MapbookActivity extends AppCompatActivity implements ActivityCompat
    * Start an IntentService to check for any
    * updated versions of the mobile map package
    */
-  public void checkForUpdatedPortalItem() {
+  private void checkForUpdatedPortalItem() {
     final Intent portalItemUpdateServiceIntent = new Intent(this, PortalItemUpdateService.class);
     this.startService(portalItemUpdateServiceIntent);
   }

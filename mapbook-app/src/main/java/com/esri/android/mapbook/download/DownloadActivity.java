@@ -63,7 +63,7 @@ public class DownloadActivity extends AppCompatActivity {
   /**
    * Configure AuthenticationManager for portal access
    */
-  final private void initialize(){
+  private void initialize(){
 
     DownloadFragment fragment = (DownloadFragment) getSupportFragmentManager().findFragmentByTag("downloadFragment");
     if (fragment == null){

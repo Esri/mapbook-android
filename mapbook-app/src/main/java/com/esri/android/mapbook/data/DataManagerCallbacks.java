@@ -39,13 +39,6 @@ import java.util.List;
  * upon asynchronous completion of tasks.
  */
 public interface DataManagerCallbacks {
-  /**
-   * Handles async calls for loading Features
-   */
-  interface FeatureCallback{
-    void onFeaturesFound(List<Feature> featureList, FeatureLayer layer);
-    void onNoFeaturesFound();
-  }
 
   /**
    * Handles async calls for loading map book

@@ -314,7 +314,6 @@ public class MapFragment extends Fragment implements MapContract.View {
    */
   private void toggleLayerList() {
 
-    //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
     final LinearLayout transitionsContainer = mRoot;
     TransitionManager.beginDelayedTransition(transitionsContainer);
     mBookmarkRecyclerView.setVisibility(View.GONE);
@@ -338,7 +337,6 @@ public class MapFragment extends Fragment implements MapContract.View {
    */
   private void toggleBookmarkList() {
 
-    //TODO This needs to be smoother.  Show/hide behavior isn't smooth enough.
     final LinearLayout transitionsContainer = mRoot;
     TransitionManager.beginDelayedTransition(transitionsContainer);
     mLayerRecyclerView.setVisibility(View.GONE);
@@ -714,10 +712,6 @@ public class MapFragment extends Fragment implements MapContract.View {
       final android.graphics.Point screenPoint = new android.graphics.Point((int) e.getX(), (int) e.getY());
 
       final ListenableFuture<List<IdentifyLayerResult>> identifyLayers = mMapView.identifyLayersAsync(screenPoint,5d,false, 1);
-
-      /*
-      TODO Question for Dan, is there a better way to move this logic into the presenter?  Or is the separation between business logic and view good enough here?
-       */
 
       identifyLayers.addDoneListener(new Runnable() {
         @Override
