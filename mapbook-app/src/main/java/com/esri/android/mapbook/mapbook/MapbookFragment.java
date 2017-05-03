@@ -64,7 +64,7 @@ import static com.esri.android.mapbook.download.DownloadActivity.ERROR_STRING;
 
 public class MapbookFragment extends Fragment implements MapbookContract.View {
 
-  MapbookContract.Presenter mPresenter;
+  private MapbookContract.Presenter mPresenter;
 
   private ConstraintLayout mRoot = null;
   private MapbookAdapter mapAdapter = null;

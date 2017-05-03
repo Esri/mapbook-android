@@ -233,9 +233,8 @@ public class DownloadFragment extends Fragment implements DownloadContract.View 
 
         path =  data.getPath();
 
-      } catch (final FileNotFoundException  e) {
-        Log.e(TAG, e.getClass().getSimpleName()+ " " + e.getMessage());
-      } catch (final IOException e){
+
+      } catch (final Exception e){
         Log.e(TAG, e.getClass().getSimpleName()+ " " + e.getMessage());
       }
       finally {
