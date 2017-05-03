@@ -591,6 +591,13 @@ public class MapFragment extends Fragment implements MapContract.View {
     final Button btnNext = (Button) calloutView.findViewById(R.id.btnNext);
     final Button btnClose = (Button) calloutView.findViewById(R.id.btnClose) ;
 
+    // Disable the next button if we only have one FeatureContent item
+    if (featureContents.size() == 1){
+      btnNext.setAlpha(0.3f);
+    }else{
+      btnNext.setAlpha(1.0f);
+    }
+
     btnPrev.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(final View v) {
         processButtonEvent(mainLayout, featureContents, calloutLayouts, layerTitle, txtPopupCount, btnNext, btnPrev, "prev");
