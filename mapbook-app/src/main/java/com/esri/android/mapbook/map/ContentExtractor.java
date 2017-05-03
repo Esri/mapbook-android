@@ -103,13 +103,14 @@ public class ContentExtractor implements ContentExtractorContract {
     for (String key: keys){
       Object o = attrMap.get(key);
       if (o != null){
+        String camelCase = key.substring(0,1) + key.substring(1).toLowerCase();
         if (o instanceof GregorianCalendar){
           final GregorianCalendar date = (GregorianCalendar) o;
           final String value = formatter.format(date.getTime());
-          String camelCase = key.substring(0,1) + key.substring(1).toLowerCase();
+
           entries.add(new Entry(camelCase, value));
         }else{
-          entries.add(new Entry(key, o.toString()));
+          entries.add(new Entry(camelCase, o.toString()));
         }
 
         Log.i(TAG,o.toString());
