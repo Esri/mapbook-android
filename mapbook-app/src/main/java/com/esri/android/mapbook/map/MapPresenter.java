@@ -46,6 +46,7 @@ import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MapPresenter implements MapContract.Presenter {
 
@@ -54,7 +55,7 @@ public class MapPresenter implements MapContract.Presenter {
   private final MapContract.View mView;
 
   @Inject
-  PopupInteractor popupInteractor;
+  ContentExtractor popupInteractor;
 
   private final String TAG = MapPresenter.class.getSimpleName();
 
@@ -190,19 +191,32 @@ public class MapPresenter implements MapContract.Presenter {
 
         final List<Popup> popups = result.getPopups();
 
-        for (final Popup popup : popups){
+        if (popups.size() > 0) {
+          for (final Popup popup : popups){
 
-          final List<Entry> entries = popupInteractor.getPopupFields(popup);
-          featureContent.setEntries(entries);
-          // Select feature
-          final GeoElement element = popup.getGeoElement();
-          if (element instanceof Feature){
-            final Feature ft = (Feature) element;
-            if (featureLayer != null){
-              featureContent.setFeature(ft); // Assuming 1 popup per IdentifyLayerResult!!!
+            final List<Entry> entries = popupInteractor.getPopupFields(popup);
+            featureContent.setEntries(entries);
+            // Select feature
+            final GeoElement element = popup.getGeoElement();
+            if (element instanceof Feature){
+              final Feature ft = (Feature) element;
+              if (featureLayer != null){
+                featureContent.setFeature(ft); // Assuming 1 popup per IdentifyLayerResult!!!
+              }
+            }
+          }
+        }else{ // No popups available, so get content from first GeoElement
+          if (result.getElements().size() > 0){
+            GeoElement geoElement = result.getElements().get(0);
+            if (geoElement instanceof Feature){
+              final Feature feature = (Feature) geoElement;
+              featureContent.setFeature(feature);
+              List<Entry> entries = popupInteractor.getEntriesFromGeoElement(geoElement);
+              featureContent.setEntries(entries);
             }
           }
         }
+
         content.add(featureContent);
       }
     }

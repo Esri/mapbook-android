@@ -27,8 +27,11 @@
 package com.esri.android.mapbook.map;
 
 import android.content.Context;
+import android.util.Log;
 import com.esri.android.mapbook.data.Entry;
 import com.esri.arcgisruntime.data.Field;
+import com.esri.arcgisruntime.mapping.GeoElement;
+import com.esri.arcgisruntime.mapping.Item;
 import com.esri.arcgisruntime.mapping.popup.Popup;
 import com.esri.arcgisruntime.mapping.popup.PopupField;
 import com.esri.arcgisruntime.mapping.popup.PopupFieldFormat;
@@ -36,22 +39,22 @@ import com.esri.arcgisruntime.mapping.popup.PopupManager;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class extract a list of Entry items from a given popup
  */
-public class PopupInteractor implements PopupInteractorContract {
+public class ContentExtractor implements ContentExtractorContract {
 
   private final Context mContext;
   private static final String DATE_FORMAT = "MM-dd-yyyy";
+  private static final String TAG = ContentExtractor.class.getSimpleName();
 
   @Inject
-  public PopupInteractor(final Context context){
+  public ContentExtractor(final Context context){
     mContext = context;
   }
+
   @Override public List<Entry> getPopupFields(final Popup popup) {
 
     final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
@@ -80,6 +83,38 @@ public class PopupInteractor implements PopupInteractorContract {
 
     }
 
+    return entries;
+  }
+
+  /**
+   * Extract attributes from a GeoElement and return
+   * a list of <Entry></Entry> items
+   * @param geoElement - GeoElement
+   * @return - List<Entry></Entry>
+   */
+  @Override public List<Entry> getEntriesFromGeoElement(GeoElement geoElement) {
+    final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+    final PopupFieldFormat dateFormat = new PopupFieldFormat();
+    dateFormat.setDateFormat(PopupFieldFormat.DateFormat.SHORT_DATE_SHORT_TIME);
+
+    Map<String,Object> attrMap =geoElement.getAttributes();
+    List<Entry> entries = new ArrayList<>(attrMap.size());
+    Set<String> keys = attrMap.keySet();
+    for (String key: keys){
+      Object o = attrMap.get(key);
+      if (o != null){
+        if (o instanceof GregorianCalendar){
+          final GregorianCalendar date = (GregorianCalendar) o;
+          final String value = formatter.format(date.getTime());
+          String camelCase = key.substring(0,1) + key.substring(1).toLowerCase();
+          entries.add(new Entry(camelCase, value));
+        }else{
+          entries.add(new Entry(key, o.toString()));
+        }
+
+        Log.i(TAG,o.toString());
+      }
+    }
     return entries;
   }
 

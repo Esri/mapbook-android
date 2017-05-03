@@ -27,12 +27,13 @@
 package com.esri.android.mapbook.map;
 
 import com.esri.android.mapbook.data.Entry;
+import com.esri.arcgisruntime.mapping.GeoElement;
 import com.esri.arcgisruntime.mapping.popup.Popup;
 
 import java.util.List;
 
 /**
- * An interface for wrapping interactions with the PopupManager.  The PopupManager
+ * An interface for wrapping extracting data from features.  The PopupManager
  * relies on a Context object.  Application logic in the MapPresenter needs a PopupManager but
  * should have no knowledge of Android specific objects (like Context), so this interface
  * is used to interact with the PopupManager.
@@ -42,9 +43,11 @@ import java.util.List;
  * http://stackoverflow.com/questions/34303510/does-the-presenter-having-knowledge-of-the-activity-context-a-bad-idea-in-the/34664466#34664466
  */
 
-public interface PopupInteractorContract {
+public interface ContentExtractorContract {
 
   List<Entry> getPopupFields(Popup popup);
+
+  List<Entry> getEntriesFromGeoElement(GeoElement geoElement);
 
 
 }
