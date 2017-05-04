@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.esri.android.mapbook">
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+            android:name=".MapBookApplication"
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/title"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
+        <activity android:name=".SplashActivity"
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".mapbook.MapbookActivity"
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation|screenSize"/>
+        <activity android:name=".download.DownloadActivity"
+                  android:screenOrientation="landscape"
+                  android:launchMode="standard"
+                  android:uiOptions="splitActionBarWhenNarrow"
+                  android:configChanges="orientation|screenSize"
+                  android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.PICK" />
+
+            </intent-filter>
+        </activity>
+        <activity android:name=".map.MapActivity"
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation|screenSize"/>
+        <activity
+                android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
+                android:screenOrientation="landscape"
+                android:label="OAuthIntentReceiver"
+                android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="my-ags-app"/>
+            </intent-filter>
+        </activity>
+        <service
+                android:name=".download.PortalItemUpdateService"
+                android:exported="false"/>
+    </application>
+
+</manifest>

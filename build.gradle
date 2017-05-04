@@ -1,0 +1,49 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+//        maven {
+//            url 'https://esri.bintray.com/arcgis'
+//        }
+        maven {
+            url 'http://android:8080/artifactory/arcgis'
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+// Define versions in a single place
+ext {
+    // Sdk and tools
+    minSdkVersion = 21
+    targetSdkVersion = 25
+    compileSdkVersion = 25
+    buildToolsVersion = '25.0.2'
+
+    // App dependencies
+    supportLibraryVersion = '25.3.0'
+    junitVersion = '4.12'
+    runnerVersion = '0.4.1'
+    runtimeVersion = '100.1.0-1691'
+    espressoCoreVersion = '2.2.2'
+    daggerVerison = '2.8'
+    guavaVersion = '18.0'
+    constraintLayout = '1.0.0'
+    robotiumVersion = '5.6.3'
+}

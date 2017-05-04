@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">mapbook</string>
+    <string name="title">My Offline Map Book</string>
+    <string name="portal">https://www.arcgis.com</string>
+    <string name="portalId">219e6bc23dc64b3696ab6bc4f09deadb</string>
+    <string name="mobileMapPackageName">OfflineMapbook_v4</string>
+    <string name="offlineDirectory">Data</string>
+    <string name="mmpk_extension">.mmpk</string>
+    <string name="wait">Please wait</string>
+    <string name="downloading_mapbook">Downloading Mapbook</string>
+    <string name="index">INDEX</string>
+    <string name="map_title">TITLE</string>
+    <string name="map_thumbnail">map thumbnail</string>
+    <string name="no_features_found">No features found at that location</string>
+    <string name="enable_wifi">ENABLE WI-FI</string>
+    <string name="cancel">CANCEL</string>
+    <string name="path_not_found">File path not found in fragment arguments</string>
+    <string name="layers">Layers</string>
+    <string name="search">Search</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
+    <string name="wireless_problem">Wireless Connectivity Problem</string>
+    <string name="query_hint">Search by address or name</string>
+    <string name="BROADCAST_ACTION">com.esri.android.mapbook.BROADCAST</string>
+    <string name="LATEST_DATE">com.esri.android.mapbook.LATEST_DATE</string>
+    <string name="logout">LOGOUT</string>
+</resources>
