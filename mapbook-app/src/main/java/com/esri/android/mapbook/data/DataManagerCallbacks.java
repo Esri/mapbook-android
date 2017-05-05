@@ -26,8 +26,6 @@
 
 package com.esri.android.mapbook.data;
 
-import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.mapping.MobileMapPackage;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;

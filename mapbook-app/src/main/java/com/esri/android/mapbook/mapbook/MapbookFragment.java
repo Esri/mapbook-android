@@ -380,7 +380,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         // No extras means the Intent Service was unable to
         // check for an update status (probably related
         // problems rehydrating credential cache from encrypted credentials
-        showMessage("Unable to check for an updated version of the mapbook");
+        Log.i(TAG, "Unable to check for an updated version of the mapbook");
       }
     }
   }
