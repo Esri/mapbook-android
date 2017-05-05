@@ -113,6 +113,7 @@ public class MapFragment extends Fragment implements MapContract.View {
   private Callout mCallout = null;
   private int currentLayoutId = 0;
   private String mMapTitle = null;
+  private boolean mapLoaded = false; // Don't initialize map items when app returns from background state.
 
   /**
    * Default constructor
@@ -171,6 +172,7 @@ public class MapFragment extends Fragment implements MapContract.View {
     // Calling activity should pass the index and map title
     final Bundle args = getArguments();
     if (args.containsKey(getString(R.string.index))  && args.containsKey(MapbookFragment.FILE_PATH) && args.containsKey(getString(R.string.map_title))){
+      mapLoaded = false;
       mPath = args.getString(MapbookFragment.FILE_PATH);
       mMapIndex = args.getInt(getString(R.string.index));
       mMapTitle = args.getString(getString(R.string.map_title));
@@ -435,22 +437,26 @@ public class MapFragment extends Fragment implements MapContract.View {
    */
   @Override public void initializeMapItems() {
     //TODO Question for Dan, should this initialization be moved to the MapModule?
-    if (mGraphicsOverlay ==  null){
-      mGraphicsOverlay = new GraphicsOverlay();
-      mGraphicsOverlay.setSelectionColor(0xFF00FFFF);
-      mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
-    }else{
-      // Clean anything out
-      mGraphicsOverlay.getGraphics().clear();
+    if (!mapLoaded){
+      if (mGraphicsOverlay ==  null){
+        mGraphicsOverlay = new GraphicsOverlay();
+        mGraphicsOverlay.setSelectionColor(0xFF00FFFF);
+        mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
+      }else{
+        // Clean anything out
+        mGraphicsOverlay.getGraphics().clear();
+      }
+
+      final BitmapDrawable startDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.pin);
+      mPinSourceSymbol = new PictureMarkerSymbol(startDrawable);
+      mPinSourceSymbol.setHeight(90);
+      mPinSourceSymbol.setWidth(20);
+      mPinSourceSymbol.loadAsync();
+
+      mPresenter.loadMap(mPath, mMapIndex);
+      mapLoaded = true;
     }
 
-    final BitmapDrawable startDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.pin);
-    mPinSourceSymbol = new PictureMarkerSymbol(startDrawable);
-    mPinSourceSymbol.setHeight(90);
-    mPinSourceSymbol.setWidth(20);
-    mPinSourceSymbol.loadAsync();
-
-    mPresenter.loadMap(mPath, mMapIndex);
   }
 
   /**
