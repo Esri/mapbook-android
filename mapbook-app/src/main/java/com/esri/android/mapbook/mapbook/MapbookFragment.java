@@ -376,6 +376,11 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         final long timeUpdated = intent.getLongExtra(getString(R.string.LATEST_DATE),0);
         mPresenter.processBroadcast(timeUpdated);
         Log.i(TAG, "Portal item's modified date in milliseconds " + timeUpdated);
+      }else{
+        // No extras means the Intent Service was unable to
+        // check for an update status (probably related
+        // problems rehydrating credential cache from encrypted credentials
+        showMessage("Unable to check for an updated version of the mapbook");
       }
     }
   }

@@ -76,6 +76,7 @@ import java.security.KeyPairGenerator;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -107,8 +108,9 @@ public class CredentialCryptographer {
    * methods are dependent on underlying OS Version.
    * @param bytes - array of bytes to encrypt
    * @return - File path representing location of encrypted data.
+   * @throws - Exception related to encryption/decryption
    */
-  public String encrypt(final byte[] bytes, final String filePath){
+  public String encrypt(final byte[] bytes, final String filePath) throws Exception{
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       return encryptData(bytes, filePath);
     }else{
@@ -120,7 +122,7 @@ public class CredentialCryptographer {
    * Entry point for decrypting a file given
    * @return String representing decrypted data
    */
-  public String decrypt(){
+  public String decrypt() throws Exception{
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       return decryptData(Constants.CRED_FILE);
     }else{
@@ -188,41 +190,41 @@ public class CredentialCryptographer {
    * @param input - byte[] to encrypt
    * @param fileName - String name of the encrypted file
    * @return String representing encrypted file or null if encryption fails.
+   * @throws Exception - Throws Exceptions related to encryption
    */
+
   @TargetApi(23)
-  private String encryptData(final byte [] input,  final String fileName){
+  private String encryptData(final byte [] input,  final String fileName) throws Exception{
 
     String encryptedDataFilePath = null;
-    try {
-      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
-      keyStore.load(null);
 
-      // Does the key need to be created?
-      if (!keyStore.containsAlias(ALIAS)){
-        createNewKey();
-      }
-      final SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
+    final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+    keyStore.load(null);
 
-      final Cipher c = Cipher.getInstance(CIPHER_TYPE);
-      c.init(Cipher.ENCRYPT_MODE, key);
-
-      // Persist the GCMParamterSpec src bytes to file for later use
-       final FileOutputStream fos = mContext.openFileOutput(Constants.IV_FILE, Context.MODE_PRIVATE);
-      fos.write(c.getIV());
-      fos.close();
-
-      encryptedDataFilePath = getFilePath(fileName);
-
-      final CipherOutputStream cipherOutputStream =
-          new CipherOutputStream(
-              new FileOutputStream(encryptedDataFilePath), c);
-      cipherOutputStream.write(input);
-      cipherOutputStream.close();
-
-    }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | NoSuchPaddingException
-        | UnrecoverableKeyException | InvalidKeyException | IOException ke){
-      Log.e(TAG, ke.getMessage());
+    // Does the key need to be created?
+    if (!keyStore.containsAlias(ALIAS)){
+      createNewKey();
     }
+    final SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
+
+    final Cipher c = Cipher.getInstance(CIPHER_TYPE);
+    c.init(Cipher.ENCRYPT_MODE, key);
+
+    // Persist the GCMParamterSpec bytes to file for later use
+    GCMParameterSpec spec = c.getParameters().getParameterSpec(GCMParameterSpec.class);
+     final FileOutputStream fos = new FileOutputStream(getFilePath(Constants.IV_FILE));
+    fos.write(spec.getIV());
+    Log.i(TAG, "IV Length is " + spec.getIV().length+ " tag length is " + spec.getTLen());
+    fos.close();
+
+    encryptedDataFilePath = getFilePath(fileName);
+
+    final CipherOutputStream cipherOutputStream =
+        new CipherOutputStream(
+            new FileOutputStream(encryptedDataFilePath), c);
+    cipherOutputStream.write(input);
+    cipherOutputStream.close();
+
     return encryptedDataFilePath;
   }
 
@@ -231,50 +233,46 @@ public class CredentialCryptographer {
    * return a string representation of the decrypted data
    * @param encryptedDataFileName String representing file name
    * @return Decrypted string or null if decryption fails
+   * @throws Exception related to decryption
    */
   @TargetApi(23)
-  private String decryptData (final String encryptedDataFileName){
+  private String decryptData (final String encryptedDataFileName) throws Exception{
     String decryptedString = null;
-    try {
 
-      final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
-      keyStore.load(null);
-      final SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
+    final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
+    keyStore.load(null);
+    final SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
 
-      final Cipher c = Cipher.getInstance(CIPHER_TYPE);
+    final Cipher c = Cipher.getInstance(CIPHER_TYPE);
 
-      final File file = new File(getFilePath(encryptedDataFileName));
-      final int fileSize = (int)file.length();
+    final File file = new File(getFilePath(encryptedDataFileName));
+    final int fileSize = (int)file.length();
 
-      // Need to provide the GCMSpec used by the
-      // encryption method when decrypting
-      final File ivFile = new File(getFilePath(Constants.IV_FILE));
-      final int ivFileSize =  (int) ivFile.length();
-      final FileInputStream fis = mContext.openFileInput(Constants.IV_FILE);
-      final byte [] GMspec = new byte[ivFileSize];
-      fis.read(GMspec, 0, ivFileSize);
-      fis.close();
-      c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, GMspec));
+    // Need to provide the GCMSpec used by the
+    // encryption method when decrypting
+    final File ivFile = new File(getFilePath(Constants.IV_FILE));
+    final int ivFileSize =  (int) ivFile.length();
+    final FileInputStream fis = new FileInputStream(getFilePath(Constants.IV_FILE));
+    final byte [] iv = new byte[ivFileSize];
+    fis.read(iv, 0, ivFileSize);
+    fis.close();
+    GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+    Log.i(TAG, "Decrypted spec iv length " +  spec.getIV().length + " tag length = "+ spec.getTLen());
+    c.init(Cipher.DECRYPT_MODE, key, spec);
 
-       final CipherInputStream cipherInputStream =
-          new CipherInputStream(new FileInputStream(getFilePath(encryptedDataFileName)),
-              c);
-      final byte[] fileContentBytes = new byte[fileSize];
+     final CipherInputStream cipherInputStream =
+        new CipherInputStream(new FileInputStream(getFilePath(encryptedDataFileName)),
+            c);
+    final byte[] fileContentBytes = new byte[fileSize];
 
-      int index = 0;
-      int nextByte;
-      while ((nextByte = cipherInputStream.read()) != -1) {
-        fileContentBytes[index] = (byte) nextByte;
-        index++;
-      }
-      decryptedString = new String(fileContentBytes, 0, index, "UTF-8");
-      Log.v(TAG, "Decrypted string = " + decryptedString);
-
-    }catch (KeyStoreException | NoSuchAlgorithmException | CertificateException |
-        NoSuchPaddingException | UnrecoverableKeyException | InvalidKeyException |
-        InvalidAlgorithmParameterException | IOException ke){
-      Log.e(TAG, ke.getMessage());
+    int index = 0;
+    int nextByte;
+    while ((nextByte = cipherInputStream.read()) != -1) {
+      fileContentBytes[index] = (byte) nextByte;
+      index++;
     }
+    decryptedString = new String(fileContentBytes, 0, index, "UTF-8");
+    Log.v(TAG, "Decrypted string = " + decryptedString);
 
     return decryptedString;
   }
@@ -511,28 +509,26 @@ public class CredentialCryptographer {
    * @param jsonCredentialCache - A nullable JSON string representing CredentialCache
    *                            If null, then an attempt is made to extract user name from
    *                            encrypted credential file on device.
+   * @throws Exception related to decrypting credentials or parsing JSON.
    */
-  public void setUserNameFromCredentials(@Nullable String jsonCredentialCache){
+  public void setUserNameFromCredentials(@Nullable String jsonCredentialCache) throws Exception{
     if (jsonCredentialCache == null){
       jsonCredentialCache = this.decrypt();
     }
-    if (jsonCredentialCache != null){
-      try {
-        final JSONArray jsonArray = new JSONArray(jsonCredentialCache);
-        if (jsonArray.get(0) != null){
-          final JSONObject jsonCredentials = jsonArray.getJSONObject(0);
-          if (jsonCredentials.has("credential")){
-            final String jCred = jsonCredentials.getString("credential");
-            final Credential credential = Credential.fromJson(jCred);
+    if (jsonCredentialCache != null && jsonCredentialCache.length() > 0){
 
-            if (credential != null){
-              mUserName = credential.getUsername();
-              Log.i(TAG, "****SETTING user name from credentials " + mUserName);
-            }
+      final JSONArray jsonArray = new JSONArray(jsonCredentialCache);
+      if (jsonArray.get(0) != null){
+        final JSONObject jsonCredentials = jsonArray.getJSONObject(0);
+        if (jsonCredentials.has("credential")){
+          final String jCred = jsonCredentials.getString("credential");
+          final Credential credential = Credential.fromJson(jCred);
+
+          if (credential != null){
+            mUserName = credential.getUsername();
+            Log.i(TAG, "****SETTING user name from credentials " + mUserName);
           }
         }
-      } catch (final JSONException e) {
-        Log.e(TAG, "JSON exception " + e.getMessage());
       }
     }
   }
