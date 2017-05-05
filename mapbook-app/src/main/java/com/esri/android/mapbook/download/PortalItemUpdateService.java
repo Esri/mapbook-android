@@ -76,15 +76,16 @@ public class PortalItemUpdateService extends IntentService {
   @Override protected void onHandleIntent(@Nullable final Intent intent) {
     Log.i(TAG, "onHandleIntent");
 
-    final String credentialString = mCredCryptographer.decrypt();
+    final String credentialString;
 
-    if (credentialString == null){
-      // Send a broadcast out with latest time stamp from portal item
-      final Intent errorIntent =
-          new Intent(getString(R.string.BROADCAST_ACTION));
-      broadcastIntent(errorIntent);
-    }else{
-      Log.i(TAG, credentialString);
+    try {
+
+      credentialString = mCredCryptographer.decrypt();
+
+      if ( credentialString == null || credentialString.length() == 0  ) {
+        handleDecryptionFailure();
+      }
+      Log.i(TAG, "Decrypted credential string = " +credentialString);
 
       // Reconstitute the AuthenticationManager from cached credentials
       AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
@@ -104,7 +105,23 @@ public class PortalItemUpdateService extends IntentService {
           broadcastIntent(localIntent);
         }
       });
+
+
+    } catch (Exception e) {
+      Log.e(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
+      if (e.getCause() != null){
+        Log.e(TAG, e.getCause().getMessage());
+      }
+      handleDecryptionFailure();
     }
+  }
+
+  private void handleDecryptionFailure(){
+    Log.e(TAG, "Unable to decrypt credentials on device");
+    // Send a broadcast with no extras
+    final Intent errorIntent =
+        new Intent(getString(R.string.BROADCAST_ACTION));
+    broadcastIntent(errorIntent);
   }
 
   /**
