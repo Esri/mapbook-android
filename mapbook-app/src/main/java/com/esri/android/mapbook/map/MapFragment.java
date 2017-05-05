@@ -62,6 +62,8 @@ import com.esri.android.mapbook.data.Entry;
 import com.esri.android.mapbook.data.FeatureContent;
 import com.esri.android.mapbook.mapbook.MapbookFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.data.Feature;
+import com.esri.arcgisruntime.data.FeatureQueryResult;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.layers.FeatureLayer;
@@ -80,6 +82,7 @@ import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -498,13 +501,31 @@ public class MapFragment extends Fragment implements MapContract.View {
   }
 
   /**
-   * Clear selected features in all layers
+   * Find, un-select all features and clear selected features in all layers
    */
   private void clearSelections(){
     final LayerList layers = mMapView.getMap().getOperationalLayers();
     for (final Layer layer : layers){
       if (layer instanceof  FeatureLayer){
-        ((FeatureLayer) layer).clearSelection();
+        final FeatureLayer featureLayer = (FeatureLayer)layer;
+
+        final ListenableFuture<FeatureQueryResult> resultListenableFuture = featureLayer.getSelectedFeaturesAsync();
+        resultListenableFuture.addDoneListener(new Runnable() {
+          @Override public void run() {
+            try {
+              FeatureQueryResult result = resultListenableFuture.get();
+              Iterator<Feature> iter = result.iterator();
+              while (iter.hasNext()){
+                featureLayer.unselectFeature(iter.next());
+
+              }
+              featureLayer.clearSelection();
+            } catch (InterruptedException | ExecutionException e) {
+              Log.i(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
+            }
+          }
+        });
+        Log.i(TAG, "Clearing layer " + featureLayer.getName());
       }
     }
   }
