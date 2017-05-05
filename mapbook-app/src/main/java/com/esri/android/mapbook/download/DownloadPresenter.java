@@ -40,6 +40,7 @@ import com.esri.arcgisruntime.security.AuthenticationManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -150,7 +151,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
           final String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
           Log.i(TAG, "JSON credential cache = " + jsonCredentials);
 
-          // Set user name using credential cache JSON
+          // Set user name from credential cache JSON
           try {
             mCredentialCryptographer.setUserNameFromCredentials(jsonCredentials);
           } catch (Exception e) {
@@ -163,7 +164,7 @@ public class DownloadPresenter implements DownloadContract.Presenter {
           // Encrypt json credentials on device
           final String filePath;
           try {
-            filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(), Constants.CRED_FILE);
+            filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(Charset.forName("UTF-8")), Constants.CRED_FILE);
             Log.i(TAG, "Data encrypted to file path = " + filePath);
           } catch (Exception e) {
             Log.e(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
@@ -171,8 +172,6 @@ public class DownloadPresenter implements DownloadContract.Presenter {
               Log.e(TAG, e.getCause().getMessage());
             }
           }
-
-
 
           // Start up a new thread dedicated to downloading mobile map package
           final Handler handler = new Handler() ;

@@ -42,7 +42,6 @@ import com.esri.arcgisruntime.security.Credential;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.crypto.SecretKey;
@@ -50,9 +49,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.BadPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
@@ -63,20 +59,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.InvalidKeyException;
 import java.security.KeyPairGenerator;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -271,7 +263,7 @@ public class CredentialCryptographer {
       fileContentBytes[index] = (byte) nextByte;
       index++;
     }
-    decryptedString = new String(fileContentBytes, 0, index, "UTF-8");
+    decryptedString = new String(fileContentBytes, 0, index, Charsets.UTF_8);
     Log.v(TAG, "Decrypted string = " + decryptedString);
 
     return decryptedString;

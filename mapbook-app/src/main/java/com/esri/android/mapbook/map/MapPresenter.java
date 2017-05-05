@@ -46,7 +46,6 @@ import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MapPresenter implements MapContract.Presenter {
 

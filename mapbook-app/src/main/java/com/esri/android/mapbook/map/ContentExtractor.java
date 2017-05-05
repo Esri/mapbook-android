@@ -31,7 +31,6 @@ import android.util.Log;
 import com.esri.android.mapbook.data.Entry;
 import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.mapping.GeoElement;
-import com.esri.arcgisruntime.mapping.Item;
 import com.esri.arcgisruntime.mapping.popup.Popup;
 import com.esri.arcgisruntime.mapping.popup.PopupField;
 import com.esri.arcgisruntime.mapping.popup.PopupFieldFormat;
@@ -39,7 +38,11 @@ import com.esri.arcgisruntime.mapping.popup.PopupManager;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class extract a list of Entry items from a given popup
