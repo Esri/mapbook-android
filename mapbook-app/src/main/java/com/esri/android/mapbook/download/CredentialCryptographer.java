@@ -69,8 +69,6 @@ public class CredentialCryptographer {
   private static final String AES_MODE = "AES/ECB/PKCS7Padding";
   private static final String AndroidKeyStore = "AndroidKeyStore";
   private static final String ALIAS = "CRED_KEY";
-  private static final String ENCRYPTED_KEY = "ENCRYPTED_KEY";
-  private static final String SHARED_PREFERENCE_NAME = "MAPBOOK_PREFERENCES";
   private String mUserName = null;
 
   @Inject Context mContext;
@@ -235,6 +233,8 @@ public class CredentialCryptographer {
       fileContentBytes[index] = (byte) nextByte;
       index++;
     }
+    cipherInputStream.close();
+
     decryptedString = new String(fileContentBytes, 0, index, Charsets.UTF_8);
     Log.v(TAG, "Decrypted string = " + decryptedString);
 

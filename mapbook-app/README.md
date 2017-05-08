@@ -424,19 +424,107 @@ geocodeFuture.addDoneListener(new Runnable() {
 });
 ```
 
+### Updating Mobile Map Package
+
+Every time the app starts and there is a network connection, it will check for updates to the mobile map package by querying the Portal.  If a newer version of the mobile map pacakge is available, a refresh button will be displayed on the main page of the app.
+
+![](assets/download_option.png)
+
+When the app checks for updates, it uses decrypted credentials that have previously been encrypted.  Portal credentials get encrypted the very first time the Offline Mapbook mobile map package is downloaded.  
+
 
 #### Storing credentials on the device
 
 When it comes to securing personal information on an Android mobile device, the best option is to never store it on the device in the first place.  If sensitive data needs to be stored, then every precaution and best practice should be employed to make the data as secure as possible. To enable the best user experience in the mapbook app, 
-the app stores credentials on the device upon downloading the mapbook from AGOL.  The stored credentials are subsequently used to check for updated mapbook versions. In this app, we demonstrate a pattern for securing credentials using Shared Preferences.  This only one of many ways to approach storing secure data on Android and it is not immune to malicious threats, especially if the device is rooted.  When choosing to store credentials on the device, it's important to consider the context of the mobile app, the environment in which it's used, the physical security of the device, and the data in your organization.  
+the app stores credentials on the device upon downloading the mapbook from the Portal.  The stored credentials are subsequently used to check for updated mapbook versions. In this app, we demonstrate a pattern for securing credentials in the app's data directory.  This only one of many ways to approach storing secure data on Android and it is not immune to malicious threats, especially if the device is rooted.  When choosing to store credentials on the device, it's important to consider the context of the mobile app, the environment in which it's used, the physical security of the device, and the data in your organization.  
 
-Steps
- 1. Use Android Keystore to manage keys used for encryption.
- 2. Using keys from key store, encrypt data on device.
- 3. Store encrypted data in the SharedPreferences.
+Here are the steps for handling credentials:
 
-User credentials are stored the first time the user downloads the mapbook from AGOL.  The app uses the credentials to check for updates the AGOL mapbook.  If an updated mapbook is available, the app will notify the user that a newer version is available and offer to download the latest version.
+ 1. Obtain contents of the ```CredentialCache```  after the user successfully authenticates against the Portal.
+ 2. Use Android Keystore to generate and store a key for encryption.
+ 3. With the key, encrypt JSON string from the ```CredentialCache``` to a file in the app's data directory.
+ 4. Decrypt credentials and re-hydrate the ```CredentialCache``` as needed when pinging the Portal for OfflineMapbook's last update time (in milliseconds).
 
-![](assets/download_option.png)
+```java
+// Once the user has successfully logged in, get the credentials from the cache
+String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
+
+// Generate the key
+KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+keyStore.load(null);
+
+KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+
+// Build one key to be used for encrypting and decrypting the file.
+// We're using AES encryption (https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
+// with Galois/Counter Mode (https://en.wikipedia.org/wiki/Galois/Counter_Mode) with NoPadding
+
+keyGenerator.init(
+   new KeyGenParameterSpec.Builder(ALIAS,
+   KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+   .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+   .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+   .build());
+ keyGenerator.generateKey();
+
+// Retrieve key from keystore
+SecretKey key = (SecretKey) keyStore.getKey(ALIAS, null);
+
+
+// Create the cipher and initialize it for encrypting
+Cipher encryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
+encryptCipher.init(Cipher.ENCRYPT_MODE, key);
+
+// Set up a CipherStream with the cipher and write the encrypted contents
+CipherOutputStream cipherOutputStream =  new CipherOutputStream(
+            new FileOutputStream(encryptedDataFilePath), encryptCipher);
+cipherOutputStream.write(input);
+cipherOutputStream.close();
+
+// Since this cipher uses GCM mode, an IV (initialization vector) and tag length will be needed
+// when decrypting the ciphertext.  Here we obtain the IV and persist it to 
+// a file so it can be used in decryption process later.
+GCMParameterSpec spec = encryptCipher.getParameters().getParameterSpec(GCMParameterSpec.class);
+FileOutputStream fos = new FileOutputStream(getFilePath(Constants.IV_FILE));
+fos.write(spec.getIV());
+fos.close();
+
+// When decrypting, read the IV from file
+File ivFile = new File(getFilePath(Constants.IV_FILE));
+int ivFileSize =  (int) ivFile.length();
+FileInputStream fis = new FileInputStream(getFilePath(Constants.IV_FILE));
+byte [] iv = new byte[ivFileSize];
+fis.read(iv, 0, ivFileSize);
+fis.close();
+
+// Use the IV bytes to recreate the spec needed by the decrypt cipher
+GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+
+Cipher decryptCipher = Cipher.getInstance(CIPHER_TYPE);
+decryptCipher.init(Cipher.DECRYPT_MODE, key, spec);
+
+CipherInputStream cipherInputStream =
+        new CipherInputStream(new FileInputStream(getFilePath(encryptedDataFileName)),
+            decryptCipher);
+
+// Determine size of CRED file so that we can create the properly sized 
+// byte array needed to hold the contents of the credential file
+File file = new File(getFilePath(encryptedDataFileName));
+int fileSize = (int)file.length();
+byte[] fileContentBytes = new byte[fileSize];
+    int index = 0;
+    int nextByte;
+    while ((nextByte = cipherInputStream.read()) != -1) {
+      fileContentBytes[index] = (byte) nextByte;
+      index++;
+    }
+cipherInputStream.close();
+
+String jsonDecryptedString = new String(fileContentBytes, 0, index, Charsets.UTF_8);
+
+// Now reconstitute the CredentialCache with the decrypted JSON string
+AuthenticationManager.CredentialCache.restoreFromJson(jsonDecryptedString);
+
+```
 
 

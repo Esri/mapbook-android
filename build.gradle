@@ -40,7 +40,7 @@ ext {
     supportLibraryVersion = '25.3.0'
     junitVersion = '4.12'
     runnerVersion = '0.4.1'
-    runtimeVersion = '100.1.0-1691'
+    runtimeVersion = '100.1.0-1696'
     espressoCoreVersion = '2.2.2'
     daggerVerison = '2.8'
     guavaVersion = '18.0'
