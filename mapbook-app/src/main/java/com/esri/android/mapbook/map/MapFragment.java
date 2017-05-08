@@ -507,31 +507,14 @@ public class MapFragment extends Fragment implements MapContract.View {
   }
 
   /**
-   * Find, un-select all features and clear selected features in all layers
+   * Clear selected features in all layers
    */
   private void clearSelections(){
     final LayerList layers = mMapView.getMap().getOperationalLayers();
     for (final Layer layer : layers){
       if (layer instanceof  FeatureLayer){
         final FeatureLayer featureLayer = (FeatureLayer)layer;
-
-        final ListenableFuture<FeatureQueryResult> resultListenableFuture = featureLayer.getSelectedFeaturesAsync();
-        resultListenableFuture.addDoneListener(new Runnable() {
-          @Override public void run() {
-            try {
-              FeatureQueryResult result = resultListenableFuture.get();
-              Iterator<Feature> iter = result.iterator();
-              while (iter.hasNext()){
-                featureLayer.unselectFeature(iter.next());
-
-              }
-              featureLayer.clearSelection();
-            } catch (InterruptedException | ExecutionException e) {
-              Log.i(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
-            }
-          }
-        });
-        Log.i(TAG, "Clearing layer " + featureLayer.getName());
+        featureLayer.clearSelection();
       }
     }
   }
