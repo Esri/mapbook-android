@@ -26,7 +26,6 @@
 
 package com.esri.android.mapbook.download;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -65,8 +64,6 @@ import java.security.cert.CertificateException;
 public class CredentialCryptographer {
   private static final String TAG = CredentialCryptographer.class.getSimpleName();
   private static final String CIPHER_TYPE = "AES/GCM/NoPadding";
-  private static final String RSA_MODE =  "RSA/ECB/PKCS1Padding";
-  private static final String AES_MODE = "AES/ECB/PKCS7Padding";
   private static final String AndroidKeyStore = "AndroidKeyStore";
   private static final String ALIAS = "CRED_KEY";
   private String mUserName = null;
@@ -82,7 +79,7 @@ public class CredentialCryptographer {
    * methods are dependent on underlying OS Version.
    * @param bytes - array of bytes to encrypt
    * @return - File path representing location of encrypted data.
-   * @throws - Exception related to encryption/decryption
+   * @throws Exception - related to encryption/decryption
    */
   public String encrypt(final byte[] bytes, final String filePath) throws Exception{
     return encryptData(bytes, filePath);
@@ -159,7 +156,7 @@ public class CredentialCryptographer {
    */
   private String encryptData(final byte [] input,  final String fileName) throws Exception{
 
-    String encryptedDataFilePath = null;
+    String encryptedDataFilePath;
 
     final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
     keyStore.load(null);
@@ -199,7 +196,7 @@ public class CredentialCryptographer {
    * @throws Exception related to decryption
    */
   private String decryptData (final String encryptedDataFileName) throws Exception{
-    String decryptedString = null;
+    String decryptedString;
 
     final KeyStore keyStore = KeyStore.getInstance(AndroidKeyStore);
     keyStore.load(null);
@@ -216,8 +213,15 @@ public class CredentialCryptographer {
     final int ivFileSize =  (int) ivFile.length();
     final FileInputStream fis = new FileInputStream(getFilePath(Constants.IV_FILE));
     final byte [] iv = new byte[ivFileSize];
-    fis.read(iv, 0, ivFileSize);
+
+    int index = 0;
+    int nextByte;
+    while ((nextByte = fis.read()) != -1){
+      iv[index] = (byte) nextByte;
+      index++;
+    }
     fis.close();
+
     GCMParameterSpec spec = new GCMParameterSpec(128, iv);
     Log.i(TAG, "Decrypted spec iv length " +  spec.getIV().length + " tag length = "+ spec.getTLen());
     c.init(Cipher.DECRYPT_MODE, key, spec);
@@ -227,8 +231,7 @@ public class CredentialCryptographer {
             c);
     final byte[] fileContentBytes = new byte[fileSize];
 
-    int index = 0;
-    int nextByte;
+    index = 0;
     while ((nextByte = cipherInputStream.read()) != -1) {
       fileContentBytes[index] = (byte) nextByte;
       index++;
