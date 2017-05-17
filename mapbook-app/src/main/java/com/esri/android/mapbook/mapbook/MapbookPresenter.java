@@ -151,7 +151,9 @@ public class MapbookPresenter implements MapbookContract.Presenter {
     final MobileMapPackage mmp = new MobileMapPackage(mmpkPath);
 
     mmp.addDoneLoadingListener(new Runnable() {
+
       @Override final public void run() {
+        Log.i(TAG, "MMPK load status " + mmp.getLoadStatus().name());
         if (mmp.getLoadStatus() == LoadStatus.LOADED) {
           callback.onMapbookLoaded(mmp);
 
@@ -229,9 +231,15 @@ public class MapbookPresenter implements MapbookContract.Presenter {
    */
   private void checkForUserName(){
     if (getUserName()== null){
-      mCredentialCryptopgrapher.setUserNameFromCredentials(null);
+      try {
+        mCredentialCryptopgrapher.setUserNameFromCredentials(null);
+        mView.setUserName(getUserName());
+      } catch (Exception e) {
+        Log.e(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
+        if (e.getCause() != null){
+          Log.e(TAG, e.getCause().getMessage());
+        }
+      }
     }
-    mView.setUserName(getUserName());
-
   }
 }

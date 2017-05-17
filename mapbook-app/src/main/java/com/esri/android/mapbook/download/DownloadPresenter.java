@@ -40,6 +40,7 @@ import com.esri.arcgisruntime.security.AuthenticationManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -147,21 +148,30 @@ public class DownloadPresenter implements DownloadContract.Presenter {
 
         if (mPortal.getLoadStatus() == LoadStatus.LOADED) {
 
-          final Handler credHandler = new Handler();
-          credHandler.post(new Runnable() {
-            @Override public void run() {
-              // Grab credential cache contents
-              final String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
-              Log.i(TAG, "JSON credential cache = " + jsonCredentials);
+          final String jsonCredentials = AuthenticationManager.CredentialCache.toJson();
+          Log.i(TAG, "JSON credential cache = " + jsonCredentials);
 
-              mCredentialCryptographer.setUserNameFromCredentials(jsonCredentials);
-
-              // Encrypt json credentials on device
-              final String filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(), Constants.CRED_FILE);
-              Log.i(TAG, "Data encrypted to file path = " + filePath);
+          // Set user name from credential cache JSON
+          try {
+            mCredentialCryptographer.setUserNameFromCredentials(jsonCredentials);
+          } catch (Exception e) {
+            Log.e(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
+            if (e.getCause() != null){
+              Log.e(TAG, e.getCause().getMessage());
             }
-          });
+          }
 
+          // Encrypt json credentials on device
+          final String filePath;
+          try {
+            filePath = mCredentialCryptographer.encrypt(jsonCredentials.getBytes(Charset.forName("UTF-8")), Constants.CRED_FILE);
+            Log.i(TAG, "Data encrypted to file path = " + filePath);
+          } catch (Exception e) {
+            Log.e(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
+            if (e.getCause() != null){
+              Log.e(TAG, e.getCause().getMessage());
+            }
+          }
 
           // Start up a new thread dedicated to downloading mobile map package
           final Handler handler = new Handler() ;
@@ -198,26 +208,36 @@ public class DownloadPresenter implements DownloadContract.Presenter {
    */
   @Override public void update() {
     //Check for valid credentials
-    final String credentialString = mCredentialCryptographer.decrypt();
 
-    if (credentialString == null){
-      Log.i(TAG,"Downloading with cached credentials");
+    final String credentialString;
+    try {
+      credentialString = mCredentialCryptographer.decrypt();
+      if (credentialString != null && credentialString.length() > 0 ){
+        Log.i(TAG,"Downloading with cached credentials");
 
-      // Rehydrate the credential cache from the decrypted file
-      AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
+        // Rehydrate the credential cache from the decrypted file
+        AuthenticationManager.CredentialCache.restoreFromJson(credentialString);
 
-      //Kick off a thread to handle mobile map package download
-      final Handler handler = new Handler() ;
-      handler.post(new Runnable() {
-        @Override public void run() {
-          // Download map book
-          downloadMapbook();
-        }
-      });
-    }else{
-      // If credentials are null, we'll prompt user for credentials
-      Log.i(TAG,"Credential cache cannot be reconstituted from null credentials, so asking using to provide credentials...");
-      signIn();
+        //Kick off a thread to handle mobile map package download
+        final Handler handler = new Handler() ;
+        handler.post(new Runnable() {
+          @Override public void run() {
+            // Download map book
+            downloadMapbook();
+          }
+        });
+      }else{
+        // If credentials are null, we'll prompt user for credentials
+        Log.i(TAG,"Credential cache cannot be reconstituted from null credentials, so asking using to provide credentials...");
+        signIn();
+      }
+    } catch (Exception e) {
+      Log.e(TAG, e.getClass().getSimpleName() + " " + e.getMessage());
+      if (e.getCause() != null){
+        Log.e(TAG, e.getCause().getMessage());
+      }
     }
+
+
   }
 }

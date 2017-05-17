@@ -71,6 +71,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
   private static final int REQUEST_DOWNLOAD = 1;
   public static final String FILE_PATH = "mmpk file path";
   private final String TAG = MapbookFragment.class.getSimpleName();
+  private PortalItemBroadcastReceiver portalItemBroadcastReceiver;
 
   /**
    * Default constructor
@@ -100,7 +101,7 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         getString(R.string.BROADCAST_ACTION));
 
     // Instantiates a new PortalItemBroadcastReceiver
-    final PortalItemBroadcastReceiver portalItemBroadcastReceiver =
+    portalItemBroadcastReceiver =
         new PortalItemBroadcastReceiver();
     // Registers the PortalItemBroadcastReceiver and its intent filters
     LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
@@ -357,6 +358,11 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
     }
   }
 
+  @Override
+  public void onDestroy(){
+    LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(portalItemBroadcastReceiver);
+    super.onDestroy();
+  }
   /**
    * This class listens for broadcasts from the PortalItemUpdateService.
    * If there's a newer version of the mobile map package available,
@@ -376,6 +382,11 @@ public class MapbookFragment extends Fragment implements MapbookContract.View {
         final long timeUpdated = intent.getLongExtra(getString(R.string.LATEST_DATE),0);
         mPresenter.processBroadcast(timeUpdated);
         Log.i(TAG, "Portal item's modified date in milliseconds " + timeUpdated);
+      }else{
+        // No extras means the Intent Service was unable to
+        // check for an update status (probably related
+        // problems rehydrating credential cache from encrypted credentials
+        Log.i(TAG, "Unable to check for an updated version of the mapbook");
       }
     }
   }
