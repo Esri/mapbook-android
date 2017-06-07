@@ -45,5 +45,5 @@ dependencies {
     androidTestCompile "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
 
     testCompile "junit:junit:$rootProject.ext.junitVersion"
-    compile 'com.android.support.constraint:constraint-layout:1.0.0'
+    compile "com.android.support.constraint:constraint-layout:$rootProject.constraintLayout"
 }
