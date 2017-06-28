@@ -306,9 +306,14 @@ public class MapbookTest {
     // Click on the second bookmark
     final RecyclerView bookmarkRecylerView = (RecyclerView) bookmarkView;
     final int bookmarkCount = bookmarkRecylerView.getAdapter().getItemCount();
+    ArrayList<View> views = solo.getViews();
+
     if (bookmarkCount > 1) {
       for (int x = 0; x < bookmarkCount; x++) {
-        solo.clickInRecyclerView(x);
+
+        ArrayList<android.widget.TextView> v = solo.clickInRecyclerView( x);
+        Assert.assertTrue(v.size()==1);
+        solo.clickOnText(v.get(0).getText().toString());
         solo.sleep(2000);
         final double bookmarkScale = mapView.getMapScale();
         Log.i(TAG, mapScale + " bookmark scale "+ bookmarkScale);
