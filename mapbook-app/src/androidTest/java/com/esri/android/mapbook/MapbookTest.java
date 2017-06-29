@@ -46,7 +46,7 @@ public class MapbookTest {
   public void setUp(){
 
     solo = new Solo(InstrumentationRegistry.getInstrumentation(), mActivityRule.getActivity());
-    Log.i(TAG, "SetUp");
+
   }
 
   @After
@@ -55,7 +55,6 @@ public class MapbookTest {
     //finishOpenedActivities() will finish all
     // the activities that have been opened during the test execution.
     solo.finishOpenedActivities();
-    Log.i(TAG, "TearDown");
   }
 
   /**
@@ -64,7 +63,7 @@ public class MapbookTest {
    */
   @Test
   public void checkIfMapbookActivityIsDisplayed() throws Exception {
-    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertTrue(solo.waitForActivity(MapbookActivity.class, 2000));
     solo.assertCurrentActivity(TAG + " not displayed", MapbookActivity.class);
 
   }
@@ -75,7 +74,7 @@ public class MapbookTest {
    */
   @Test
   public void checkIfTitleIsDisplayed() throws Exception{
-    Assert.assertNotNull(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertNotNull(solo.waitForActivity(MapbookActivity.class, 2000));
     final ActionBar actionBar = mActivityRule.getActivity().getSupportActionBar();
     Assert.assertNotNull(actionBar);
     Assert.assertTrue(solo.waitForText( solo.getString(R.string.title)));
@@ -88,7 +87,7 @@ public class MapbookTest {
    */
   @Test
   public void checkForMapbookContent() throws Exception{
-    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertTrue(solo.waitForActivity(MapbookActivity.class, 2000));
     Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
 
     final TextView title = (TextView) solo.getView(R.id.txtTitle);
@@ -133,7 +132,7 @@ public class MapbookTest {
    */
   @Test
   public void checkClickOnMapThumbnailShowsMap() throws Exception{
-    solo.waitForActivity("MapbookActivity", 2000);
+    solo.waitForActivity(MapbookActivity.class, 2000);
     solo.waitForFragmentById(R.id.mapbookViewFragment);
 
     final RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
@@ -306,9 +305,14 @@ public class MapbookTest {
     // Click on the second bookmark
     final RecyclerView bookmarkRecylerView = (RecyclerView) bookmarkView;
     final int bookmarkCount = bookmarkRecylerView.getAdapter().getItemCount();
+    ArrayList<View> views = solo.getViews();
+
     if (bookmarkCount > 1) {
       for (int x = 0; x < bookmarkCount; x++) {
-        solo.clickInRecyclerView(x);
+
+        ArrayList<android.widget.TextView> v = solo.clickInRecyclerView( x);
+        Assert.assertTrue(v.size()==1);
+        solo.clickOnText(v.get(0).getText().toString());
         solo.sleep(2000);
         final double bookmarkScale = mapView.getMapScale();
         Log.i(TAG, mapScale + " bookmark scale "+ bookmarkScale);
@@ -334,7 +338,7 @@ public class MapbookTest {
     // Go back to main screen
     solo.goBack();
 
-    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
+    Assert.assertTrue(solo.waitForActivity(MapbookActivity.class, 2000));
     Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
   }
 
@@ -342,8 +346,8 @@ public class MapbookTest {
    * Navigate to the first map in the mabook
    */
   private void navigateToMap(){
-    Assert.assertTrue(solo.waitForActivity("MapbookActivity", 2000));
-    Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment));
+    Assert.assertTrue(solo.waitForActivity(MapbookActivity.class, 2000));
+    Assert.assertTrue(solo.waitForFragmentById(R.id.mapbookViewFragment, 2000));
 
     final RecyclerView mapRecyclerView = (RecyclerView) solo.getView(R.id.recyclerView) ;
     Assert.assertNotNull(mapRecyclerView);
@@ -352,6 +356,6 @@ public class MapbookTest {
 
     // This should trigger the map activity to be shown
     Assert.assertTrue(solo.waitForActivity(MapActivity.class, 2000));
-    Assert.assertTrue(solo.waitForFragmentById(R.id.mapLinearLayout));
+    Assert.assertTrue(solo.waitForFragmentById(R.id.mapLinearLayout,2000));
   }
 }

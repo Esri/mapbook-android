@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">mapbook</string>
-    <string name="title">My Offline Mapbook</string>
+    <string name="title">Offline Mapbook</string>
     <string name="portal">https://www.arcgis.com</string>
     <string name="portalId">b5d32c90c9384187b4b8f041bd698c42</string>
     <string name="mobileMapPackageName">OfflineMapbook_v11</string>

@@ -10,7 +10,7 @@
     <application
             android:name=".MapBookApplication"
             android:allowBackup="true"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_sdk_labs"
             android:label="@string/title"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
