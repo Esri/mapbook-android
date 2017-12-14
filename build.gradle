@@ -3,10 +3,10 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+        classpath 'com.android.tools.build:gradle:3.0.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -17,9 +17,11 @@ allprojects {
     repositories {
         jcenter()
         maven {
-            url 'https://esri.bintray.com/arcgis'
+           // url 'https://esri.bintray.com/arcgis'
+            url 'http://android:8080/artifactory/arcgis'
         }
 
+        google()
     }
 }
 
@@ -31,14 +33,14 @@ ext {
     // Sdk and tools
     minSdkVersion = 23
     targetSdkVersion = 25
-    compileSdkVersion = 25
-    buildToolsVersion = '25.0.2'
+    compileSdkVersion = 27
+    buildToolsVersion = '27.0.2'
 
     // App dependencies
-    supportLibraryVersion = '25.3.0'
+    supportLibraryVersion = '27.0.2'
     junitVersion = '4.12'
     runnerVersion = '0.4.1'
-    runtimeVersion = '100.1.0'
+    runtimeVersion = '100.2.0-1912'
     espressoCoreVersion = '2.2.2'
     daggerVerison = '2.8'
     guavaVersion = '18.0'
