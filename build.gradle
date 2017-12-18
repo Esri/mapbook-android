@@ -17,8 +17,7 @@ allprojects {
     repositories {
         jcenter()
         maven {
-           // url 'https://esri.bintray.com/arcgis'
-            url 'http://android:8080/artifactory/arcgis'
+            url 'https://esri.bintray.com/arcgis'
         }
 
         google()
@@ -40,7 +39,7 @@ ext {
     supportLibraryVersion = '27.0.2'
     junitVersion = '4.12'
     runnerVersion = '0.4.1'
-    runtimeVersion = '100.2.0-1912'
+    runtimeVersion = '100.2.0'
     espressoCoreVersion = '2.2.2'
     daggerVerison = '2.8'
     guavaVersion = '18.0'
