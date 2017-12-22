@@ -33,15 +33,15 @@ dependencies {
     implementation "com.google.guava:guava:$rootProject.guavaVersion"
     provided 'javax.annotation:jsr250-api:1.0'
 
-    androidTestCompile("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    androidTestCompile "com.android.support.test:runner:$rootProject.runnerVersion"
-    androidTestCompile "com.android.support.test:rules:$rootProject.runnerVersion"
-    androidTestCompile "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
-    androidTestCompile "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
+    androidTestImplementation "com.android.support.test:runner:$rootProject.runnerVersion"
+    androidTestImplementation "com.android.support.test:rules:$rootProject.runnerVersion"
+    androidTestImplementation "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+    androidTestImplementation "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
 
-    testCompile "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
     implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintLayout"
 }
