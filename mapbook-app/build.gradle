@@ -1,9 +1,7 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         applicationId "com.esri.android.mapbook"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -24,26 +22,26 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // App's dependencies, including test
-    compile "com.esri.arcgisruntime:arcgis-android:$rootProject.runtimeVersion"
-    compile "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
-    compile "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
-    compile "com.android.support:design:$rootProject.supportLibraryVersion"
-    compile "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
-    compile "com.android.support:support-v4:$rootProject.supportLibraryVersion"
-    compile "com.google.dagger:dagger:$rootProject.daggerVerison"
-    apt "com.google.dagger:dagger-compiler:$rootProject.daggerVerison"
-    compile "com.google.guava:guava:$rootProject.guavaVersion"
+    implementation "com.esri.arcgisruntime:arcgis-android:$rootProject.runtimeVersion"
+    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:support-v4:$rootProject.supportLibraryVersion"
+    implementation "com.google.dagger:dagger:$rootProject.daggerVerison"
+    annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerVerison"
+    implementation "com.google.guava:guava:$rootProject.guavaVersion"
     provided 'javax.annotation:jsr250-api:1.0'
 
-    androidTestCompile("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    androidTestCompile "com.android.support.test:runner:$rootProject.runnerVersion"
-    androidTestCompile "com.android.support.test:rules:$rootProject.runnerVersion"
-    androidTestCompile "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
-    androidTestCompile "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
+    androidTestImplementation "com.android.support.test:runner:$rootProject.runnerVersion"
+    androidTestImplementation "com.android.support.test:rules:$rootProject.runnerVersion"
+    androidTestImplementation "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+    androidTestImplementation "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
 
-    testCompile "junit:junit:$rootProject.ext.junitVersion"
-    compile "com.android.support.constraint:constraint-layout:$rootProject.constraintLayout"
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintLayout"
 }
