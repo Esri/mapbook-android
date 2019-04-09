@@ -16,10 +16,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    android {
+        compileOptions {
+            sourceCompatibility 1.8
+            targetCompatibility 1.8
+        }
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // App's dependencies, including test
     implementation "com.esri.arcgisruntime:arcgis-android:$rootProject.runtimeVersion"
@@ -31,7 +38,7 @@ dependencies {
     implementation "com.google.dagger:dagger:$rootProject.daggerVerison"
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerVerison"
     implementation "com.google.guava:guava:$rootProject.guavaVersion"
-    provided 'javax.annotation:jsr250-api:1.0'
+    compileOnly 'javax.annotation:jsr250-api:1.0'
 
     androidTestImplementation("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
