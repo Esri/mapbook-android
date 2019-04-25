@@ -21,7 +21,7 @@ Join our[ **GeoNet community** ](https://community.esri.com/community/developers
 ## Development Instructions
 This mapbook repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
 
-* Login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
+* Log in to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
 
 ![](Register1.png)
 
