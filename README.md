@@ -1,9 +1,9 @@
 
 # Mapbook Android
-This repo is home to the mobile mapbook app, an example application using the [ArcGIS Runtime SDK for Android.](https://developers.arcgis.com/android/) Replace the paper maps you use for field work with offline maps.
+This repo is home to the mobile mapbook app, an example application using the [ArcGIS Runtime SDK for Android.](https://developers.arcgis.com/android/) Replace the paper maps you use for field work with offline maps. **Note:** this app is meant for tablets only and won't render properly on phone screens.
 
 Visit Esri's[ **open source app site** ](https://developers.arcgis.com/example-apps/mapbook-android/?utm_source=github&utm_medium=web&utm_campaign=example_apps_mapbook_android)to read more about this app and how the Runtime features are implemented.
-Join our[ **GeoNet community** ](https://community.esri.com/community/developers/native-app-developers/arcgis-runtime-sdk-for-android)and keep up to date on the latest discussions about Open Source Apps!
+Join our[ **GeoNet community** ](https://community.esri.com/community/developers/native-app-developers/arcgis-runtime-sdk-for-android)and keep up to date on the latest discussions about the ArcGIS Runtime SDK for Android!
 
 ## Features
 - Mobile map packages
