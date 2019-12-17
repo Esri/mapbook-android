@@ -28,7 +28,7 @@ package com.esri.android.mapbook.mapbook;
 
 import android.content.Context;
 import android.os.Environment;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import com.esri.android.mapbook.R;
 import com.esri.android.mapbook.data.FileManager;
 import com.esri.android.mapbook.util.MapbookApplicationScope;

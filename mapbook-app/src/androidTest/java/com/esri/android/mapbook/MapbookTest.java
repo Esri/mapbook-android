@@ -1,12 +1,12 @@
 package com.esri.android.mapbook;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.app.ActionBar;
-import android.support.v7.view.menu.ActionMenuItemView;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.view.menu.ActionMenuItemView;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;

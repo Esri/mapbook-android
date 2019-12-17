@@ -8,7 +8,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -30,25 +30,25 @@ dependencies {
 
     // App's dependencies, including test
     implementation "com.esri.arcgisruntime:arcgis-android:$rootProject.runtimeVersion"
-    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:support-v4:$rootProject.supportLibraryVersion"
+    implementation "androidx.appcompat:appcompat:$rootProject.appcompatLibraryVersion"
+    implementation "androidx.cardview:cardview:$rootProject.cardviewLibraryVersion"
+    implementation "com.google.android.material:material:$rootProject.materialLibraryVersion"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerviewLibraryVersion"
+    implementation "androidx.legacy:legacy-support-v4:$rootProject.legacyLibraryVersion"
     implementation "com.google.dagger:dagger:$rootProject.daggerVerison"
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerVerison"
     implementation "com.google.guava:guava:$rootProject.guavaVersion"
     compileOnly 'javax.annotation:jsr250-api:1.0'
 
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
+    androidTestImplementation("androidx.test.espresso:espresso-core:$rootProject.espressoCoreVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    androidTestImplementation "com.android.support.test:runner:$rootProject.runnerVersion"
-    androidTestImplementation "com.android.support.test:rules:$rootProject.runnerVersion"
-    androidTestImplementation "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+    androidTestImplementation "androidx.test:runner:$rootProject.runnerVersion"
+    androidTestImplementation "androidx.test:rules:$rootProject.runnerVersion"
+    androidTestImplementation "androidx.annotation:annotation:$rootProject.annotationVersion"
     androidTestImplementation "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintLayout"
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayout"
 }
