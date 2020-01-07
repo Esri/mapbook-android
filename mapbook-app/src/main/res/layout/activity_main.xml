@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout android:id="@+id/coordinator_layout"
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@+id/coordinator_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".mapbook.MapbookActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/app_bar"
@@ -20,7 +20,7 @@
 
         android:weightSum="1">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -30,11 +30,11 @@
             android:layout_weight="1.02">
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sandie"/>
-        </android.support.v7.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/mapbookViewFragment" android:layout_marginTop="16dp">
@@ -118,7 +118,7 @@
                   app:layout_constraintTop_toBottomOf="@+id/imageDownloadBtn" android:visibility="invisible"
                   android:lines="2" android:textAlignment="center"/>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="930dp"
                 android:layout_height="280dp"
                 android:layout_marginBottom="28dp"
@@ -136,6 +136,6 @@
                 tools:layout_constraintRight_creator="1" tools:layout_constraintBottom_creator="1"
                 tools:layout_constraintLeft_creator="1" app:layout_constraintHorizontal_bias="0.25"
                 app:layout_constraintVertical_bias="0.85"/>
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

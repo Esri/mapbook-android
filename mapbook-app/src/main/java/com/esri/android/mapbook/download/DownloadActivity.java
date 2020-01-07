@@ -27,7 +27,7 @@
 package com.esri.android.mapbook.download;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import com.esri.android.mapbook.ApplicationModule;
 import com.esri.android.mapbook.MapBookApplication;
