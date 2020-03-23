@@ -8,13 +8,13 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-            android:name="com.esri.arcgisruntime.opensourceapps.mapbook.MapBookApplication"
+            android:name=".MapBookApplication"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/title"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.SplashActivity"
+        <activity android:name=".SplashActivity"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize">
             <intent-filter>
@@ -23,10 +23,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.mapbook.MapbookActivity"
+        <activity android:name=".mapbook.MapbookActivity"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize"/>
-        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.download.DownloadActivity"
+        <activity android:name=".download.DownloadActivity"
                   android:screenOrientation="landscape"
                   android:launchMode="standard"
                   android:uiOptions="splitActionBarWhenNarrow"
@@ -38,7 +38,7 @@
 
             </intent-filter>
         </activity>
-        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.map.MapActivity"
+        <activity android:name=".map.MapActivity"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize"/>
         <activity
@@ -55,7 +55,7 @@
             </intent-filter>
         </activity>
         <service
-                android:name="com.esri.arcgisruntime.opensourceapps.mapbook.download.PortalItemUpdateService"
+                android:name=".download.PortalItemUpdateService"
                 android:exported="false"/>
     </application>
 
