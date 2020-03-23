@@ -1,6 +1,6 @@
 # Release 1.0.5
 
- - Update app package name
+- Update app package name
 
 # Release 1.0.4
 
