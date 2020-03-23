@@ -21,7 +21,7 @@
     <string name="internet_connectivity">Internet connectivity is required for downloading a mapbook</string>
     <string name="wireless_problem">Wireless Connectivity Problem</string>
     <string name="query_hint">Search by address or name</string>
-    <string name="BROADCAST_ACTION">com.esri.android.mapbook.BROADCAST</string>
-    <string name="LATEST_DATE">com.esri.android.mapbook.LATEST_DATE</string>
+    <string name="BROADCAST_ACTION">com.esri.arcgisruntime.android.mapbook.BROADCAST</string>
+    <string name="LATEST_DATE">com.esri.arcgisruntime.android.mapbook.LATEST_DATE</string>
     <string name="logout">LOGOUT</string>
 </resources>

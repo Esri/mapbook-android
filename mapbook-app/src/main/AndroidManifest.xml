@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.esri.android.mapbook">
+          package="com.esri.arcgisruntime.opensourceapps.mapbook">
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
@@ -8,13 +8,13 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-            android:name=".MapBookApplication"
+            android:name="com.esri.arcgisruntime.opensourceapps.mapbook.MapBookApplication"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/title"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".SplashActivity"
+        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.SplashActivity"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize">
             <intent-filter>
@@ -23,10 +23,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".mapbook.MapbookActivity"
+        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.mapbook.MapbookActivity"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize"/>
-        <activity android:name=".download.DownloadActivity"
+        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.download.DownloadActivity"
                   android:screenOrientation="landscape"
                   android:launchMode="standard"
                   android:uiOptions="splitActionBarWhenNarrow"
@@ -38,7 +38,7 @@
 
             </intent-filter>
         </activity>
-        <activity android:name=".map.MapActivity"
+        <activity android:name="com.esri.arcgisruntime.opensourceapps.mapbook.map.MapActivity"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize"/>
         <activity
@@ -55,7 +55,7 @@
             </intent-filter>
         </activity>
         <service
-                android:name=".download.PortalItemUpdateService"
+                android:name="com.esri.arcgisruntime.opensourceapps.mapbook.download.PortalItemUpdateService"
                 android:exported="false"/>
     </application>
 
