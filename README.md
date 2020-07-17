@@ -1,9 +1,26 @@
-
 # Mapbook Android
+
 This repo is home to the mobile mapbook app, an example application using the [ArcGIS Runtime SDK for Android.](https://developers.arcgis.com/android/) Replace the paper maps you use for field work with offline maps. **Note:** this app is meant for tablets only and won't render properly on phone screens.
 
-Visit Esri's[ **open source app site** ](https://developers.arcgis.com/example-apps/mapbook-android/?utm_source=github&utm_medium=web&utm_campaign=example_apps_mapbook_android)to read more about this app and how the Runtime features are implemented.
-Join our[ **GeoNet community** ](https://community.esri.com/community/developers/native-app-developers/arcgis-runtime-sdk-for-android)and keep up to date on the latest discussions about the ArcGIS Runtime SDK for Android!
+<!-- MDTOC maxdepth:6 firsth1:0 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [Features](#features)   
+- [Detailed Documentation](#detailed-documentation)   
+- [Development Instructions](#development-instructions)   
+   - [Fork the repo](#fork-the-repo)   
+   - [Clone the repo](#clone-the-repo)   
+      - [Command line Git](#command-line-git)   
+   - [Configuring a Remote for a Fork](#configuring-a-remote-for-a-fork)   
+- [Testing With Robotium](#testing-with-robotium)   
+- [Requirements](#requirements)   
+- [Resources](#resources)   
+- [Issues](#issues)   
+- [Contributing](#contributing)   
+- [MDTOC](#mdtoc)   
+- [Licensing](#licensing)   
+
+<!-- /MDTOC -->
+---
 
 ## Features
 - Mobile map packages
@@ -17,6 +34,8 @@ Join our[ **GeoNet community** ](https://community.esri.com/community/developers
 - Bookmarks
 - Sign in to an ArcGIS account
 
+## Detailed Documentation
+Read the [docs](./docs/README.md) for a detailed explanation of the application, including its architecture and how it leverages the ArcGIS platform, as well as how you can begin using the app right away.
 
 ## Development Instructions
 This mapbook repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
@@ -82,7 +101,7 @@ If there are changes made in the Original repository, you can sync the fork to k
 1. In the terminal, change the current working directory to your local project
 2. Type ```git fetch upstream``` to fetch the commits from the upstream repository
 3. ```git checkout master``` to checkout your fork's local master branch.
-4. ```git merge upstream/master``` to sync your local `master' branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
+4. ```git merge upstream/master``` to sync your local `master` branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
 
 
 ## Testing With Robotium
@@ -105,17 +124,21 @@ The project includes a small suite of Robotium tests that test various features 
 * [Google+](https://plus.google.com/+esri/posts)
 * [twitter@ArcGISRuntime](https://twitter.com/ArcGISRuntime)
 * [twitter@esri](http://twitter.com/esri)
-## Issues
 
+## Issues
 Find a bug or want to request a new feature enhancement? Let us know by submitting an issue.
 
 ## Contributing
 Anyone and everyone is welcome to contribute. We do accept pull requests.
 
 1. Get involved
-2. Report issues
-3. Contribute code
-4. Improve documentation
+1. Report issues
+1. Contribute code
+1. Improve documentation
+
+## MDTOC
+Generation of this and other documents' table of contents in this repository was performed using the [MDTOC package for Atom](https://atom.io/packages/atom-mdtoc).
+
 ## Licensing
 Copyright 2017 Esri
 

@@ -1,3 +1,34 @@
+# Contents
+
+<!-- MDTOC maxdepth:6 firsth1:0 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [Data scenario](#data-scenario)   
+- [Authoring the data for viewing](#authoring-the-data-for-viewing)   
+   - [Setting symbology](#setting-symbology)   
+   - [Creating a reference backdrop](#creating-a-reference-backdrop)   
+   - [Creating locators](#creating-locators)   
+   - [Setting bookmarks](#setting-bookmarks)   
+   - [Metadata and thumbnails](#metadata-and-thumbnails)   
+- [Packaging for consumption](#packaging-for-consumption)   
+   - [Including multiple maps](#including-multiple-maps)   
+   - [Including the locator](#including-the-locator)   
+- [Sharing the mobile map package](#sharing-the-mobile-map-package)   
+   - [Using the ArcGIS Pro 'Share Package' tool](#using-the-arcgis-pro-share-package-tool)   
+   - [Uploading directly from the 'My Content' page](#uploading-directly-from-the-my-content-page)   
+- [Authentication](#authentication)   
+- [Mobile map packages](#mobile-map-packages)   
+- [Identify](#identify)   
+- [Displaying identify results](#displaying-identify-results)   
+   - [Popups](#popups)   
+   - [Callouts](#callouts)   
+- [TOC, legend, and bookmarks](#toc-legend-and-bookmarks)   
+- [Suggestions & search](#suggestions-search)   
+- [Updating mobile map package](#updating-mobile-map-package)   
+   - [Storing credentials on the device](#storing-credentials-on-the-device)   
+
+<!-- /MDTOC -->
+---
+
 # Description
 
 Learn how to create and share mobile map packages so that you can take your organization's maps offline and view them in the field with an Android app.  This example demonstrate how to:
