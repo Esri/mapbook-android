@@ -16,9 +16,8 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url 'https://esri.bintray.com/arcgis'
-        }
+        maven { url 'https://esri.bintray.com/arcgis' }
+        maven { url 'http://olympus.esri.com/artifactory/arcgisruntime-repo/' }
         google()
     }
 }
@@ -41,7 +40,7 @@ ext {
     legacyLibraryVersion = '1.0.0'
     junitVersion = '4.12'
     runnerVersion = '1.1.0'
-    runtimeVersion = '100.8.0'
+    runtimeVersion = '100.9.0'
     espressoCoreVersion = '3.1.0'
     daggerVerison = '2.25.3'
     guavaVersion = '28.1-android'
