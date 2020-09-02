@@ -437,7 +437,7 @@ public class MapFragment extends Fragment implements MapContract.View {
     if (!mapLoaded){
       if (mGraphicsOverlay ==  null){
         mGraphicsOverlay = new GraphicsOverlay();
-        mGraphicsOverlay.setSelectionColor(0xFF00FFFF);
+        mMapView.getSelectionProperties().setColor(0xFF00FFFF);
         mMapView.getGraphicsOverlays().add(mGraphicsOverlay);
       }else{
         // Clean anything out
@@ -445,7 +445,11 @@ public class MapFragment extends Fragment implements MapContract.View {
       }
 
       final BitmapDrawable startDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.pin);
-      mPinSourceSymbol = new PictureMarkerSymbol(startDrawable);
+      try {
+        mPinSourceSymbol = PictureMarkerSymbol.createAsync(startDrawable).get();
+      } catch (InterruptedException | ExecutionException exception) {
+        Log.e(TAG, "PictureMarkerSymbol failed to load: " + exception.getMessage());
+      }
       mPinSourceSymbol.setHeight(90);
       mPinSourceSymbol.setWidth(20);
       mPinSourceSymbol.loadAsync();
