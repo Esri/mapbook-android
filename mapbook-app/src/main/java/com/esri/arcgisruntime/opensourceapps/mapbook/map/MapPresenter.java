@@ -186,7 +186,6 @@ public class MapPresenter implements MapContract.Presenter {
       if (result.getLayerContent() instanceof FeatureLayer) {
         featureLayer = (FeatureLayer) result.getLayerContent();
         final FeatureContent featureContent = new FeatureContent(featureLayer);
-        featureLayer.setSelectionWidth(3.0d);
 
         final List<Popup> popups = result.getPopups();
 
