@@ -105,7 +105,7 @@ If there are changes made in the Original repository, you can sync the fork to k
 
 
 ## Testing With Robotium
-The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the mapbook-app will run best on an attached device, rather than in the emulator.  Use the following steps to configure your environment for running the tests.  During some of the tests, screen shots are captured by Robotium and by default are stored in the /sdcard/Robotium-Screenshots/ directory on the device.  See [```Solo.takeScreenshot()```](http://recorder.robotium.com/javadoc/com/robotium/solo/Solo.html#takeScreenshot()) for more information.
+The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the mapbook-app will run best on an attached device, rather than in the emulator.  Use the following steps to configure your environment for running the tests.  During some of the tests, screen shots are captured by Robotium and by default are stored in the /sdcard/Robotium-Screenshots/ directory on the device.
 
 1.  Attach a non-emulated Android device to your computer.
 2.  Ensure location services are enabled on the Android device.
@@ -150,4 +150,4 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 A copy of the license is available in the repository's [LICENSE](LICENSE) file.
 
-For information about licensing your deployed app, see [License your app](https://developers.arcgis.com/android/guide/license-your-app.htm).
+For information about licensing your deployed app, see [License your app](https://developers.arcgis.com/android/license-and-deployment).
