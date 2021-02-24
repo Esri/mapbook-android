@@ -175,7 +175,7 @@ Note the value for android:scheme in the XML. This is [redirect URI](https://dev
 
 ### Mobile map packages
 
-The [`MobileMapPackage`](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm)  is downloaded from the `Portal` into the application-specific directory on the device.  The Naperville Water Company Mapbook  `MobileMapPackage` used in this app contains a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.  The `MobileMapPackage` must first be [loaded](https://developers.arcgis.com/android/latest/guide/loadable-pattern.htm) before metadata about the package can be displayed.
+The [`MobileMapPackage`](http://pro.arcgis.com/en/pro-app/help/sharing/overview/mobile-map-package.htm)  is downloaded from the `Portal` into the application-specific directory on the device.  The Naperville Water Company Mapbook  `MobileMapPackage` used in this app contains a locator and several maps. Each map contains a vector tile package representing base data, feature layers consisting of feature data about water systems and address points, and bookmarked viewpoints.  The `MobileMapPackage` must first be [loaded](https://developers.arcgis.com/android/programming-patterns/loadable/) before metadata about the package can be displayed.
 
 ![Mapbook Main](./images/mapbook_main.png)
 
@@ -206,7 +206,7 @@ mobileMapPackage.loadAsync();
 
 ### Identify
 
-As the user taps on a map in the mapbook, the [identify](https://developers.arcgis.com/android/latest/guide/identify-features.htm) operation is used to retrieve all of the data for that location from the map's visible feature layers.  In this mobile map package, every map has multiple feature layers and so the method to identify features in all layers is used.  By extending the [`DefaultMapViewOnTouchListener`](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/DefaultMapViewOnTouchListener.html) and overriding the `onSingleTapConfirmed` method, the clicked location is used to identify features in the visible layers.
+As the user taps on a map in the mapbook, the [identify](https://developers.arcgis.com/android/api-reference/reference/com/esri/arcgisruntime/mapping/view/GeoView.html#identifyLayersAsync(android.graphics.Point,double,boolean)) operation is used to retrieve all of the data for that location from the map's visible feature layers.  In this mobile map package, every map has multiple feature layers and so the method to identify features in all layers is used.  By extending the [`DefaultMapViewOnTouchListener`](https://developers.arcgis.com/android/latest/api-reference/reference/com/esri/arcgisruntime/mapping/view/DefaultMapViewOnTouchListener.html) and overriding the `onSingleTapConfirmed` method, the clicked location is used to identify features in the visible layers.
 
 ```java
 
@@ -261,7 +261,7 @@ Results of the identify action are displayed using `Popup` and `Callout` objects
 
 #### Popups
 
-The layers in this app have been configured using ArcGIS Pro to support [`PopUp`](https://developers.arcgis.com/android/latest/guide/essential-vocabulary.htm#GUID-F67C6CED-142A-498C-9CC2-3D14582DB0D3) objects.  The `IdentifyLayerResult` returns pop-up content that is customized for display in a `Callout` widget.
+The layers in this app have been configured using ArcGIS Pro to support [`PopUp`](https://developers.arcgis.com/documentation/glossary/pop-up/) objects.  The `IdentifyLayerResult` returns pop-up content that is customized for display in a `Callout` widget.
 
 ```java
 List<IdentifyLayerResult> results = identifyLayers.get();
@@ -339,7 +339,7 @@ mCallout.show();
 
 ### TOC, legend, and bookmarks
 
-Layer visibility can be toggled in the table of contents (TOC).  In addition to the layer name, a legend is also shown for each layer.  A set of nested RecyclerViews are used to display the TOC and legend, obtained from the map as [operational layers](https://developers.arcgis.com/android/latest/guide/layers.htm#ESRI_SECTION1_272346C9CB0049938539D5F8970624F2).
+Layer visibility can be toggled in the table of contents (TOC).  In addition to the layer name, a legend is also shown for each layer.  A set of nested RecyclerViews are used to display the TOC and legend, obtained from the map as [operational layers](https://developers.arcgis.com/android/api-reference/reference/com/esri/arcgisruntime/mapping/ArcGISMap.html#getOperationalLayers()).
 
 ```java
 // Get the list of Layer items from the map
@@ -444,7 +444,7 @@ Typing the first few letters of an address into the Mapbook search box (e.g. “
       mLocator.loadAsync();
 ```
 
-Once a suggestion is selected, the loaded `LocatorTask` uses [geocoding](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04)  to transform an address or a place name to a specific geographic location. In this app, there is one predefined composite locator that searches all visible layers.
+Once a suggestion is selected, the loaded `LocatorTask` uses [geocoding](https://developers.arcgis.com/android/geocode-and-search/#what-is-geocoding)  to transform an address or a place name to a specific geographic location. In this app, there is one predefined composite locator that searches all visible layers.
 
 ```java
 // Call geocodeAsync passing in an address
